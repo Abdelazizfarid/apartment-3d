@@ -254,8 +254,8 @@ function setWalls(m) {
 
 // Specs sheet: finishes per room + every piece with its size, grouped by room.
 const FINISH_SPEC = {
-  Reception: 'Floor: honed travertine 120×120 · Walls: warm greige matte (≈ #E6DDD1) · TV wall: full-height fluted walnut · Ceiling: gypsum, recessed 2700 K downlights · Curtains: ceiling track, sheer + linen',
-  Dining: 'Floor: honed travertine · Pendants ×2 over table at 75 cm above top · Walls: warm greige',
+  Reception: 'Floor: existing glossy marble-look porcelain, 60×60 (kept) · Walls: warm greige matte (≈ #E6DDD1) · TV wall: full-height fluted walnut · Ceiling: gypsum, recessed 2700 K downlights · Curtains: ceiling track, sheer + linen',
+  Dining: 'Floor: existing glossy marble-look porcelain (kept) · Pendants ×2 over table at 75 cm above top · Walls: warm greige',
   'Main bathroom': 'Floor + walls: Calacatta large-format (marble or porcelain), full height · Brushed-brass fittings · Walk-in glass shower with linear drain',
   Kitchen: 'Floor: travertine · Base units: handleless greige lacquer · Tall units: walnut · Worktop + splash: Calacatta 2 cm · Brass mixer',
   Bedroom: 'Floor: oak herringbone parquet · Bed wall: fluted walnut · Wardrobe: walnut to ceiling · Curtains: sheer + linen',

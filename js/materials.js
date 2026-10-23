@@ -62,6 +62,8 @@ function calacattaTexture() {
 
 // tile = how many meters one texture repeat covers (UVs are generated in world meters).
 const DEFS = {
+  // The client's existing reception/dining floor, built from their photo: glossy marble-look porcelain, 60×60 assumed.
+  existing_tile: { tile: 1.2, p: () => ({ map: tex('assets/tex/existing_tile/diff.jpg', true), roughnessMap: tex('assets/tex/existing_tile/rough.jpg'), roughness: 1, clearcoat: 0.7, clearcoatRoughness: 0.08 }) },
   travertine: { tile: 1.6, p: () => ({ ...scan('marble_01', { normal: 0.6 }), roughness: 0.75, clearcoat: 0.25, clearcoatRoughness: 0.35 }) },
   parquet:    { tile: 1.8, p: () => ({ ...scan('herringbone_parquet', { normal: 0.8 }), roughness: 1 }) },
   calacatta:  { tile: 1.5, p: () => ({ map: calacattaTexture(), color: '#ffffff', roughness: 0.18, clearcoat: 0.6, clearcoatRoughness: 0.08 }) },

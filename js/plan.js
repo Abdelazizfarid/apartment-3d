@@ -10,8 +10,8 @@ export const DOOR_H = 2.25;
 
 // Room interiors (axis-aligned rectangles, inner wall faces) used for floor finishes, labels and lights.
 export const ROOMS = [
-  { name: 'Reception',      rects: [[0.252, 0.405, 4.6, 4.286]], floor: 'travertine' },
-  { name: 'Dining',         rects: [[4.6, 0.758, 7.730, 4.286]], floor: 'travertine' },
+  { name: 'Reception',      rects: [[0.252, 0.405, 4.6, 4.286]], floor: 'existing_tile' },
+  { name: 'Dining',         rects: [[4.6, 0.758, 7.730, 4.286]], floor: 'existing_tile' },
   { name: 'Main bathroom',  rects: [[7.851, 0.779, 9.420, 3.161]], floor: 'calacatta' },
   { name: 'Kitchen',        rects: [[9.758, 0.377, 12.83, 3.161]], floor: 'travertine' },
   { name: 'Bedroom',        rects: [[13.137, 0.249, 16.343, 4.421]], floor: 'parquet' },
