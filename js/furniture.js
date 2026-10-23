@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { M, mesh } from './materials.js';
+import { M, mesh, PHONE } from './materials.js';
 import { WALL_H } from './plan.js';
 
 // ---------- primitives (y = bottom of the part) ----------
@@ -74,7 +74,16 @@ export async function loadModels(onProgress) {
         }
         root = keep;
       }
-      root.traverse(o => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+      root.traverse(o => {
+        if (!o.isMesh) return;
+        o.castShadow = true; o.receiveShadow = true;
+        if (PHONE && o.material.isMeshPhysicalMaterial) {
+          const s = o.material;
+          o.material = new THREE.MeshStandardMaterial({ name: s.name, color: s.color, map: s.map, normalMap: s.normalMap, normalScale: s.normalScale,
+            roughness: s.roughness, roughnessMap: s.roughnessMap, metalness: s.metalness, metalnessMap: s.metalnessMap, aoMap: s.aoMap,
+            emissive: s.emissive, emissiveMap: s.emissiveMap, transparent: s.transparent, opacity: s.opacity, alphaMap: s.alphaMap, alphaTest: s.alphaTest, side: s.side });
+        }
+      });
       const b = new THREE.Box3().setFromObject(root), c = b.getCenter(new THREE.Vector3());
       const wrap = new THREE.Group(); root.position.sub(new THREE.Vector3(c.x, b.min.y, c.z)); wrap.add(root);
       models[key] = { obj: wrap, size: b.getSize(new THREE.Vector3()) };
@@ -90,12 +99,13 @@ function model(key, w, h, d, fit = 'uniform', tint) {
   if (fit === 'stretch') o.scale.set(w / s.x, h / s.y, d / s.z);
   else o.scale.setScalar(Math.min(w / s.x, h / s.y, d / s.z));
   if (tint) o.traverse(n => {
-    if (!n.isMesh || !n.material.sheen) return;
-    n.material = n.material.clone(); n.material.map = null; n.material.color.set(tint); n.material.sheenColor.set(tint).offsetHSL(0, -0.1, 0.25);
+    if (!n.isMesh || !(n.material.sheen || /fabric/i.test(n.material.name))) return;
+    n.material = n.material.clone(); n.material.map = null; n.material.color.set(tint); n.material.sheenColor?.set(tint).offsetHSL(0, -0.1, 0.25);
   });
   return o;
 }
 function lampLight(y, intensity = 1.2, distance = 3.5) {
+  if (PHONE) return new THREE.Group(); // ponytail: lamps only glow on phones; a dozen point lights is too much for mobile shaders
   const l = new THREE.PointLight('#ffc98a', intensity, distance, 2);
   l.position.y = y; l.userData.lamp = true;
   return l;

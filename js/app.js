@@ -8,7 +8,7 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { PLAN, WALL_H, SILL, WIN_TOP, DOOR_H, ROOMS, DOORS, CLADDING, LIGHTS, PROPOSAL } from './plan.js';
-import { M, mesh } from './materials.js';
+import { M, mesh, PHONE } from './materials.js';
 import { CATALOG, build, loadModels, box, fluted, channels } from './furniture.js';
 
 const $ = id => document.getElementById(id);
@@ -17,7 +17,6 @@ const SNAP = 0.05, KEY = 'wadi-houf-design-v2';
 // ---------- renderer / scene ----------
 const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
 // Phones get a lighter pipeline so iOS doesn't kill the tab for GPU memory.
-const PHONE = matchMedia('(pointer: coarse)').matches;
 renderer.setPixelRatio(Math.min(devicePixelRatio, PHONE ? 1.5 : 2));
 renderer.setSize(innerWidth, innerHeight);
 renderer.toneMapping = THREE.NeutralToneMapping;
@@ -25,7 +24,7 @@ renderer.toneMappingExposure = 0.9;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFShadowMap;
 $('view').appendChild(renderer.domElement);
-RectAreaLightUniformsLib.init();
+if (!PHONE) RectAreaLightUniformsLib.init();
 
 const scene = new THREE.Scene();
 const BG = new THREE.Color('#eeebe7');
@@ -45,7 +44,7 @@ sun.position.set(CENTER.x - 9, 12, CENTER.z - 7);
 sun.target.position.copy(CENTER);
 sun.castShadow = true;
 sun.shadow.mapSize.setScalar(PHONE ? 2048 : 4096);
-sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.02;
+sun.shadow.bias = PHONE ? -0.001 : -0.0004; sun.shadow.normalBias = PHONE ? 0.05 : 0.02;
 Object.assign(sun.shadow.camera, { left: -13, right: 13, top: 13, bottom: -13, near: 1, far: 40 });
 scene.add(sun, sun.target);
 
@@ -158,8 +157,9 @@ function buildArchitecture(H) {
   }
 }
 for (const [x, z, w, d, intensity] of LIGHTS) {
-  const l = new THREE.RectAreaLight('#ffe6cc', intensity * 0.6, w, d);
-  l.position.set(x, WALL_H - 0.02, z); l.lookAt(x, 0, z);
+  // Phones: plain point lights instead of area lights (those need half-float LUTs that break on iOS).
+  const l = PHONE ? new THREE.PointLight('#ffe6cc', intensity * w * d * 0.35, 0, 2) : new THREE.RectAreaLight('#ffe6cc', intensity * 0.6, w, d);
+  l.position.set(x, WALL_H - (PHONE ? 0.4 : 0.02), z); l.lookAt(x, 0, z);
   scene.add(l);
 }
 

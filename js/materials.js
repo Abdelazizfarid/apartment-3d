@@ -1,6 +1,11 @@
 // Finish library. Real PBR scans from Poly Haven (CC0) + a generated Calacatta marble.
 import * as THREE from 'three';
 
+// Phones (iOS especially) get a simpler shading path: their GPUs render the physical
+// extras (clearcoat, sheen, transmission) and area lights with black/grainy artifacts.
+export const PHONE = matchMedia('(pointer: coarse)').matches || new URLSearchParams(location.search).has('phone');
+const PHYSICAL_ONLY = ['clearcoat', 'clearcoatRoughness', 'sheen', 'sheenRoughness', 'sheenColor', 'transmission', 'thickness', 'ior'];
+
 const loader = new THREE.TextureLoader();
 const texCache = new Map();
 function tex(path, srgb, rotate) {
@@ -92,7 +97,9 @@ export function M(name, color) {
   const key = color ? `${name}|${color}` : name;
   if (!cache.has(key)) {
     const d = DEFS[name];
-    const m = new THREE.MeshPhysicalMaterial(d.p());
+    const props = d.p();
+    if (PHONE) PHYSICAL_ONLY.forEach(k => delete props[k]);
+    const m = PHONE ? new THREE.MeshStandardMaterial(props) : new THREE.MeshPhysicalMaterial(props);
     if (color) m.color.set(color);
     m.userData.tile = d.tile;
     cache.set(key, m);
