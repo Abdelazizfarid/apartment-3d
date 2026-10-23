@@ -212,17 +212,17 @@ function buildArchitecture(H) {
     const s = span([x1, z1, x2, z2]), cx = (x1 + x2) / 2, cz = (z1 + z2) / 2, t = s.t2 - s.t1;
     const sign = s.alongX ? (roomAt(cx, s.t2 + 0.3) ? 1 : -1) : (roomAt(s.t2 + 0.3, cz) ? 1 : -1);
     const len = s.b - s.a;
-    if (finish === 'calacatta') {
+    if (finish === 'calacatta' || finish === 'stone_grey') {
       // keep window openings clear
       const holes = PLAN.windows.map(span).filter(w => w.alongX === s.alongX && w.b > s.a && w.a < s.b && Math.abs((w.t1 + w.t2) / 2 - (s.t1 + s.t2) / 2) < 0.4);
       let cuts = [s.a, ...holes.flatMap(w => [Math.max(w.a, s.a), Math.min(w.b, s.b)]), s.b];
       for (let i = 0; i < cuts.length - 1; i++) {
         const a = cuts[i], b = cuts[i + 1], inHole = i % 2 === 1;
         const r = s.alongX ? [a, s.t1, b, s.t2] : [s.t1, a, s.t2, b];
-        if (!inHole) arch.add(slab(r, y1, y2, M('calacatta')));
+        if (!inHole) arch.add(slab(r, y1, y2, M(finish)));
         else {
-          if (Math.min(y2, SILL) > y1) arch.add(slab(r, y1, Math.min(y2, SILL), M('calacatta')));
-          if (y2 > WIN_TOP) arch.add(slab(r, Math.max(y1, WIN_TOP), y2, M('calacatta')));
+          if (Math.min(y2, SILL) > y1) arch.add(slab(r, y1, Math.min(y2, SILL), M(finish)));
+          if (y2 > WIN_TOP) arch.add(slab(r, Math.max(y1, WIN_TOP), y2, M(finish)));
         }
       }
       continue;
@@ -361,7 +361,7 @@ function setWalls(m) {
 const FINISH_SPEC = {
   Reception: 'Floor: wall-to-wall wool carpet (marbled sand / ivory) over the existing tile, ~20 cm tile margin · West side: full-height panorama glazing to the balcony · Walls: warm greige matte (≈ #E6DDD1) · TV wall: full-height fluted walnut · Ceiling: gypsum, recessed 2700 K downlights · Curtains: ceiling track, sheer + linen',
   Dining: 'Floor: wall-to-wall wool carpet, ivory with taupe border, over the existing tile · Pendants ×2 over table at 75 cm above top · Walls: warm greige',
-  'Main bathroom': 'Floor + walls: Calacatta large-format (marble or porcelain), full height · Sink by the door, shower cabin in the back corner beside the WC · Black-framed glass cabin',
+  'Main bathroom': 'Floor + walls: warm grey concrete-look porcelain 60×120, full height, fine joints · Sink by the door, walk-in shower in the back corner beside the WC · Frameless glass, gunmetal rain shower + hand shower, recessed niche with 3 LED-lit shelves, linear drain · Warm dim lighting',
   Balcony: 'Reception west wall opened as floor-to-ceiling panorama: 4 black-aluminium sliding glass panels · Balcony: stone floor, painted fascia, black-framed glass railing 1.1 m',
   Kitchen: 'Floor: travertine · Base units: handleless greige lacquer · Tall units: walnut · Worktop + splash: Calacatta 2 cm · Brass mixer',
   Bedroom: 'Floor: wall-to-wall plush ivory carpet over the existing wood-look tile; dark skirting kept · Two single beds 90×200 on the fluted walnut wall, shared nightstand · L-shaped study desk with PC + laptop where the wardrobe was · Curtains: sheer + linen',

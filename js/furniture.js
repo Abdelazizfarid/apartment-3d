@@ -401,37 +401,48 @@ export const CATALOG = {
     spec: 'Chimney hood, black steel, ducted', build: ({ w, d, h, y }) => group(box(w, 0.06, d, M('blackmetal')), box(w * 0.32, Math.max(0.1, WALL_H - y - 0.06), d * 0.5, M('blackmetal'), 0, 0.06, -d / 4)) },
   // Bathroom
   toilet: { label: 'Wall-hung toilet', cat: 'Bathroom', w: 0.37, d: 0.55, h: 0.42,
-    spec: 'Rimless wall-hung WC, concealed cistern, brushed-brass flush plate',
+    spec: 'Rimless wall-hung WC, concealed cistern, gunmetal flush plate',
     build: ({ w, d, h }) => group(rbox(w, 0.33, d, 0.14, M('ceramic'), 0, h - 0.37), rbox(w - 0.02, 0.03, d - 0.05, 0.1, M('ceramic'), 0, h - 0.04, 0.02),
-      box(0.22, 0.15, 0.01, M('brass'), 0, 0.95, -d / 2 - 0.004)) },
+      box(0.22, 0.15, 0.01, M('gunmetal'), 0, 0.95, -d / 2 - 0.004)) },
   vanity: { label: 'Floating vanity', cat: 'Bathroom', w: 0.8, d: 0.46, h: 0.85,
-    spec: 'Wall-hung walnut vanity, Calacatta top, ceramic vessel basin, wall-mounted brass mixer',
-    build: ({ w, d, h }) => group(box(w, 0.4, d, M('walnut'), 0, h - 0.43), box(w, 0.03, d, M('calacatta'), 0, h - 0.03),
-      cyl(0.2, 0.15, 0.13, M('ceramic'), 0, h, 0.02, 48), cyl(0.18, 0.13, 0.001, M('shadowgap'), 0, h + 0.13, 0.02, 48), box(0.02, 0.02, 0.17, M('brass'), 0, h + 0.22, -d / 2 + 0.085)) },
+    spec: 'Wall-hung oak vanity with grey porcelain top, white vessel basin, wall-mounted gunmetal mixer, LED strip underneath',
+    build: ({ w, d, h }) => group(box(w, 0.4, d, M('lightoak'), 0, h - 0.43), box(w, 0.03, d, M('stone_grey'), 0, h - 0.03),
+      box(w - 0.06, 0.006, 0.012, M('ledstrip'), 0, h - 0.437, d / 2 - 0.05),
+      cyl(0.2, 0.15, 0.13, M('ceramic'), 0, h, 0.02, 48), cyl(0.18, 0.13, 0.001, M('shadowgap'), 0, h + 0.13, 0.02, 48), box(0.02, 0.02, 0.17, M('gunmetal'), 0, h + 0.22, -d / 2 + 0.085),
+      ...bottles(w / 2 - 0.1, h, -d / 2 + 0.1, 2)) },
   mirror_led: { wall: true, label: 'Backlit mirror', cat: 'Bathroom', w: 0.7, d: 0.03, h: 0.7, y: 1.25, spec: 'Round backlit LED mirror Ø70 cm',
     build: ({ w, d, h }) => {
       const r = Math.min(w, h) / 2, m = mesh(new THREE.CircleGeometry(r, 64), M('mirror')), halo = mesh(new THREE.RingGeometry(r - 0.01, r + 0.025, 64), M('ledstrip'));
       m.position.set(0, h / 2, d); halo.position.set(0, h / 2, 0.005);
       return group(m, halo);
     } },
-  shower: { label: 'Shower cabin (black frame)', cat: 'Bathroom', w: 0.8, d: 0.9, h: 2.0,
-    spec: 'Corner shower cabin: 8 mm tinted glass in bold matt-black aluminium frame, sliding door with full-height bar handle, low white tray, black rain head + hand shower on rail, thermostatic mixer, wall shelf',
-    // back (-z) and right (+x) sides are walls; glass on the front (+z, sliding door) and left (-x)
+  shower: { label: 'Walk-in shower (niche, rain head)', cat: 'Bathroom', w: 0.8, d: 0.9, h: 2.0,
+    spec: 'Walk-in shower: frameless 8 mm clear glass with gunmetal hinges and pull handle, flush grey porcelain floor with linear drain, gunmetal Ø30 rain head on arm + hand shower on hose, thermostatic mixer, recessed niche with 3 shelves and warm LED strips',
+    // back (-z) and right (+x) sides are walls; glass on the front (+z) and left (-x)
     build: ({ w, d, h }) => {
-      const k = M('blackmetal'), gl = M('showerglass'), F = 0.035, y0 = 0.06, ph = h - y0, fz = d / 2 - 0.02, lx = -w / 2 + 0.02;
-      const g = group(rbox(w, y0, d, 0.012, M('ceramic')), box(0.09, 0.003, 0.09, M('steel'), 0, y0, 0.05));
-      // glass: left side panel, fixed front half, sliding door (on the inner track)
-      g.add(box(0.008, ph, d - 0.04, gl, lx, y0, 0), box(w / 2, ph, 0.008, gl, -w / 4, y0, fz), box(w / 2 + 0.04, ph - 0.03, 0.008, gl, w / 4 - 0.02, y0 + 0.015, fz - 0.035));
-      // bold black frame: posts, top + bottom rails on both glass sides, door edge profiles, handle
-      g.add(box(F, ph, F, k, lx, y0, fz), box(F, ph, F, k, w / 2 - F / 2, y0, fz), box(F, ph, F, k, lx, y0, -d / 2 + F / 2));
-      for (const y of [y0, h - F]) g.add(box(w, F, F, k, 0, y, fz), box(F, F, d, k, lx, y, 0), box(w / 2 + 0.04, F * 0.6, F * 0.6, k, w / 4 - 0.02, y, fz - 0.035));
-      g.add(box(0.02, ph - 0.03, 0.02, k, -0.04, y0 + 0.015, fz - 0.035), box(0.02, ph - 0.03, 0.02, k, w / 2 - 0.03, y0 + 0.015, fz - 0.035));
-      g.add(box(0.025, 0.6, 0.03, k, 0.02, 0.75, fz - 0.065), box(0.025, 0.6, 0.03, k, 0.02, 0.75, fz - 0.005));
-      // fittings on the back wall: mixer, hand shower on a rail, rain head on an arm; shelf on the side wall
-      g.add(box(0.14, 0.1, 0.035, k, 0.15, 1.05, -d / 2 + 0.018), cyl(0.022, 0.022, 0.04, k, 0.15, 1.08, -d / 2 + 0.05, 16));
-      g.add(box(0.025, 0.85, 0.025, k, -0.12, 0.95, -d / 2 + 0.03), cyl(0.04, 0.03, 0.12, k, -0.12, 1.55, -d / 2 + 0.07, 16));
-      g.add(box(0.025, 0.025, 0.32, k, 0, 2.05, -d / 2 + 0.16), box(0.26, 0.012, 0.26, k, 0, 2.03, -d / 2 + 0.3));
-      g.add(box(0.12, 0.015, 0.32, k, w / 2 - 0.06, 1.3, -0.05), box(0.05, 0.16, 0.05, M('ceramic'), w / 2 - 0.06, 1.315, -0.12), box(0.05, 0.12, 0.05, M('matteceramic'), w / 2 - 0.06, 1.315, -0.04));
+      const k = M('gunmetal'), gl = M('showerglass'), fz = d / 2 - 0.02, lx = -w / 2 + 0.01, bz = -d / 2, rx = w / 2;
+      const g = group(box(w, 0.006, d, M('stone_grey')), box(w - 0.1, 0.004, 0.035, k, 0, 0.004, bz + 0.06));   // floor + linear drain
+      // frameless glass: fixed side panel and hinged door, slim gunmetal hinges, pull handle, floor channel
+      g.add(box(0.008, h, d - 0.02, gl, lx, 0.01, 0), box(w - 0.03, h - 0.02, 0.008, gl, -0.005, 0.02, fz));
+      for (const y of [0.25, h - 0.3]) g.add(box(0.05, 0.08, 0.03, k, lx + 0.03, y, fz));
+      g.add(box(0.02, 0.35, 0.02, k, w / 2 - 0.12, 0.95, fz + 0.035), box(0.02, 0.02, 0.05, k, w / 2 - 0.12, 0.96, fz + 0.015), box(0.02, 0.02, 0.05, k, w / 2 - 0.12, 1.28, fz + 0.015));
+      g.add(box(0.012, 0.012, d, k, lx, 0.006, 0));
+      // rain head on an arm from the back wall, riser, hand shower on a hose, mixer
+      const rx0 = -0.05;
+      g.add(cyl(0.012, 0.012, 1.1, k, rx0, 1.0, bz + 0.05, 12), box(0.024, 0.024, 0.35, k, rx0, 2.08, bz + 0.2));
+      g.add(cyl(0.15, 0.15, 0.02, k, rx0, 2.04, bz + 0.38, 48), cyl(0.145, 0.145, 0.002, M('shadowgap'), rx0, 2.038, bz + 0.38, 48));
+      const hs = cyl(0.035, 0.02, 0.22, k, rx0 - 0.08, 1.55, bz + 0.09, 16); hs.rotation.x = 0.5; g.add(hs);
+      g.add(box(0.12, 0.05, 0.05, k, rx0, 1.0, bz + 0.03), cyl(0.025, 0.025, 0.05, k, rx0 + 0.07, 1.0, bz + 0.07, 16));
+      const hose = mesh(new THREE.TorusGeometry(0.12, 0.006, 8, 32, Math.PI), k); hose.position.set(rx0 - 0.04, 0.95, bz + 0.07); hose.rotation.z = Math.PI; g.add(hose);
+      // recessed niche in the side wall: dark-lit back, 3 shelves, warm LED under each, bottles + plants
+      const nx = rx - 0.06, nz0 = -0.1, nw = 0.5;
+      g.add(box(0.02, 1.15, nw, M('stone_grey'), rx - 0.01, 0.75, nz0));
+      for (const [i, y] of [0.75, 1.15, 1.55].entries()) {
+        g.add(box(0.12, 0.025, nw, M('stone_grey'), nx, y, nz0), box(0.006, 0.006, nw - 0.04, M('ledstrip'), nx - 0.05, y - 0.006, nz0));
+        g.add(...bottles(nx, y + 0.025, nz0 - 0.12, i === 1 ? 2 : 1));
+        if (i !== 1) { const pl = model('calathea', 0.16, 0.16, 0.16); pl.position.set(nx, y + 0.1, nz0 + 0.14); g.add(cyl(0.05, 0.04, 0.09, M('ceramic'), nx, y + 0.025, nz0 + 0.14, 20), pl); }
+      }
+      g.add(new THREE.PointLight('#ffcf9a', PHONE ? 0 : 0.6, 1.4, 2).translateX(nx - 0.08).translateY(1.2).translateZ(nz0));
       return g;
     } },
   washer: { label: 'Washing machine', cat: 'Other', w: 0.6, d: 0.6, h: 0.85, spec: 'Front-load washer-dryer',
@@ -450,6 +461,17 @@ export const CATALOG = {
     build: ({ w, d, h }, fab) => group(drape(0.45, h, fab, 0.055, 0.08, 0, -w / 2 + 0.25), drape(0.45, h, fab, 0.055, 0.08, 0, w / 2 - 0.25),
       box(w + 0.1, 0.03, 0.06, M('ceiling'), 0, h - 0.01, 0)) },
 };
+
+// Amber glass pump bottles with black tops, laid out along z from (x, y, z).
+function bottles(x, y, z, n) {
+  const out = [];
+  for (let i = 0; i < n; i++) {
+    const bz = z + i * 0.08;
+    out.push(cyl(0.028, 0.028, 0.17, M('amber'), x, y, bz, 20), box(0.03, 0.006, 0.06, M('ceramic', '#e9e2d6'), x + 0.0, y + 0.07, bz + 0.0).translateX(0.029),
+             cyl(0.01, 0.01, 0.04, M('blackmetal'), x, y + 0.17, bz, 10), box(0.035, 0.008, 0.008, M('blackmetal'), x - 0.01, y + 0.205, bz));
+  }
+  return out;
+}
 
 function kitchenBase({ w, d, h }, kind) {
   const g = group(box(w - 0.004, 0.1, d - 0.08, M('shadowgap'), 0, 0, -0.04), box(w - 0.004, h - 0.14, d - 0.02, M('lacquer'), 0, 0.1, -0.01),

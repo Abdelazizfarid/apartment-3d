@@ -18,7 +18,7 @@ export const ROOMS = [
   { name: 'Reception',      rects: [[0.252, 0.405, 4.6, 4.286]], floor: 'existing_tile' , cove: true },
   { name: 'Balcony',        rects: [[-1.208, 0.678, -0.023, 4.156]], floor: 'travertine', outdoor: true },
   { name: 'Dining',         rects: [[4.6, 0.758, 7.730, 4.286]], floor: 'existing_tile' , cove: true },
-  { name: 'Main bathroom',  rects: [[7.851, 0.779, 9.420, 3.161]], floor: 'calacatta' },
+  { name: 'Main bathroom',  rects: [[7.851, 0.779, 9.420, 3.161]], floor: 'stone_grey' },
   { name: 'Kitchen',        rects: [[9.758, 0.377, 12.83, 3.161]], floor: 'travertine' },
   { name: 'Bedroom',        rects: [[13.137, 0.249, 16.343, 4.421]], floor: 'wood_tile', skirting: 'wood_skirt' , cove: true },
   { name: 'Master bedroom', rects: [[16.423, 1.261, 20.0, 5.512], [15.40, 4.56, 16.43, 5.512]], floor: 'wood_tile', skirting: 'wood_skirt' , cove: true },
@@ -43,11 +43,11 @@ export const CLADDING = [
   [13.137, 0.30, 13.177, 2.98, 0, 2.9, 'fluted'],
   // Master: built-out fluted headboard wall (hides the column niche)
   [16.90, 1.261, 20.0, 1.43, 0, 2.9, 'fluted'],
-  // Bathroom: Calacatta marble on every wall
-  [7.851, 0.779, 7.871, 3.161, 0, 2.9, 'calacatta'],
-  [7.851, 0.779, 9.420, 0.799, 0, 2.9, 'calacatta'],
-  [9.400, 0.779, 9.420, 3.161, 0, 2.9, 'calacatta'],
-  [8.780, 3.141, 9.420, 3.161, 0, 2.9, 'calacatta'],
+  // Bathroom: warm grey large-format porcelain on every wall
+  [7.851, 0.779, 7.871, 3.161, 0, 2.9, 'stone_grey'],
+  [7.851, 0.779, 9.420, 0.799, 0, 2.9, 'stone_grey'],
+  [9.400, 0.779, 9.420, 3.161, 0, 2.9, 'stone_grey'],
+  [8.780, 3.141, 9.420, 3.161, 0, 2.9, 'stone_grey'],
   // Kitchen: marble backsplash
   [9.758, 0.377, 12.83, 0.397, 0.9, 1.55, 'calacatta'],
   [9.758, 0.377, 9.778, 2.55, 0.9, 1.55, 'calacatta'],
@@ -55,7 +55,7 @@ export const CLADDING = [
 
 // Ceiling area lights per room: [x, z, width, depth, intensity]
 export const LIGHTS = [
-  [2.65, 2.35, 3.2, 2.6, 6], [6.4, 2.3, 1.6, 1.4, 5], [8.65, 1.95, 1.0, 1.6, 5], [11.3, 1.75, 2.4, 1.8, 6],
+  [2.65, 2.35, 3.2, 2.6, 6], [6.4, 2.3, 1.6, 1.4, 5], [8.65, 1.95, 1.0, 1.6, 2.2], [11.3, 1.75, 2.4, 1.8, 6],
   [14.75, 2.3, 2.4, 2.8, 5], [18.2, 3.4, 2.6, 3.0, 5], [11.2, 4.95, 6.5, 0.6, 5], [8.4, 3.8, 0.8, 0.8, 4],
 ];
 

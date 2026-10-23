@@ -28,6 +28,26 @@ const scan = (name, { color = true, normal = 1, rotate = false } = {}) => ({
 });
 
 // Calacatta: warm white stone with soft grey-gold veining, drawn once on a canvas (seeded, so it never changes).
+// Warm grey concrete-look porcelain, 60×120 slabs with fine joints (texture covers 1.2 × 1.2 m: two slabs).
+let stoneCanvas = null;
+function stoneTexture() {
+  if (stoneCanvas) return stoneCanvas;
+  const c = document.createElement('canvas'); c.width = c.height = 1024;
+  const g = c.getContext('2d');
+  let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  g.fillStyle = '#77716b'; g.fillRect(0, 0, 1024, 1024);
+  g.filter = 'blur(30px)';
+  for (let i = 0; i < 60; i++) { g.fillStyle = rnd() < 0.5 ? 'rgba(140,134,128,0.35)' : 'rgba(95,90,85,0.35)'; g.beginPath(); g.arc(rnd() * 1024, rnd() * 1024, 40 + rnd() * 140, 0, 7); g.fill(); }
+  g.filter = 'none';
+  for (let i = 0; i < 40000; i++) { g.fillStyle = rnd() < 0.5 ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.07)'; g.fillRect(rnd() * 1024, rnd() * 1024, 2, 2); }
+  g.fillStyle = '#5c5751';
+  for (const x of [0, 512, 1022]) g.fillRect(x - 1, 0, 3, 1024);
+  g.fillRect(0, 0, 1024, 3); g.fillRect(0, 1022, 1024, 2);
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+  return (stoneCanvas = t);
+}
+
 let calacattaCanvas = null;
 function calacattaTexture() {
   if (calacattaCanvas) return calacattaCanvas;
@@ -69,6 +89,9 @@ const DEFS = {
   wood_skirt: { tile: 1, p: () => ({ color: '#4b3b36', roughness: 0.5 }) },
   travertine: { tile: 1.6, p: () => ({ ...scan('marble_01', { normal: 0.6 }), roughness: 0.75, clearcoat: 0.25, clearcoatRoughness: 0.35 }) },
   parquet:    { tile: 1.8, p: () => ({ ...scan('herringbone_parquet', { normal: 0.8 }), roughness: 1 }) },
+  stone_grey: { tile: 1.2, p: () => ({ map: stoneTexture(), normalMap: tex('assets/tex/plastered_wall_04/nor.jpg'), normalScale: new THREE.Vector2(0.35, 0.35), roughness: 0.55, clearcoat: 0.15, clearcoatRoughness: 0.4 }) },
+  gunmetal:   { tile: 1, p: () => ({ color: '#2b2b2d', metalness: 0.9, roughness: 0.35 }) },
+  amber:      { tile: 1, p: () => ({ color: '#2e1607', roughness: 0.08, metalness: 0, clearcoat: 1 }) },
   calacatta:  { tile: 1.5, p: () => ({ map: calacattaTexture(), color: '#ffffff', roughness: 0.18, clearcoat: 0.6, clearcoatRoughness: 0.08 }) },
   cream:      { tile: 1.2, p: () => ({ map: calacattaTexture(), color: '#eadfcd', roughness: 0.25, clearcoat: 0.5, clearcoatRoughness: 0.1 }) },
   walnut_v:   { tile: 1.2, p: () => ({ ...scan('smoked_walnut_veneer', { normal: 0.5, rotate: true }), roughness: 1, clearcoat: 0.15, clearcoatRoughness: 0.5 }) },
@@ -88,7 +111,7 @@ const DEFS = {
   blackmetal: { tile: 1, p: () => ({ color: '#1c1c1c', metalness: 0.7, roughness: 0.45 }) },
   steel:      { tile: 1, p: () => ({ color: '#9da3a8', metalness: 1, roughness: 0.3 }) },
   glass:      { tile: 1, p: () => ({ color: '#ffffff', metalness: 0, roughness: 0.02, transmission: 1, thickness: 0.01, ior: 1.5, transparent: true, opacity: PHONE ? 0.06 : 0.25, depthWrite: false }) },
-  showerglass:{ tile: 1, p: () => ({ color: '#bcd6dc', roughness: 0.05, metalness: 0.1, transparent: true, opacity: 0.38, depthWrite: false, side: THREE.DoubleSide }) },
+  showerglass:{ tile: 1, p: () => ({ color: '#e8f0f0', roughness: 0.03, metalness: 0.1, transparent: true, opacity: 0.12, depthWrite: false, side: THREE.DoubleSide }) },
   mirror:     { tile: 1, p: () => ({ color: '#ffffff', metalness: 1, roughness: 0.02 }) },
   ceramic:    { tile: 1, p: () => ({ color: '#f6f4f0', roughness: 0.12, clearcoat: 0.8 }) },
   matteceramic:{ tile: 1, p: () => ({ color: '#d8d0c4', roughness: 0.7 }) },
