@@ -221,11 +221,12 @@ export const CATALOG = {
       const head = channels(w + 0.1, 1.25, fab, (w + 0.1) / 8); head.position.set(0, 0.12, -d / 2); g.add(head);
       g.add(rbox(w + 0.02, 0.07, d * 0.72, 0.03, linen, 0, 0.53, d / 2 - d * 0.36));
       g.add(rbox(w + 0.05, 0.035, 0.5, 0.015, olive, 0, 0.6, d / 2 - 0.4));
-      for (const sx of [-1, 1]) {
-        const p = rbox(w * 0.44, 0.5, 0.16, 0.07, linen, sx * w * 0.235, 0.5, -d / 2 + 0.2); p.rotation.x = -0.28; g.add(p);
-        const q = rbox(w * 0.36, 0.42, 0.14, 0.06, sand, sx * w * 0.2, 0.52, -d / 2 + 0.36); q.rotation.x = -0.32; g.add(q);
+      const single = w < 1.2, k = single ? 1.8 : 1;                 // single bed: one pillow, full width
+      for (const sx of single ? [0] : [-1, 1]) {
+        const p = rbox(w * 0.44 * k, 0.5, 0.16, 0.07, linen, sx * w * 0.235, 0.5, -d / 2 + 0.2); p.rotation.x = -0.28; g.add(p);
+        const q = rbox(w * 0.36 * k, 0.42, 0.14, 0.06, sand, sx * w * 0.2, 0.52, -d / 2 + 0.36); q.rotation.x = -0.32; g.add(q);
       }
-      const c = rbox(0.45, 0.3, 0.12, 0.06, olive, 0, 0.55, -d / 2 + 0.5); c.rotation.x = -0.3; g.add(c);
+      const c = rbox(Math.min(0.45, w * 0.45), 0.3, 0.12, 0.06, olive, 0, 0.55, -d / 2 + 0.5); c.rotation.x = -0.3; g.add(c);
       return g;
     } },
   nightstand: { label: 'Nightstand', cat: 'Bedroom', w: 0.5, d: 0.45, h: 0.5,
@@ -285,6 +286,49 @@ export const CATALOG = {
           }
         }
       }
+      return g;
+    } },
+  // L footprint: long leg (w) against the back wall, return leg at the +x end running forward to d. Top depth 65 cm.
+  desk_l: { label: 'L-shaped desk (PC + laptop)', cat: 'Bedroom', w: 2.4, d: 1.6, h: 0.75,
+    spec: 'L-shaped study desk, 65 cm deep light-oak top on black steel legs, 3-drawer pedestal, 27" monitor + PC tower, laptop, keyboard, mouse, desk lamp',
+    build: ({ w, d, h }) => {
+      const D = 0.65, T = 0.03, oak = M('lightoak'), k = M('blackmetal'), g = new THREE.Group();
+      const bz = -d / 2, rx = w / 2 - D, rz0 = bz + D;                           // back edge, return-leg inner x, return-leg start z
+      g.add(box(w, T, D, oak, 0, h - T, bz + D / 2), box(D, T, d - D, oak, rx + D / 2, h - T, rz0 + (d - D) / 2));
+      for (const [x, z] of [[-w / 2 + 0.03, bz + 0.05], [-w / 2 + 0.03, bz + D - 0.05], [rx + 0.05, d / 2 - 0.05], [w / 2 - 0.05, d / 2 - 0.05], [rx + 0.05, rz0 + 0.05]])
+        g.add(box(0.04, h - T, 0.04, k, x, 0, z));
+      // drawer pedestal under the return leg
+      g.add(box(0.42, 0.6, 0.5, oak, rx + D / 2, 0.02, d / 2 - 0.3));
+      const px = rx + D / 2 - 0.211, pz = d / 2 - 0.3;               // pedestal front faces the seated user (-x)
+      for (const y of [0.22, 0.42]) g.add(box(0.004, 0.004, 0.46, M('shadowgap'), px, y, pz));
+      for (const y of [0.13, 0.33, 0.52]) g.add(box(0.02, 0.012, 0.14, k, px - 0.01, y, pz));
+      // PC: monitor on a stand, keyboard, mouse; tower under the desk
+      const mx = -w * 0.05, mz = bz + 0.18;
+      g.add(box(0.24, 0.012, 0.18, k, mx, h, mz), box(0.035, 0.32, 0.03, k, mx, h, mz - 0.03));
+      g.add(box(0.62, 0.37, 0.025, k, mx, h + 0.17, mz), box(0.6, 0.35, 0.003, M('blackglass'), mx, h + 0.18, mz + 0.014));
+      g.add(box(0.44, 0.02, 0.14, M('steel'), mx, h, bz + 0.45), box(0.06, 0.02, 0.1, M('steel'), mx + 0.32, h, bz + 0.45));
+      g.add(box(0.2, 0.45, 0.42, k, -w / 2 + 0.3, 0.02, bz + 0.3), box(0.004, 0.4, 0.36, M('ledstrip'), -w / 2 + 0.2 + 0.002, 0.04, bz + 0.3));
+      // laptop on the return leg, open toward whoever sits on the -x side
+      const lx = rx + D / 2 + 0.05, lz = rz0 + (d - D) * 0.55;
+      g.add(box(0.23, 0.015, 0.33, M('steel'), lx, h, lz));
+      const screen = box(0.008, 0.22, 0.33, M('steel'), 0, 0, 0); screen.position.set(lx + 0.115, h + 0.11, lz); screen.rotation.z = 0.25; g.add(screen);
+      const disp = box(0.002, 0.2, 0.31, M('blackglass'), 0, 0, 0); disp.position.set(lx + 0.108, h + 0.11, lz); disp.rotation.z = 0.25; g.add(disp);
+      // desk lamp in the corner
+      g.add(cyl(0.07, 0.08, 0.02, k, rx + D / 2, h, bz + 0.15), cyl(0.008, 0.008, 0.4, k, rx + D / 2, h + 0.02, bz + 0.15, 8), cyl(0.06, 0.08, 0.1, k, rx + D / 2, h + 0.38, bz + 0.15, 16));
+      return g;
+    } },
+  office_chair: { label: 'Office chair', cat: 'Bedroom', w: 0.62, d: 0.62, h: 1.1,
+    spec: 'Ergonomic office chair, charcoal fabric, adjustable height and lumbar support, 5-star base on castors',
+    build: ({ w, h }) => {
+      const k = M('blackmetal'), fab = M('velvet', '#3a3a3c'), g = new THREE.Group();
+      for (let i = 0; i < 5; i++) {
+        const a = i / 5 * Math.PI * 2, arm = box(w * 0.46, 0.03, 0.05, k, 0, 0.05, 0);
+        arm.geometry.translate(w * 0.23, 0, 0); arm.position.set(0, 0.065, 0); arm.rotation.y = a; g.add(arm);
+        g.add(cyl(0.025, 0.025, 0.05, k, Math.cos(a) * w * 0.44, 0, -Math.sin(a) * w * 0.44, 12));
+      }
+      g.add(cyl(0.025, 0.03, 0.36, k, 0, 0.08), rbox(0.5, 0.08, 0.5, 0.03, fab, 0, 0.44));
+      const back = rbox(0.46, h - 0.6, 0.07, 0.03, fab, 0, 0.58, -0.24); back.rotation.x = -0.1; g.add(back);
+      for (const sx of [-1, 1]) g.add(box(0.04, 0.2, 0.04, k, sx * 0.27, 0.48, -0.02), box(0.06, 0.025, 0.26, k, sx * 0.27, 0.68, 0.0));
       return g;
     } },
   desk: { label: 'Dresser / desk', cat: 'Bedroom', w: 1.2, d: 0.5, h: 0.76,

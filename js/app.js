@@ -342,7 +342,7 @@ const FINISH_SPEC = {
   'Main bathroom': 'Floor + walls: Calacatta large-format (marble or porcelain), full height · Sink by the door, shower cabin in the back corner beside the WC · Black-framed glass cabin',
   Balcony: 'Reception west wall opened as floor-to-ceiling panorama: 4 black-aluminium sliding glass panels · Balcony: stone floor, painted fascia, black-framed glass railing 1.1 m',
   Kitchen: 'Floor: travertine · Base units: handleless greige lacquer · Tall units: walnut · Worktop + splash: Calacatta 2 cm · Brass mixer',
-  Bedroom: 'Floor: existing wood-look porcelain planks (≈15×60, taupe-brown) with matching dark skirting (kept) · Bed wall: fluted walnut · Wardrobe: cream lacquer + light oak to ceiling, mirror doors, open lit shelf column · Curtains: sheer + linen',
+  Bedroom: 'Floor: existing wood-look porcelain planks (≈15×60, taupe-brown) with matching dark skirting (kept) · Two single beds 90×200 on the fluted walnut wall, shared nightstand · L-shaped study desk with PC + laptop where the wardrobe was · Curtains: sheer + linen',
   'Master bedroom': 'Floor: existing wood-look porcelain planks with matching dark skirting (kept) · Headboard wall: built-out full-height fluted walnut (hides the column) · Wardrobe: cream lacquer + light oak to ceiling, mirror doors, open lit shelf column',
   Corridor: 'Floor: existing glossy marble-look porcelain (kept, continues from dining) · Art lighting · Doors: flush walnut, 2.25 m, brass levers; entrance: armoured, dark walnut',
 };
