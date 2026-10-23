@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { PointerLockControls } from 'three/addons/controls/PointerLockControls.js';
 import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
 import { RectAreaLightUniformsLib } from 'three/addons/lights/RectAreaLightUniformsLib.js';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
@@ -73,6 +72,7 @@ composer.addPass(new OutputPass());
 
 // ---------- architecture ----------
 const arch = new THREE.Group(), ceiling = new THREE.Group();
+const doorState = [], doors = [];
 scene.add(arch, ceiling);
 const roomAt = (x, z) => ROOMS.find(r => r.rects.some(([a, b, c, d]) => x >= a && x <= c && z >= b && z <= d));
 const span = ([x1, z1, x2, z2]) => {
@@ -175,25 +175,29 @@ function buildArchitecture(H) {
     }
   }
 
-  for (const d of DOORS) {
+  DOORS.forEach((d, di) => {
     const s = span(d.open), dh = Math.min(DOOR_H, H);
     if (H > DOOR_H) arch.add(slab(d.open, DOOR_H, H, M('paint')));
     const jamb = (a, b) => arch.add(slab(s.alongX ? [a, s.t1 - 0.015, b, s.t2 + 0.015] : [s.t1 - 0.015, a, s.t2 + 0.015, b], 0, dh, M('walnut')));
     jamb(s.a, s.a + 0.03); jamb(s.b - 0.03, s.b);
     if (H > DOOR_H) arch.add(slab(s.alongX ? [s.a, s.t1 - 0.015, s.b, s.t2 + 0.015] : [s.t1 - 0.015, s.a, s.t2 + 0.015, s.b], DOOR_H - 0.03, DOOR_H, M('walnut')));
-    // Door leaf, open exactly as drawn, with brass levers on its free end.
-    const l = span(d.leaf), lm = (l.t1 + l.t2) / 2;
-    arch.add(slab(d.leaf, 0.01, dh - 0.01, d.main ? M('walnut_v', '#7a6656') : M('walnut_v')));
-    const oc = s.alongX ? [(s.a + s.b) / 2, (s.t1 + s.t2) / 2] : [(s.t1 + s.t2) / 2, (s.a + s.b) / 2];
-    const ends = [l.a, l.b].map(v => l.alongX ? [v, lm] : [lm, v]);
-    const free = Math.hypot(ends[0][0] - oc[0], ends[0][1] - oc[1]) > Math.hypot(ends[1][0] - oc[0], ends[1][1] - oc[1]) ? 0 : 1;
-    const along = free === 0 ? l.a + 0.09 : l.b - 0.09;
-    if (H > 1.05) for (const side of [-1, 1]) {
-      const off = side * ((l.t2 - l.t1) / 2 + 0.03);
-      arch.add(l.alongX ? box(0.14, 0.02, 0.02, M('brass'), along + (free === 0 ? 0.05 : -0.05), 1.0, lm + off)
-                        : box(0.02, 0.02, 0.14, M('brass'), lm + off, 1.0, along + (free === 0 ? 0.05 : -0.05)));
-    }
-  }
+    // Door leaf on a hinge pivot: starts open the way the plan draws it, tap to close/open (see Inside mode).
+    const l = span(d.leaf), lm = (l.t1 + l.t2) / 2, c = (s.t1 + s.t2) / 2;
+    const near = Math.abs(lm - s.a) < Math.abs(lm - s.b) ? s.a : s.b, far = near === s.a ? s.b : s.a, dir = Math.sign(far - near);
+    const L = Math.abs(far - near) - 0.07, farLeaf = Math.abs(l.a - c) > Math.abs(l.b - c) ? l.a : l.b, side = Math.sign(farLeaf - c);
+    const P = (al, pe) => s.alongX ? [al, pe] : [pe, al];
+    const angOf = ([vx, vz]) => -Math.atan2(vz, vx);
+    const angOpen = angOf(P(0, side)), delta = Math.atan2(Math.sin(angOf(P(dir, 0)) - angOpen), Math.cos(angOf(P(dir, 0)) - angOpen));
+    const [hx, hz] = P(near + dir * 0.035, c), t = 0.045, pivot = new THREE.Group();
+    pivot.position.set(hx, 0, hz);
+    pivot.add(box(L, dh - 0.02, t, d.main ? M('walnut_v', '#7a6656') : M('walnut_v'), L / 2, 0.01, 0));
+    if (H > 1.05) for (const sd of [-1, 1]) pivot.add(box(0.14, 0.02, 0.02, M('brass'), L - 0.1, 1.0, sd * (t / 2 + 0.025)));
+    const st = (doorState[di] ??= { open: true });
+    pivot.rotation.y = st.open ? angOpen : angOpen + delta;
+    pivot.traverse(o => { o.userData.door = di; });
+    arch.add(pivot);
+    doors[di] = { pivot, angOpen, angClosed: angOpen + delta, rect: d.open };
+  });
 
   for (const [x1, z1, x2, z2, y1, y2raw, finish] of CLADDING) {
     const y2 = Math.min(y2raw, H);
@@ -224,7 +228,7 @@ function buildArchitecture(H) {
   }
 
   // Ceiling with recessed downlights (shown only when the camera is inside).
-  for (const r of PLAN.floor) ceiling.add(slab(r, WALL_H, WALL_H + 0.05, M('ceiling')));
+  ceiling.add(slab([-0.023, 0, 20.3, 5.9], WALL_H, WALL_H + 0.05, M('ceiling'))); // one slab: per-room strips left hairline gaps
   for (const room of ROOMS.filter(r => !r.outdoor)) for (const [a, b, c, d] of room.rects) {
     const nx = Math.max(1, Math.round((c - a - 1) / 1.3)), nz = Math.max(1, Math.round((d - b - 1) / 1.3));
     for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
@@ -361,17 +365,13 @@ $('specs-print').onclick = () => window.print();
 // ---------- controls ----------
 const orbit = new OrbitControls(camera, renderer.domElement);
 orbit.enableDamping = true; orbit.maxPolarAngle = Math.PI / 2 - 0.02;
-const walk = new PointerLockControls(camera, document.body);
-// iPhone/iPad Safari has no Pointer Lock API (and no keyboard), so Walk mode is desktop-only.
-const canLock = 'requestPointerLock' in document.body;
-if (!canLock) $('v-walk').hidden = true;
 let mode = 'orbit', locked = true;
 const HELP = {
-  orbit: 'Drag to rotate · Right-drag / two fingers to pan · Scroll / pinch to zoom',
-  walk: 'Click the view to look around · WASD / arrows to walk · Esc to release the mouse',
+  orbit: 'Tap a room to step inside · Drag to rotate · Two fingers to pan · Pinch to zoom',
+  inside: 'Drag to look around · Joystick / WASD to walk · Tap the floor to walk there · Tap a door to open or close it',
   photo: 'Rendering a photo-real image… keep the camera still. Drag to change the angle (restarts).',
 };
-const helpText = () => mode === 'walk' ? HELP.walk : (locked ? '' : 'Drag furniture to move · R rotate · Del delete · ') + HELP.orbit;
+const helpText = () => mode === 'inside' ? HELP.inside : (locked ? '' : 'Drag furniture to move · R rotate · Del delete · ') + HELP.orbit;
 function applyBackground() {
   scene.background = (wallMode === 0 || photo) && sky ? sky : BG;
   scene.environment = photo && sky ? sky : envPMREM; // the path tracer needs an equirect environment
@@ -379,14 +379,15 @@ function applyBackground() {
 }
 function setMode(m) {
   mode = m;
-  ['orbit', 'top', 'walk'].forEach(k => $('v-' + k).classList.toggle('on', k === m));
+  ['orbit', 'top', 'walk'].forEach(k => $('v-' + k).classList.toggle('on', k === m || (k === 'walk' && m === 'inside')));
   $('help').textContent = helpText();
-  orbit.enabled = m !== 'walk';
-  if (m === 'walk') {
-    setWalls(0);
-    camera.position.set(4.6, 1.6, 3.7); camera.lookAt(2.0, 1.4, 1.2);
-  } else {
-    if (walk.isLocked) walk.unlock();
+  orbit.enabled = m === 'orbit' || m === 'top';
+  $('stick').hidden = $('exit-inside').hidden = m !== 'inside';
+  document.body.classList.toggle('inside', m === 'inside');
+  camera.fov = m === 'inside' ? (camera.aspect < 1 ? 78 : 65) : 45;
+  camera.updateProjectionMatrix();
+  renderer.toneMappingExposure = m === 'inside' ? 1.0 : 0.9;
+  if (m === 'orbit' || m === 'top') {
     orbit.target.copy(CENTER);
     const k = Math.max(1, 1.3 / camera.aspect); // pull back on narrow (phone) screens so the whole flat fits
     if (m === 'top') camera.position.set(CENTER.x, 24 * k, CENTER.z + 0.01);
@@ -396,21 +397,13 @@ function setMode(m) {
 }
 $('v-orbit').onclick = () => setMode('orbit');
 $('v-top').onclick = () => setMode('top');
-$('v-walk').onclick = () => setMode('walk');
+$('v-walk').onclick = () => enterInside(4.7, 3.9, 2.0, 1.6);
+$('exit-inside').onclick = () => { setWalls(1); setMode('orbit'); };
 $('room-go').onchange = e => {
   const r = ROOMS[e.target.value]; if (!r) return;
-  const [a, b, c, d] = r.rects[0], cx = (a + c) / 2, cz = (b + d) / 2;
-  setMode('orbit');
-  if (wallMode === 0) setWalls(1);
-  orbit.target.set(cx, 0.5, cz); camera.position.set(cx - 1.2, 5.5, cz + 4.5);
+  const [x1, z1, x2, z2] = r.rects[0];
+  enterInside((x1 + x2) / 2, (z1 + z2) / 2);
   e.target.value = '';
-};
-
-// Eye-level interior view from a room corner, walls on, for photos.
-$('v-eye').onclick = () => {
-  setMode('orbit'); setWalls(0);
-  orbit.target.set(2.3, 1.0, 1.8); camera.position.set(4.7, 1.55, 4.0);
-  applyBackground();
 };
 
 // Furniture is locked on every load so nothing moves by accident; unlocking needs a confirm.
@@ -435,9 +428,11 @@ const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), floorPlane = new T
 let drag = null;
 const pick = e => { ndc.set((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1); ray.setFromCamera(ndc, camera); };
 const rootOf = o => { while (o && o.parent !== furn) o = o.parent; return o; };
+let down = null;
 renderer.domElement.addEventListener('pointerdown', e => {
-  if (photo) return;
-  if (mode === 'walk') { if (canLock) walk.lock(); return; }
+  down = { x: e.clientX, y: e.clientY, t: performance.now(), lx: e.clientX, ly: e.clientY };
+  if (photo || mode === 'flying') return;
+  if (mode === 'inside') { renderer.domElement.setPointerCapture(e.pointerId); return; }
   if (e.button !== 0 || locked) return;
   pick(e);
   const hit = ray.intersectObjects(furn.children.filter(o => o.visible), true)[0];
@@ -449,6 +444,11 @@ renderer.domElement.addEventListener('pointerdown', e => {
   orbit.enabled = false;
 });
 addEventListener('pointermove', e => {
+  if (mode === 'inside' && down && e.target === renderer.domElement) {
+    yaw += (e.clientX - down.lx) * 0.005; pitch = THREE.MathUtils.clamp(pitch + (e.clientY - down.ly) * 0.005, -1.2, 1.2);
+    down.lx = e.clientX; down.ly = e.clientY; walkTo = null;
+    return;
+  }
   if (!drag) return;
   pick(e);
   const p = new THREE.Vector3(); if (!ray.ray.intersectPlane(floorPlane, p)) return;
@@ -456,18 +456,115 @@ addEventListener('pointermove', e => {
   it.x = snap(p.x + drag.dx); it.z = snap(p.z + drag.dz);
   place(drag.obj); outline.setFromObject(drag.obj);
 });
-addEventListener('pointerup', () => { if (drag) { save(); drag = null; orbit.enabled = mode !== 'walk'; } });
+addEventListener('pointerup', e => {
+  const tap = down && Math.hypot(e.clientX - down.x, e.clientY - down.y) < 8 && performance.now() - down.t < 400;
+  down = null;
+  if (drag) { save(); drag = null; furnBoxes = null; orbit.enabled = mode === 'orbit' || mode === 'top'; return; }
+  if (!tap || photo || e.target !== renderer.domElement) return;
+  pick(e);
+  if (mode === 'inside') {
+    const doorHit = ray.intersectObjects(doors.map(d => d.pivot), true)[0];
+    if (doorHit && doorHit.distance < 4) { const st = doorState[doorHit.object.userData.door]; st.open = !st.open; return; }
+    const p = new THREE.Vector3();
+    if (ray.ray.intersectPlane(floorPlane, p) && p.distanceTo(camera.position) < 14) walkTo = p;
+    return;
+  }
+  if ((mode === 'orbit' || mode === 'top') && (locked || !selected)) {
+    const p = new THREE.Vector3();
+    if (ray.ray.intersectPlane(floorPlane, p) && roomAt(p.x, p.z)) enterInside(p.x, p.z);
+  }
+});
+
 const keys = {};
 addEventListener('keydown', e => {
   if (['INPUT', 'SELECT'].includes(e.target.tagName)) return;
   keys[e.code] = true;
-  if (mode !== 'walk' && !photo && !locked) {
+  if (mode !== 'inside' && !photo && !locked) {
     if (e.code === 'KeyR') rotate(e.shiftKey ? 15 : -90);
     if (e.code === 'Delete' || e.code === 'Backspace') $('del').click();
     if (e.code === 'Escape') select(null);
   }
+  if (mode === 'inside' && e.code === 'Escape') $('exit-inside').click();
 });
 addEventListener('keyup', e => { keys[e.code] = false; });
+
+// ---------- Inside mode: first-person, eye height, walls / furniture / closed doors are solid ----------
+const EYE = 1.6, R = 0.22;
+let yaw = 0, pitch = 0, walkTo = null, furnBoxes = null, fly = null;
+const SKIP = new Set(['rug', 'curtain', 'curtain_open', 'pendant', 'art', 'mirror_round', 'mirror_led', 'tv', 'hood', 'flowers', 'vase', 'ceramic_vase', 'table_lamp']);
+const inPanoRect = ([a, b, c, d]) => a >= PANORAMA[0] - 0.01 && c <= PANORAMA[2] + 0.01 && b >= PANORAMA[1] - 0.01 && d <= PANORAMA[3] + 0.01;
+const STATIC = PLAN.walls.concat(PLAN.windows).filter(r => !inPanoRect(r)).concat([PANORAMA]);
+function solids() {
+  furnBoxes ??= furn.children.filter(o => o.visible && !SKIP.has(o.userData.item.type) && (o.userData.item.y || 0) < 0.6).map(o => {
+    const b = new THREE.Box3().setFromObject(o);
+    return [b.min.x + 0.04, b.min.z + 0.04, b.max.x - 0.04, b.max.z - 0.04];
+  });
+  return STATIC.concat(doors.filter((d, i) => !doorState[i].open).map(d => d.rect), furnBoxes);
+}
+const blockedAt = (x, z) => solids().some(([a, b, c, d]) => x > a - R && x < c + R && z > b - R && z < d + R);
+function freeSpot(x, z) {
+  if (!blockedAt(x, z)) return [x, z];
+  for (let r = 0.2; r < 2; r += 0.2) for (let k = 0; k < 16; k++) {
+    const px = x + Math.cos(k / 16 * Math.PI * 2) * r, pz = z + Math.sin(k / 16 * Math.PI * 2) * r;
+    if (!blockedAt(px, pz) && roomAt(px, pz)) return [px, pz];
+  }
+  return [x, z];
+}
+// Fly from wherever the camera is down to eye level in the room, looking across it.
+function enterInside(x, z, lookX, lookZ) {
+  select(null); furnBoxes = null; walkTo = null;
+  setWalls(0);
+  [x, z] = freeSpot(x, z);
+  const room = roomAt(x, z), [x1, z1, x2, z2] = room ? room.rects[0] : [x - 1, z - 1, x + 1, z + 1];
+  let tx = lookX ?? (x1 + x2) / 2, tz = lookZ ?? (z1 + z2) / 2;
+  if (Math.hypot(tx - x, tz - z) < 0.8) { if (x2 - x1 > z2 - z1) tx = x < tx ? x2 : x1; else tz = z < tz ? z2 : z1; }
+  yaw = Math.atan2(-(tx - x), -(tz - z)); pitch = -0.05;
+  const endQ = new THREE.Quaternion().setFromEuler(new THREE.Euler(pitch, yaw, 0, 'YXZ'));
+  fly = { t: 0, p0: camera.position.clone(), q0: camera.quaternion.clone(), p1: new THREE.Vector3(x, EYE, z), q1: endQ };
+  mode = 'flying'; orbit.enabled = false;
+  $('panel').hidden = true; $('menu-btn').textContent = '☰ Menu';
+}
+function tryMove(dx, dz) {
+  const p = camera.position;
+  if (!blockedAt(p.x + dx, p.z)) p.x += dx;
+  if (!blockedAt(p.x, p.z + dz)) p.z += dz;
+}
+// On-screen joystick (bottom-left) for phones
+const stick = { x: 0, y: 0 };
+$('stick').addEventListener('pointerdown', e => { $('stick').setPointerCapture(e.pointerId); moveStick(e); });
+$('stick').addEventListener('pointermove', e => { if (e.buttons) moveStick(e); });
+$('stick').addEventListener('pointerup', () => { stick.x = stick.y = 0; $('knob').style.transform = ''; });
+function moveStick(e) {
+  const r = $('stick').getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2, max = r.width / 2;
+  let dx = e.clientX - cx, dy = e.clientY - cy; const len = Math.hypot(dx, dy);
+  if (len > max) { dx *= max / len; dy *= max / len; }
+  stick.x = dx / max; stick.y = dy / max; walkTo = null;
+  $('knob').style.transform = `translate(${dx}px, ${dy}px)`;
+}
+function updateInside(dt) {
+  const sp = 1.4 * dt, k = keys;
+  let f = -stick.y + ((k.KeyW || k.ArrowUp) ? 1 : 0) - ((k.KeyS || k.ArrowDown) ? 1 : 0);
+  let s = stick.x + (k.KeyD ? 1 : 0) - (k.KeyA ? 1 : 0);
+  if (k.ArrowLeft || k.KeyQ) yaw += 1.6 * dt;
+  if (k.ArrowRight || k.KeyE) yaw -= 1.6 * dt;
+  if (f || s) walkTo = null;
+  if (walkTo) {
+    const dx = walkTo.x - camera.position.x, dz = walkTo.z - camera.position.z, d = Math.hypot(dx, dz);
+    if (d < 0.08) walkTo = null;
+    else { const before = camera.position.clone(); tryMove(dx / d * Math.min(sp, d), dz / d * Math.min(sp, d)); if (camera.position.distanceTo(before) < 1e-4) walkTo = null; }
+  }
+  const fx = -Math.sin(yaw), fz = -Math.cos(yaw), rx = Math.cos(yaw), rz = -Math.sin(yaw);
+  if (f || s) tryMove((fx * f + rx * s) * sp, (fz * f + rz * s) * sp);
+  camera.position.y = EYE;
+  camera.rotation.set(pitch, yaw, 0, 'YXZ');
+}
+// Smoothly swing door leaves toward their open/closed angle.
+function updateDoors(dt) {
+  doors.forEach((d, i) => {
+    const target = doorState[i].open ? d.angOpen : d.angClosed, r = d.pivot.rotation;
+    r.y += (target - r.y) * Math.min(1, dt * 6);
+  });
+}
 
 // ---------- photo-real path tracing ----------
 let photo = null;
@@ -476,7 +573,7 @@ $('photo').onclick = async () => {
   $('photo').disabled = true; $('photo').textContent = 'Preparing…';
   try {
     const { WebGLPathTracer } = await import('https://esm.sh/three-gpu-pathtracer@0.0.27?external=three');
-    select(null); if (walk.isLocked) walk.unlock();
+    select(null);
     const pt = new WebGLPathTracer(renderer);
     pt.tiles.set(2, 2); pt.filterGlossyFactor = 0.5; pt.renderDelay = 0; pt.fadeDuration = 0; pt.minSamples = 1;
     photo = pt; applyBackground();
@@ -521,21 +618,26 @@ const timer = new THREE.Timer();
 renderer.setAnimationLoop(() => {
   timer.update();
   const dt = Math.min(timer.getDelta(), 0.1);
-  if (mode === 'walk' && walk.isLocked) {
-    const sp = 1.8 * dt;
-    if (keys.KeyW || keys.ArrowUp) walk.moveForward(sp);
-    if (keys.KeyS || keys.ArrowDown) walk.moveForward(-sp);
-    if (keys.KeyA || keys.ArrowLeft) walk.moveRight(-sp);
-    if (keys.KeyD || keys.ArrowRight) walk.moveRight(sp);
+  updateDoors(dt);
+  if (mode === 'flying') {
+    fly.t = Math.min(1, fly.t + dt / 1.4);
+    const e = fly.t < 0.5 ? 2 * fly.t * fly.t : 1 - (-2 * fly.t + 2) ** 2 / 2;
+    camera.position.lerpVectors(fly.p0, fly.p1, e); camera.quaternion.slerpQuaternions(fly.q0, fly.q1, e);
+    camera.fov = 45 + ((camera.aspect < 1 ? 78 : 65) - 45) * e; camera.updateProjectionMatrix();
+    if (fly.t >= 1) setMode('inside');
+  } else if (mode === 'inside') {
+    const before = camera.position.clone(), r0 = yaw + pitch;
+    updateInside(dt);
+    if (photo && (camera.position.distanceTo(before) > 1e-5 || yaw + pitch !== r0)) photo.updateCamera();
   } else orbit.update();
   ceiling.visible = wallMode === 0 && camera.position.y < WALL_H;
   for (const t of tags) {
     const v = t.p.clone().project(camera);
-    t.el.style.display = mode === 'walk' || photo || v.z > 1 || camera.position.y < WALL_H ? 'none' : '';
+    t.el.style.display = mode === 'inside' || mode === 'flying' || photo || v.z > 1 || camera.position.y < WALL_H ? 'none' : '';
     t.el.style.left = (v.x + 1) / 2 * innerWidth + 'px';
     t.el.style.top = (1 - v.y) / 2 * innerHeight + 'px';
   }
   if (photo) { photo.renderSample(); $('samples').textContent = `${Math.floor(photo.samples)} samples`; }
   else composer.render();
 });
-window.__app = { scene, camera, orbit, items, setWalls, setMode };
+window.__app = { tryMove, blockers: (x, z) => solids().filter(([a, b, c, d]) => x > a - R && x < c + R && z > b - R && z < d + R), scene, camera, orbit, items, setWalls, setMode, enterInside, doorState, get mode() { return mode; } };

@@ -29,7 +29,14 @@
   #sel-none, #sel-spec { color: #8a7f74; font-size: 12px; }
   #help { position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%); background: #000a; color: #fff;
           padding: 6px 12px; border-radius: 6px; font-size: 12px; pointer-events: none; max-width: 90vw; text-align: center; }
-  #samples { position: fixed; top: 12px; right: 12px; background: #000a; color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 12px; }
+  #exit-inside { position: fixed; top: 12px; right: 12px; z-index: 3; font-size: 16px; padding: 6px 12px; box-shadow: 0 4px 16px #0002; }
+  #stick { position: fixed; left: 24px; bottom: 70px; width: 120px; height: 120px; border-radius: 50%; background: #fff5; border: 2px solid #fffb;
+           backdrop-filter: blur(4px); touch-action: none; z-index: 3; display: grid; place-items: center; }
+  #stick[hidden] { display: none; }
+  #knob { width: 52px; height: 52px; border-radius: 50%; background: #fffe; box-shadow: 0 2px 8px #0003; pointer-events: none; }
+  #view canvas { touch-action: none; }
+  body.inside #help { top: 60px; bottom: auto; max-width: 70vw; }
+  #samples { position: fixed; top: 60px; right: 12px; background: #000a; color: #fff; padding: 4px 10px; border-radius: 6px; font-size: 12px; }
   #samples:empty { display: none; }
   .tag { position: fixed; pointer-events: none; font-size: 12px; font-weight: 600; color: #3b332b; text-shadow: 0 0 4px #fff, 0 0 2px #fff; transform: translate(-50%, -50%); }
   #loading { position: fixed; inset: 0; display: grid; place-items: center; background: #ebe7e1; z-index: 10; }
@@ -51,9 +58,9 @@
   "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
   "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/",
   "three/examples/jsm/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/",
-  "./js/plan.js": "./js/plan.js?v=2026-10-24b",
-  "./js/materials.js": "./js/materials.js?v=2026-10-24b",
-  "./js/furniture.js": "./js/furniture.js?v=2026-10-24b"
+  "./js/plan.js": "./js/plan.js?v=2026-10-24f",
+  "./js/materials.js": "./js/materials.js?v=2026-10-24f",
+  "./js/furniture.js": "./js/furniture.js?v=2026-10-24f"
 } }
 </script>
 </head>
@@ -70,8 +77,7 @@
   <div class="row">
     <button id="v-orbit" class="on">3D</button>
     <button id="v-top">Top</button>
-    <button id="v-eye">Eye level</button>
-    <button id="v-walk">Walk</button>
+    <button id="v-walk">🚶 Inside</button>
     <button id="v-walls">Walls: cut</button>
   </div>
   <div class="row">
@@ -133,8 +139,10 @@
   <div id="specs-body"></div>
 </div>
 <div id="help"></div>
+<button id="exit-inside" hidden>⬅ 3D view</button>
+<div id="stick" hidden aria-label="Walk joystick"><div id="knob"></div></div>
 <div id="samples"></div>
 <!-- On every deploy bump v= here AND in version.txt; stale pages reload themselves (see top of app.js). -->
-<script type="module" src="js/app.js?v=2026-10-24b"></script>
+<script type="module" src="js/app.js?v=2026-10-24f"></script>
 </body>
 </html>
