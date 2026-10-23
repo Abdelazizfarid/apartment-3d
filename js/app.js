@@ -344,14 +344,14 @@ function setWalls(m) {
 
 // Specs sheet: finishes per room + every piece with its size, grouped by room.
 const FINISH_SPEC = {
-  Reception: 'Floor: existing glossy marble-look porcelain, 60×60 (kept) · West side: full-height panorama glazing to the balcony · Walls: warm greige matte (≈ #E6DDD1) · TV wall: full-height fluted walnut · Ceiling: gypsum, recessed 2700 K downlights · Curtains: ceiling track, sheer + linen',
-  Dining: 'Floor: existing glossy marble-look porcelain (kept) · Pendants ×2 over table at 75 cm above top · Walls: warm greige',
+  Reception: 'Floor: wall-to-wall wool carpet (marbled sand / ivory) over the existing tile, ~20 cm tile margin · West side: full-height panorama glazing to the balcony · Walls: warm greige matte (≈ #E6DDD1) · TV wall: full-height fluted walnut · Ceiling: gypsum, recessed 2700 K downlights · Curtains: ceiling track, sheer + linen',
+  Dining: 'Floor: wall-to-wall wool carpet, ivory with taupe border, over the existing tile · Pendants ×2 over table at 75 cm above top · Walls: warm greige',
   'Main bathroom': 'Floor + walls: Calacatta large-format (marble or porcelain), full height · Sink by the door, shower cabin in the back corner beside the WC · Black-framed glass cabin',
   Balcony: 'Reception west wall opened as floor-to-ceiling panorama: 4 black-aluminium sliding glass panels · Balcony: stone floor, painted fascia, black-framed glass railing 1.1 m',
   Kitchen: 'Floor: travertine · Base units: handleless greige lacquer · Tall units: walnut · Worktop + splash: Calacatta 2 cm · Brass mixer',
-  Bedroom: 'Floor: existing wood-look porcelain planks (≈15×60, taupe-brown) with matching dark skirting (kept) · Two single beds 90×200 on the fluted walnut wall, shared nightstand · L-shaped study desk with PC + laptop where the wardrobe was · Curtains: sheer + linen',
-  'Master bedroom': 'Floor: existing wood-look porcelain planks with matching dark skirting (kept) · Headboard wall: built-out full-height fluted walnut (hides the column) · Wardrobe: cream lacquer + light oak to ceiling, mirror doors, open lit shelf column',
-  Corridor: 'Floor: existing glossy marble-look porcelain (kept, continues from dining) · Art lighting · Doors: flush walnut, 2.25 m, brass levers; entrance: armoured, dark walnut',
+  Bedroom: 'Floor: wall-to-wall plush ivory carpet over the existing wood-look tile; dark skirting kept · Two single beds 90×200 on the fluted walnut wall, shared nightstand · L-shaped study desk with PC + laptop where the wardrobe was · Curtains: sheer + linen',
+  'Master bedroom': 'Floor: wall-to-wall ivory carpet with taupe border over the existing wood-look tile; dark skirting kept · Headboard wall: built-out full-height fluted walnut (hides the column) · Wardrobe: cream lacquer + light oak to ceiling, mirror doors, open lit shelf column',
+  Corridor: 'Floor: wall-to-wall wool carpet, sand diamond lattice, over the existing tile · Art lighting · Doors: flush walnut, 2.25 m, brass levers; entrance: armoured, dark walnut',
 };
 $('specs').onclick = () => {
   const groups = {};
