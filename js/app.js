@@ -12,6 +12,17 @@ import { M, mesh, PHONE } from './materials.js';
 import { CATALOG, build, loadModels, box, fluted, channels } from './furniture.js';
 
 const $ = id => document.getElementById(id);
+
+// Phones keep the old page cached (GitHub Pages sends max-age=600). If a newer deploy exists,
+// reload once under a new URL, which skips the cached copy.
+const BUILD = new URL(import.meta.url).searchParams.get('v');
+fetch('version.txt', { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(v => {
+  v = v.trim();
+  if (BUILD && v && v !== BUILD && !sessionStorage.getItem('reloaded-' + v)) {
+    sessionStorage.setItem('reloaded-' + v, '1');
+    location.replace(location.pathname + '?v=' + encodeURIComponent(v));
+  }
+}).catch(() => {});
 const SNAP = 0.05, KEY = 'wadi-houf-design-v2';
 
 // ---------- renderer / scene ----------
