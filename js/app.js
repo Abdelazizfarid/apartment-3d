@@ -6,6 +6,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { PLAN, WALL_H, SILL, WIN_TOP, DOOR_H, ROOMS, DOORS, CLADDING, LIGHTS, PROPOSAL, PANORAMA, BALCONY } from './plan.js';
 import { M, mesh, PHONE } from './materials.js';
 import { CATALOG, build, loadModels, box, fluted, channels } from './furniture.js';
@@ -29,8 +30,8 @@ const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffe
 // Phones get a lighter pipeline so iOS doesn't kill the tab for GPU memory.
 renderer.setPixelRatio(Math.min(devicePixelRatio, PHONE ? 1.5 : 2));
 renderer.setSize(innerWidth, innerHeight);
-renderer.toneMapping = THREE.NeutralToneMapping;
-renderer.toneMappingExposure = 0.9;
+renderer.toneMapping = THREE.ACESFilmicToneMapping; // filmic, camera-like highlight roll-off
+renderer.toneMappingExposure = 0.95;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFShadowMap;
 $('view').appendChild(renderer.domElement);
@@ -43,7 +44,11 @@ const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.05, 2
 const CENTER = new THREE.Vector3(10.1, 0, 2.9);
 
 const pmrem = new THREE.PMREMGenerator(renderer);
-let sky = null, envPMREM = null;
+let sky = null, envPMREM = null, view = null;
+// Real elevated city view (Poly Haven, CC0) seen through the windows when walls are up; building in it turned away from the glass.
+new THREE.TextureLoader().load('assets/hdri/view.jpg', t => { t.mapping = THREE.EquirectangularReflectionMapping; t.colorSpace = THREE.SRGBColorSpace; view = t; applyBackground(); });
+scene.backgroundRotation.y = Math.PI * 0.6;
+scene.backgroundIntensity = 1.7;
 new HDRLoader().load('assets/hdri/interior.hdr', t => { envPMREM = scene.environment = pmrem.fromEquirectangular(t).texture; t.dispose(); });
 new HDRLoader().load('assets/hdri/sky.hdr', t => { t.mapping = THREE.EquirectangularReflectionMapping; sky = t; applyBackground(); });
 scene.environmentIntensity = 0.4;
@@ -54,6 +59,7 @@ sun.position.set(CENTER.x - 9, 12, CENTER.z - 7);
 sun.target.position.copy(CENTER);
 sun.castShadow = true;
 sun.shadow.mapSize.setScalar(PHONE ? 2048 : 4096);
+sun.shadow.radius = 4; sun.shadow.blurSamples = 12;
 sun.shadow.bias = PHONE ? -0.001 : -0.0004; sun.shadow.normalBias = PHONE ? 0.05 : 0.02;
 Object.assign(sun.shadow.camera, { left: -13, right: 13, top: 13, bottom: -13, near: 1, far: 40 });
 scene.add(sun, sun.target);
@@ -68,6 +74,7 @@ const gtao = new GTAOPass(scene, camera, innerWidth, innerHeight);
 gtao.updateGtaoMaterial({ radius: 0.35, distanceFallOff: 1, thickness: 1 });
 gtao.blendIntensity = 0.9;
 if (!PHONE) composer.addPass(gtao);
+if (!PHONE) composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth / 2, innerHeight / 2), 0.35, 0.6, 1.4));
 composer.addPass(new OutputPass());
 
 // ---------- architecture ----------
@@ -227,16 +234,24 @@ function buildArchitecture(H) {
     arch.add(panel);
   }
 
-  // Ceiling with recessed downlights (shown only when the camera is inside).
+  // Ceiling: gypsum drop band (cove) round the living rooms with hidden warm LED washing the raised centre,
+  // spotlights set in the band; plain ceiling with a grid of downlights elsewhere.
   ceiling.add(slab([-0.023, 0, 20.3, 5.9], WALL_H, WALL_H + 0.05, M('ceiling'))); // one slab: per-room strips left hairline gaps
-  for (const room of ROOMS.filter(r => !r.outdoor)) for (const [a, b, c, d] of room.rects) {
-    const nx = Math.max(1, Math.round((c - a - 1) / 1.3)), nz = Math.max(1, Math.round((d - b - 1) / 1.3));
-    for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
-      const disc = mesh(new THREE.CircleGeometry(0.045, 24), M('glow'), { shadow: false });
-      disc.rotation.x = Math.PI / 2;
-      disc.position.set(a + 0.5 + (c - a - 1) * (nx === 1 ? 0.5 : i / (nx - 1)), WALL_H - 0.002, b + 0.5 + (d - b - 1) * (nz === 1 ? 0.5 : j / (nz - 1)));
-      ceiling.add(disc);
+  const spot = (x, z, y) => { const d = mesh(new THREE.CircleGeometry(0.04, 24), M('glow'), { shadow: false }); d.rotation.x = Math.PI / 2; d.position.set(x, y, z); ceiling.add(d); };
+  for (const room of ROOMS.filter(r => !r.outdoor)) for (const rect of room.rects) {
+    const [a, b, c, d] = rect;
+    if (room.cove && rect === room.rects[0]) {
+      const B = 0.45, D = 0.14, y = WALL_H - D;
+      ceiling.add(slab([a, b, c, b + B], y, WALL_H, M('ceiling')), slab([a, d - B, c, d], y, WALL_H, M('ceiling')),
+                  slab([a, b + B, a + B, d - B], y, WALL_H, M('ceiling')), slab([c - B, b + B, c, d - B], y, WALL_H, M('ceiling')));
+      for (const r of [[a + B, b + B, c - B, b + B + 0.02], [a + B, d - B - 0.02, c - B, d - B], [a + B, b + B, a + B + 0.02, d - B], [c - B - 0.02, b + B, c - B, d - B]])
+        ceiling.add(slab(r, y + 0.02, y + 0.035, M('ledstrip')));                  // LED tucked behind the band lip
+      for (const [x1, x2, zz] of [[a, c, b + B / 2], [a, c, d - B / 2]]) { const n = Math.max(2, Math.round((x2 - x1) / 1.2)); for (let i = 0; i < n; i++) spot(x1 + (x2 - x1) * (i + 0.5) / n, zz, y - 0.002); }
+      continue;
     }
+    const nx = Math.max(1, Math.round((c - a - 1) / 1.3)), nz = Math.max(1, Math.round((d - b - 1) / 1.3));
+    for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++)
+      spot(a + 0.5 + (c - a - 1) * (nx === 1 ? 0.5 : i / (nx - 1)), b + 0.5 + (d - b - 1) * (nz === 1 ? 0.5 : j / (nz - 1)), WALL_H - 0.002);
   }
 }
 for (const [x, z, w, d, intensity] of LIGHTS) {
@@ -380,7 +395,9 @@ const HELP = {
 };
 const helpText = () => mode === 'inside' ? HELP.inside : (locked ? '' : 'Drag furniture to move · R rotate · Del delete · ') + HELP.orbit;
 function applyBackground() {
-  scene.background = (wallMode === 0 || photo) && sky ? sky : BG;
+  const outdoors = wallMode === 0 || photo;
+  scene.background = outdoors ? (view ?? sky ?? BG) : BG;
+  ground.visible = !(outdoors && view);           // the panorama has its own ground far below
   scene.environment = photo && sky ? sky : envPMREM; // the path tracer needs an equirect environment
   ceiling.visible = wallMode === 0 && camera.position.y < WALL_H;
 }
@@ -393,7 +410,7 @@ function setMode(m) {
   document.body.classList.toggle('inside', m === 'inside');
   camera.fov = m === 'inside' ? (camera.aspect < 1 ? 78 : 65) : 45;
   camera.updateProjectionMatrix();
-  renderer.toneMappingExposure = m === 'inside' ? 1.0 : 0.9;
+  renderer.toneMappingExposure = m === 'inside' ? 1.0 : 0.95;
   if (m === 'orbit' || m === 'top') {
     orbit.target.copy(CENTER);
     const k = Math.max(1, 1.3 / camera.aspect); // pull back on narrow (phone) screens so the whole flat fits

@@ -87,7 +87,7 @@ const DEFS = {
   brass:      { tile: 1, p: () => ({ color: '#c8a35a', metalness: 1, roughness: 0.28 }) },
   blackmetal: { tile: 1, p: () => ({ color: '#1c1c1c', metalness: 0.7, roughness: 0.45 }) },
   steel:      { tile: 1, p: () => ({ color: '#9da3a8', metalness: 1, roughness: 0.3 }) },
-  glass:      { tile: 1, p: () => ({ color: '#ffffff', metalness: 0, roughness: 0.02, transmission: 1, thickness: 0.01, ior: 1.5, transparent: true, opacity: 0.25, depthWrite: false }) },
+  glass:      { tile: 1, p: () => ({ color: '#ffffff', metalness: 0, roughness: 0.02, transmission: 1, thickness: 0.01, ior: 1.5, transparent: true, opacity: PHONE ? 0.06 : 0.25, depthWrite: false }) },
   showerglass:{ tile: 1, p: () => ({ color: '#bcd6dc', roughness: 0.05, metalness: 0.1, transparent: true, opacity: 0.38, depthWrite: false, side: THREE.DoubleSide }) },
   mirror:     { tile: 1, p: () => ({ color: '#ffffff', metalness: 1, roughness: 0.02 }) },
   ceramic:    { tile: 1, p: () => ({ color: '#f6f4f0', roughness: 0.12, clearcoat: 0.8 }) },
@@ -186,7 +186,10 @@ export function rugMaterial(pattern, w, d) {
   // woven speckle so it reads as wool, not print
   for (let i = 0; i < W * H / 60; i++) { g.fillStyle = rnd() < 0.5 ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'; g.fillRect(rnd() * W, rnd() * H, 2, 2); }
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
-  const props = { map: t, roughness: 1, ...(PHONE ? {} : { sheen: 0.6, sheenRoughness: 0.9, sheenColor: '#ffffff' }) };
+  // real cut-pile surface: scanned carpet normal + roughness, repeated every 50 cm
+  const pile = n => { const x = tex(`assets/tex/carpet/${n}.jpg`, false).clone(); x.repeat.set(w / 0.5, d / 0.5); x.needsUpdate = true; return x; };
+  const props = { map: t, normalMap: pile('nor'), normalScale: new THREE.Vector2(0.9, 0.9), roughnessMap: pile('rough'), roughness: 1,
+    ...(PHONE ? {} : { sheen: 0.8, sheenRoughness: 0.7, sheenColor: '#fff6ea' }) };
   const mat = PHONE ? new THREE.MeshStandardMaterial(props) : new THREE.MeshPhysicalMaterial(props);
   rugCache.set(key, mat);
   return mat;

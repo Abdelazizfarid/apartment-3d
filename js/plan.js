@@ -15,13 +15,13 @@ export const BALCONY = [[0, 0.678], [-1.208, 0.678], [0, 4.156]];
 
 // Room interiors (axis-aligned rectangles, inner wall faces) used for floor finishes, labels and lights.
 export const ROOMS = [
-  { name: 'Reception',      rects: [[0.252, 0.405, 4.6, 4.286]], floor: 'existing_tile' },
+  { name: 'Reception',      rects: [[0.252, 0.405, 4.6, 4.286]], floor: 'existing_tile' , cove: true },
   { name: 'Balcony',        rects: [[-1.208, 0.678, -0.023, 4.156]], floor: 'travertine', outdoor: true },
-  { name: 'Dining',         rects: [[4.6, 0.758, 7.730, 4.286]], floor: 'existing_tile' },
+  { name: 'Dining',         rects: [[4.6, 0.758, 7.730, 4.286]], floor: 'existing_tile' , cove: true },
   { name: 'Main bathroom',  rects: [[7.851, 0.779, 9.420, 3.161]], floor: 'calacatta' },
   { name: 'Kitchen',        rects: [[9.758, 0.377, 12.83, 3.161]], floor: 'travertine' },
-  { name: 'Bedroom',        rects: [[13.137, 0.249, 16.343, 4.421]], floor: 'wood_tile', skirting: 'wood_skirt' },
-  { name: 'Master bedroom', rects: [[16.423, 1.261, 20.0, 5.512], [15.40, 4.56, 16.43, 5.512]], floor: 'wood_tile', skirting: 'wood_skirt' },
+  { name: 'Bedroom',        rects: [[13.137, 0.249, 16.343, 4.421]], floor: 'wood_tile', skirting: 'wood_skirt' , cove: true },
+  { name: 'Master bedroom', rects: [[16.423, 1.261, 20.0, 5.512], [15.40, 4.56, 16.43, 5.512]], floor: 'wood_tile', skirting: 'wood_skirt' , cove: true },
   { name: 'Corridor',       rects: [[7.20, 4.42, 15.28, 5.512], [7.85, 3.28, 12.98, 4.42]], floor: 'existing_tile', noLabel: true },
 ];
 
