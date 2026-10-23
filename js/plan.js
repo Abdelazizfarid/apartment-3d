@@ -62,11 +62,9 @@ export const LIGHTS = [
 // Proposed layout: [type, x, z, rotation°, w, d, h, y]; rotation 0 = front faces south (+z).
 export const PROPOSAL = [
   // Reception
-  ['sofa_l', 2.255, 1.515, 0, 3.23, 1.81],
+  ['sofa_l', 2.815, 1.515, 0, 4.35, 1.81],      // runs to the wall pier at x≈5.0
   ['rug_abstract', 2.475, 2.345, 0, 4.05, 3.49],   // wall-to-wall carpet, ~20 cm tile edge
   ['coffee_round', 2.0, 2.6, 0, 1.0, 1.0, 0.42],
-  ['side_table', 4.17, 1.05, 0],
-  ['plant_tree', 4.62, 0.8, 0],
   ['tv_console', 2.15, 4.046, 180, 2.6, 0.38, 0.32, 0.22],
   ['tv', 2.15, 4.21, 180, 1.68, 0.04, 0.97, 1.0],
   ['lounge_chair', 0.95, 3.4, 135],
@@ -74,29 +72,28 @@ export const PROPOSAL = [
   ['curtain_open', 0.355, 2.57, 90, 3.4], ['curtain', 2.715, 0.48, 0, 2.6],
   // Dining
   ['rug_border', 6.125, 2.525, 0, 2.85, 3.15],
-  ['dining_table', 5.95, 2.15, 0, 1.8, 0.95],
-  ['dining_chair', 5.55, 1.45, 0], ['dining_chair', 6.35, 1.45, 0],
-  ['dining_chair', 5.55, 2.85, 180], ['dining_chair', 6.35, 2.85, 180],
-  ['dining_chair', 4.82, 2.15, 90], ['dining_chair', 7.08, 2.15, -90],
-  ['pendant', 5.6, 2.15, 0], ['pendant', 6.3, 2.15, 0],
-  ['flowers', 5.95, 2.15, 0, 0.3, 0.2, 0.3, 0.76],
+  ['dining_round', 6.2, 2.5, 0, 1.3, 1.3],
+  ['dining_chair', 6.91, 2.91, -120], ['dining_chair', 6.20, 3.32, -180], ['dining_chair', 5.49, 2.91, 120],
+  ['dining_chair', 5.49, 2.09, 60], ['dining_chair', 6.20, 1.68, 0], ['dining_chair', 6.91, 2.09, -60],
+  ['pendant', 6.2, 2.5, 0],
+  ['flowers', 6.2, 2.5, 0, 0.3, 0.2, 0.3, 0.76],
   ['sideboard', 7.5, 2.0, -90, 1.6, 0.45, 0.75],
   ['mirror_round', 7.715, 2.0, -90, 0.9, 0.03, 0.9, 1.25],
   ['vase', 7.5, 1.55, 0, 0.23, 0.23, 0.6, 0.75],
   ['curtain', 6.53, 0.83, 0, 1.4],
   // Bathroom
   ['toilet', 8.06, 1.07, 0],
+  ['water_heater', 8.11, 1.95, 90],
   ['bath_mat', 8.55, 2.75, 0, 0.8, 0.5],
   // Bathroom: sink by the door, shower cabin in the back corner beside the toilet
   ['vanity', 9.17, 2.62, -90, 0.8, 0.46],
   ['mirror_led', 9.40, 2.62, -90, 0.7, 0.03, 0.7, 1.25],
   ['shower', 9.0, 1.25, 0, 0.8, 0.9],
   // Kitchen
-  ['counter', 10.184, 0.677, 0, 0.85], ['sink_unit', 11.06, 0.677, 0, 0.9],
-  ['dishwasher', 11.81, 0.677, 0, 0.6], ['counter', 12.47, 0.677, 0, 0.72],
-  ['counter', 10.058, 1.14, 90, 0.32], ['hob_unit', 10.058, 1.75, 90, 0.9], ['counter', 10.058, 2.375, 90, 0.35],
-  ['hood', 10.008, 1.75, 90, 0.9, 0.5, 0.45, 1.65],
-  ['fridge', 10.058, 2.855, 90, 0.61, 0.6, 2.4],
+  ['counter', 10.184, 0.677, 0, 0.85], ['hob_unit', 11.06, 0.677, 0, 0.9],
+  ['dishwasher', 11.81, 0.677, 0, 0.6], ['fridge', 12.52, 0.677, 0, 0.61, 0.6, 2.4],
+  ['counter', 10.058, 1.14, 90, 0.32], ['sink_unit', 10.058, 1.75, 90, 0.9], ['counter', 10.058, 2.375, 90, 0.35],
+  ['counter', 10.058, 2.855, 90, 0.61],
   ['counter', 11.02, 2.861, 180, 1.32],
   ['rug_runner', 11.45, 1.45, 0, 1.8, 0.7],
   // Bedroom: two single beds with a shared nightstand; L-shaped study desk where the wardrobe was
@@ -106,6 +103,7 @@ export const PROPOSAL = [
   ['rug_shag', 14.75, 2.335, 0, 2.8, 3.77],
   ['desk_l', 15.543, 3.175, -90, 2.45, 1.6],
   ['office_chair', 15.2, 3.05, 90],
+  ['wardrobe', 16.06, 1.55, -90, 0.78, 0.55, 2.2],
   ['curtain', 14.826, 0.33, 0, 2.0], ['curtain', 16.26, 0.8, -90, 1.0],
   // Master bedroom
   ['bed', 18.62, 2.48, 0, 1.8, 2.1],

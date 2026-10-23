@@ -23,7 +23,7 @@ fetch('version.txt', { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then
     location.replace(location.pathname + '?v=' + encodeURIComponent(v));
   }
 }).catch(() => {});
-const SNAP = 0.05, KEY = 'wadi-houf-design-v3';
+const SNAP = 0.05, KEY = 'wadi-houf-design-v4';
 
 // ---------- renderer / scene ----------
 const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
@@ -289,10 +289,13 @@ function rebuildItem(it) {
 }
 const rebuildAll = () => { furn.clear(); items.forEach(rebuildItem); select(null); collectParts(); };
 // Openable furniture parts (wardrobe doors / drawers) tagged by the builders with userData.part
-let parts = [];
+let parts = [], ticks = [];
 function collectParts() {
-  parts = [];
-  furn.traverse(o => { if (o.userData.part) { o.userData.part.open ??= false; o.userData.part.z0 ??= o.position.z; parts.push(o); } });
+  parts = []; ticks = [];
+  furn.traverse(o => {
+    if (o.userData.part) { o.userData.part.open ??= false; o.userData.part.z0 ??= o.position.z; parts.push(o); }
+    if (o.userData.tick) ticks.push(o.userData.tick);
+  });
 }
 
 // ---------- UI ----------
@@ -361,9 +364,9 @@ function setWalls(m) {
 const FINISH_SPEC = {
   Reception: 'Floor: wall-to-wall wool carpet (marbled sand / ivory) over the existing tile, ~20 cm tile margin · West side: full-height panorama glazing to the balcony · Walls: warm greige matte (≈ #E6DDD1) · TV wall: full-height fluted walnut · Ceiling: gypsum, recessed 2700 K downlights · Curtains: ceiling track, sheer + linen',
   Dining: 'Floor: wall-to-wall wool carpet, ivory with taupe border, over the existing tile · Pendants ×2 over table at 75 cm above top · Walls: warm greige',
-  'Main bathroom': 'Floor + walls: warm grey concrete-look porcelain 60×120, full height, fine joints · Sink by the door, walk-in shower in the back corner beside the WC · Frameless glass, gunmetal rain shower + hand shower, recessed niche with 3 LED-lit shelves, linear drain · Warm dim lighting',
+  'Main bathroom': 'Floor + walls: warm grey concrete-look porcelain 60×120, full height, fine joints · Sink by the door, walk-in shower in the back corner beside the WC · Frameless glass with hinged door; rain head, hand shower, mixer and 2 body jets on the right wall; niche with 3 LED-lit shelves on the front wall · 50 L electric water heater on the left wall · Warm dim lighting',
   Balcony: 'Reception west wall opened as floor-to-ceiling panorama: 4 black-aluminium sliding glass panels · Balcony: stone floor, painted fascia, black-framed glass railing 1.1 m',
-  Kitchen: 'Floor: travertine · Base units: handleless greige lacquer · Tall units: walnut · Worktop + splash: Calacatta 2 cm · Brass mixer',
+  Kitchen: 'Floor: travertine · Hob under the window (downdraft extractor), sink on the left wall, fridge column straight ahead from the door · Base units: handleless greige lacquer · Tall units: walnut · Worktop + splash: Calacatta 2 cm · Brass mixer',
   Bedroom: 'Floor: wall-to-wall plush ivory carpet over the existing wood-look tile; dark skirting kept · Two single beds 90×200 on the fluted walnut wall, shared nightstand · L-shaped study desk with PC + laptop where the wardrobe was · Curtains: sheer + linen',
   'Master bedroom': 'Floor: wall-to-wall ivory carpet with taupe border over the existing wood-look tile; dark skirting kept · Headboard wall: built-out full-height fluted walnut (hides the column) · Wardrobe: cream lacquer + light oak to ceiling, mirror doors, open lit shelf column',
   Corridor: 'Floor: wall-to-wall wool carpet, sand diamond lattice, over the existing tile · Art lighting · Doors: flush walnut, 2.25 m, brass levers; entrance: armoured, dark walnut',
@@ -390,7 +393,7 @@ orbit.enableDamping = true; orbit.maxPolarAngle = Math.PI / 2 - 0.02;
 let mode = 'orbit', locked = true;
 const HELP = {
   orbit: 'Tap a room to step inside · Drag to rotate · Two fingers to pan · Pinch to zoom',
-  inside: 'Drag to look around · Joystick / WASD to walk · Tap the floor to walk there · Tap a door, wardrobe door or drawer to open or close it',
+  inside: 'Drag to look around · Joystick / WASD to walk · Tap the floor to walk there · Tap doors, wardrobe doors, drawers or the shower door to open them · Tap the shower fittings to turn the water on/off',
   photo: 'Rendering a photo-real image… keep the camera still. Drag to change the angle (restarts).',
 };
 const helpText = () => mode === 'inside' ? HELP.inside : (locked ? '' : 'Drag furniture to move · R rotate · Del delete · ') + HELP.orbit;
@@ -520,7 +523,7 @@ addEventListener('keyup', e => { keys[e.code] = false; });
 // ---------- Inside mode: first-person, eye height, walls / furniture / closed doors are solid ----------
 const EYE = 1.6, R = 0.22;
 let yaw = 0, pitch = 0, walkTo = null, furnBoxes = null, fly = null;
-const SKIP = new Set(['rug', 'rug_abstract', 'rug_border', 'rug_runner', 'rug_shag', 'rug_round', 'bath_mat', 'curtain', 'curtain_open', 'pendant', 'art', 'mirror_round', 'mirror_led', 'tv', 'hood', 'flowers', 'vase', 'ceramic_vase', 'table_lamp']);
+const SKIP = new Set(['shower', 'water_heater', 'rug', 'rug_abstract', 'rug_border', 'rug_runner', 'rug_shag', 'rug_round', 'bath_mat', 'curtain', 'curtain_open', 'pendant', 'art', 'mirror_round', 'mirror_led', 'tv', 'hood', 'flowers', 'vase', 'ceramic_vase', 'table_lamp']);
 const inPanoRect = ([a, b, c, d]) => a >= PANORAMA[0] - 0.01 && c <= PANORAMA[2] + 0.01 && b >= PANORAMA[1] - 0.01 && d <= PANORAMA[3] + 0.01;
 const STATIC = PLAN.walls.concat(PLAN.windows).filter(r => !inPanoRect(r)).concat([PANORAMA]);
 function solids() {
@@ -528,7 +531,14 @@ function solids() {
     const b = new THREE.Box3().setFromObject(o);
     return [b.min.x + 0.04, b.min.z + 0.04, b.max.x - 0.04, b.max.z - 0.04];
   });
-  return STATIC.concat(doors.filter((d, i) => !doorState[i].open).map(d => d.rect), furnBoxes);
+  // shower: solid while its glass door is shut (unless you are already standing inside it)
+  const showers = furn.children.filter(o => o.userData.item.type === 'shower').flatMap(o => {
+    let open = false; o.traverse(c => { if (c.userData.part?.kind === 'hinge' && c.userData.part.open) open = true; });
+    const b = new THREE.Box3().setFromObject(o), c = camera.position;
+    const inside = c.x > b.min.x && c.x < b.max.x && c.z > b.min.z && c.z < b.max.z;
+    return open || inside ? [] : [[b.min.x + 0.04, b.min.z + 0.04, b.max.x - 0.04, b.max.z - 0.04]];
+  });
+  return STATIC.concat(doors.filter((d, i) => !doorState[i].open).map(d => d.rect), furnBoxes, showers);
 }
 const blockedAt = (x, z) => solids().some(([a, b, c, d]) => x > a - R && x < c + R && z > b - R && z < d + R);
 function freeSpot(x, z) {
@@ -593,8 +603,9 @@ function updateDoors(dt) {
   for (const o of parts) {
     const p = o.userData.part;
     if (p.kind === 'hinge') o.rotation.y += ((p.open ? p.angle : 0) - o.rotation.y) * k;
-    else o.position.z += (p.z0 + (p.open ? p.dist : 0) - o.position.z) * k;
+    else if (p.kind === 'slide') o.position.z += (p.z0 + (p.open ? p.dist : 0) - o.position.z) * k;
   }
+  for (const t of ticks) t(dt);
   doors.forEach((d, i) => {
     const target = doorState[i].open ? d.angOpen : d.angClosed, r = d.pivot.rotation;
     r.y += (target - r.y) * Math.min(1, dt * 6);

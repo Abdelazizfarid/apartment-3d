@@ -203,6 +203,10 @@ export const CATALOG = {
     spec: 'Cream marble top 180×95 cm, rounded corners, twin marble pedestals',
     build: ({ w, d, h }) => group(rbox(w, 0.04, d, 0.02, M('cream'), 0, h - 0.04),
       rbox(0.22, h - 0.04, d * 0.55, 0.05, M('cream'), -w * 0.28, 0), rbox(0.22, h - 0.04, d * 0.55, 0.05, M('cream'), w * 0.28, 0)) },
+  dining_round: { label: 'Round dining table (marble)', cat: 'Dining', w: 1.3, d: 1.3, h: 0.76,
+    spec: 'Round dining table Ø130 cm for 6, cream marble top, sculpted marble pedestal',
+    build: ({ w, h }) => group(cyl(w / 2, w / 2, 0.04, M('cream'), 0, h - 0.04, 0, 64), cyl(0.16, 0.24, h - 0.12, M('cream'), 0, 0.06, 0, 48),
+      cyl(0.36, 0.38, 0.06, M('cream'), 0, 0, 0, 48), cyl(0.24, 0.16, 0.08, M('cream'), 0, h - 0.12, 0, 48)) },
   dining_chair: { label: 'Dining chair (velvet)', cat: 'Dining', w: 0.48, d: 0.52, h: 0.86, tint: 'velvet', color: '#9a8670',
     spec: 'Upholstered dining chair, taupe velvet, solid walnut legs, seat height 47 cm',
     build: ({ w, d, h }, fab) => {
@@ -390,7 +394,7 @@ export const CATALOG = {
   sink_unit: { label: 'Kitchen sink unit', cat: 'Kitchen', w: 0.9, d: 0.6, h: 0.9,
     spec: 'Sink base, undermount steel sink, brushed-brass gooseneck mixer', build: it => kitchenBase(it, 'sink') },
   hob_unit: { label: 'Hob + oven unit', cat: 'Kitchen', w: 0.9, d: 0.6, h: 0.9,
-    spec: 'Built-in oven, 90 cm black-glass induction hob', build: it => kitchenBase(it, 'hob') },
+    spec: 'Built-in oven, 90 cm black-glass induction hob with integrated downdraft extractor (sits under the window)', build: it => kitchenBase(it, 'hob') },
   dishwasher: { label: 'Dishwasher (integrated)', cat: 'Kitchen', w: 0.6, d: 0.6, h: 0.9,
     spec: 'Fully integrated 60 cm dishwasher behind lacquer panel', build: it => kitchenBase(it, 'panel') },
   fridge: { label: 'Fridge column (integrated)', cat: 'Kitchen', w: 0.61, d: 0.6, h: 2.4,
@@ -416,33 +420,74 @@ export const CATALOG = {
       m.position.set(0, h / 2, d); halo.position.set(0, h / 2, 0.005);
       return group(m, halo);
     } },
-  shower: { label: 'Walk-in shower (niche, rain head)', cat: 'Bathroom', w: 0.8, d: 0.9, h: 2.0,
-    spec: 'Walk-in shower: frameless 8 mm clear glass with gunmetal hinges and pull handle, flush grey porcelain floor with linear drain, gunmetal Ø30 rain head on arm + hand shower on hose, thermostatic mixer, recessed niche with 3 shelves and warm LED strips',
-    // back (-z) and right (+x) sides are walls; glass on the front (+z) and left (-x)
+  shower: { label: 'Walk-in shower (rain + body jets)', cat: 'Bathroom', w: 0.8, d: 0.9, h: 2.0,
+    spec: 'Walk-in shower: frameless 8 mm clear glass, hinged door with gunmetal pull handle, flush grey porcelain floor with linear drain; on the right wall: gunmetal Ø30 rain head on arm, hand shower, thermostatic mixer and 2 body jets; niche with 3 LED-lit shelves on the front wall',
+    // local frame: back (-z) and right (+x) are walls; glass on the front (+z, hinged door) and left (-x).
+    // Tap the door to open/close it; tap any fitting on the right wall to turn the water on/off.
     build: ({ w, d, h }) => {
-      const k = M('gunmetal'), gl = M('showerglass'), fz = d / 2 - 0.02, lx = -w / 2 + 0.01, bz = -d / 2, rx = w / 2;
-      const g = group(box(w, 0.006, d, M('stone_grey')), box(w - 0.1, 0.004, 0.035, k, 0, 0.004, bz + 0.06));   // floor + linear drain
-      // frameless glass: fixed side panel and hinged door, slim gunmetal hinges, pull handle, floor channel
-      g.add(box(0.008, h, d - 0.02, gl, lx, 0.01, 0), box(w - 0.03, h - 0.02, 0.008, gl, -0.005, 0.02, fz));
-      for (const y of [0.25, h - 0.3]) g.add(box(0.05, 0.08, 0.03, k, lx + 0.03, y, fz));
-      g.add(box(0.02, 0.35, 0.02, k, w / 2 - 0.12, 0.95, fz + 0.035), box(0.02, 0.02, 0.05, k, w / 2 - 0.12, 0.96, fz + 0.015), box(0.02, 0.02, 0.05, k, w / 2 - 0.12, 1.28, fz + 0.015));
-      g.add(box(0.012, 0.012, d, k, lx, 0.006, 0));
-      // rain head on an arm from the back wall, riser, hand shower on a hose, mixer
-      const rx0 = -0.05;
-      g.add(cyl(0.012, 0.012, 1.1, k, rx0, 1.0, bz + 0.05, 12), box(0.024, 0.024, 0.35, k, rx0, 2.08, bz + 0.2));
-      g.add(cyl(0.15, 0.15, 0.02, k, rx0, 2.04, bz + 0.38, 48), cyl(0.145, 0.145, 0.002, M('shadowgap'), rx0, 2.038, bz + 0.38, 48));
-      const hs = cyl(0.035, 0.02, 0.22, k, rx0 - 0.08, 1.55, bz + 0.09, 16); hs.rotation.x = 0.5; g.add(hs);
-      g.add(box(0.12, 0.05, 0.05, k, rx0, 1.0, bz + 0.03), cyl(0.025, 0.025, 0.05, k, rx0 + 0.07, 1.0, bz + 0.07, 16));
-      const hose = mesh(new THREE.TorusGeometry(0.12, 0.006, 8, 32, Math.PI), k); hose.position.set(rx0 - 0.04, 0.95, bz + 0.07); hose.rotation.z = Math.PI; g.add(hose);
-      // recessed niche in the side wall: dark-lit back, 3 shelves, warm LED under each, bottles + plants
-      const nx = rx - 0.06, nz0 = -0.1, nw = 0.5;
-      g.add(box(0.02, 1.15, nw, M('stone_grey'), rx - 0.01, 0.75, nz0));
+      const k = M('gunmetal'), gl = M('showerglass'), fz = d / 2 - 0.02, lx = -w / 2 + 0.01, bz = -d / 2, rx = w / 2, zc = -0.05;
+      const g = group(box(w, 0.006, d, M('stone_grey')), box(w - 0.1, 0.004, 0.035, k, 0, 0.004, bz + 0.06));
+      g.add(box(0.008, h, d - 0.02, gl, lx, 0.01, 0), box(0.012, 0.012, d, k, lx, 0.006, 0));
+      // hinged glass door, pivot on the left post, swings out
+      const door = new THREE.Group(), W = w - 0.03; door.position.set(lx, 0, fz);
+      door.add(box(W, h - 0.02, 0.008, gl, W / 2, 0.02, 0));
+      for (const y of [0.25, h - 0.3]) door.add(box(0.06, 0.08, 0.03, k, 0.03, y, 0));
+      door.add(box(0.02, 0.35, 0.02, k, W - 0.1, 0.95, 0.035), box(0.02, 0.02, 0.05, k, W - 0.1, 0.96, 0.015), box(0.02, 0.02, 0.05, k, W - 0.1, 1.28, 0.015));
+      door.userData.part = { kind: 'hinge', angle: -1.6 };
+      g.add(door);
+      // right-wall fittings: riser, arm + rain head, hand shower, mixer, two body jets (one tappable group)
+      const fit = new THREE.Group(), hx = rx - 0.4;
+      fit.add(cyl(0.012, 0.012, 1.1, k, rx - 0.04, 1.0, zc, 12), box(0.38, 0.024, 0.024, k, rx - 0.22, 2.08, zc));
+      fit.add(cyl(0.15, 0.15, 0.02, k, hx, 2.04, zc, 48), cyl(0.145, 0.145, 0.002, M('shadowgap'), hx, 2.038, zc, 48));
+      const hs = cyl(0.035, 0.02, 0.22, k, rx - 0.07, 1.5, zc + 0.08, 16); hs.rotation.z = 0.4; fit.add(hs);
+      fit.add(box(0.03, 0.22, 0.16, k, rx - 0.015, 0.95, zc), cyl(0.03, 0.03, 0.05, k, rx - 0.045, 1.05, zc, 16), cyl(0.03, 0.03, 0.05, k, rx - 0.045, 0.98, zc, 16));
+      const jets = [zc - 0.25, zc + 0.25].map(z => new THREE.Vector3(rx - 0.03, 1.15, z));
+      for (const j of jets) { const n = cyl(0.04, 0.04, 0.03, k, 0, 0, 0, 24); n.rotation.z = Math.PI / 2; n.position.copy(j); fit.add(n); }
+      fit.userData.part = { kind: 'toggle', open: false };
+      g.add(fit);
+      // niche on the front (back) wall, right of the window
+      const nx = rx - 0.14, nw = 0.24;
+      g.add(box(nw, 1.15, 0.02, M('stone_grey'), nx, 0.75, bz + 0.01));
       for (const [i, y] of [0.75, 1.15, 1.55].entries()) {
-        g.add(box(0.12, 0.025, nw, M('stone_grey'), nx, y, nz0), box(0.006, 0.006, nw - 0.04, M('ledstrip'), nx - 0.05, y - 0.006, nz0));
-        g.add(...bottles(nx, y + 0.025, nz0 - 0.12, i === 1 ? 2 : 1));
-        if (i !== 1) { const pl = model('calathea', 0.16, 0.16, 0.16); pl.position.set(nx, y + 0.1, nz0 + 0.14); g.add(cyl(0.05, 0.04, 0.09, M('ceramic'), nx, y + 0.025, nz0 + 0.14, 20), pl); }
+        g.add(box(nw, 0.025, 0.12, M('stone_grey'), nx, y, bz + 0.06), box(nw - 0.03, 0.006, 0.006, M('ledstrip'), nx, y - 0.006, bz + 0.11));
+        if (i === 1) { const pl = model('calathea', 0.14, 0.14, 0.12); pl.position.set(nx + 0.05, y + 0.1, bz + 0.07); g.add(cyl(0.04, 0.035, 0.08, M('ceramic'), nx + 0.05, y + 0.025, bz + 0.07, 20), pl); g.add(...bottles(nx - 0.05, y + 0.025, bz + 0.07, 1)); }
+        else g.add(...bottles(nx - 0.04, y + 0.025, bz + 0.07, 1), ...bottles(nx + 0.04, y + 0.025, bz + 0.07, 1));
       }
-      g.add(new THREE.PointLight('#ffcf9a', PHONE ? 0 : 0.6, 1.4, 2).translateX(nx - 0.08).translateY(1.2).translateZ(nz0));
+      // running water: rain from the head, two jets spraying into the middle
+      const wm = new THREE.LineBasicMaterial({ color: '#dceff8', transparent: true, opacity: 0.75 });
+      const R = 260, J = 70, pos = new Float32Array((R + J * 2) * 6), geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      const water = new THREE.LineSegments(geo, wm); water.frustumCulled = false; water.raycast = () => {}; water.visible = false;
+      const drops = Array.from({ length: R }, () => { const a = Math.random() * 6.283, r = Math.sqrt(Math.random()) * 0.13; return [hx + Math.cos(a) * r, zc + Math.sin(a) * r, Math.random(), Math.cos(a), Math.sin(a)]; });
+      const jetP = jets.flatMap(j => Array.from({ length: J }, () => [j, Math.random(), (Math.random() - 0.5) * 0.25, (Math.random() - 0.5) * 0.12]));
+      g.add(water);
+      g.userData.tick = dt => {
+        water.visible = fit.userData.part.open;
+        if (!water.visible) return;
+        let o = 0;
+        for (const dr of drops) {
+          dr[2] = (dr[2] + dt * 2.3) % 1;
+          const t = dr[2], y = 2.02 - t * 2.0, spread = t * 0.08;
+          pos.set([dr[0] + dr[3] * spread, y, dr[1] + dr[4] * spread, dr[0] + dr[3] * spread, y - 0.09, dr[1] + dr[4] * spread], o); o += 6;
+        }
+        for (const p of jetP) {
+          p[1] = (p[1] + dt * 1.8) % 1;
+          const [j, s, sz, sy] = p, dx = hx - j.x, dz = zc - j.z + sz, len = Math.hypot(dx, dz);
+          const x = j.x + dx / len * s * 0.45, z = j.z + dz / len * s * 0.45, y = j.y + sy * s - 0.35 * s * s;
+          pos.set([x, y, z, x - dx / len * 0.04, y + 0.7 * s * 0.04, z - dz / len * 0.04], o); o += 6;
+        }
+        geo.attributes.position.needsUpdate = true;
+      };
+      return g;
+    } },
+  water_heater: { label: 'Electric water heater', cat: 'Bathroom', w: 0.45, d: 0.45, h: 0.8, y: 1.35,
+    spec: 'Wall-mounted 50 L electric water heater, white enamel tank with thermostat dial; hot / cold pipes concealed below',
+    build: ({ w, h }) => {
+      const r = w / 2, g = group(cyl(r, r, h, M('ceramic'), 0, 0, 0, 40), mesh(new THREE.SphereGeometry(r, 32, 12, 0, 6.283, 0, Math.PI / 2), M('ceramic')),
+        box(0.12, 0.05, 0.2, M('gunmetal'), 0, h * 0.3, -r + 0.02), box(0.12, 0.05, 0.2, M('gunmetal'), 0, h * 0.75, -r + 0.02));
+      g.children[1].position.y = h; g.children[1].scale.y = 0.35;
+      const dial = cyl(0.04, 0.04, 0.02, M('gunmetal'), 0, 0, 0, 24); dial.rotation.x = Math.PI / 2; dial.position.set(0, h * 0.25, r + 0.005); g.add(dial);
+      g.add(cyl(0.012, 0.012, 0.35, M('steel'), -0.07, -0.35, 0, 10), cyl(0.012, 0.012, 0.35, M('steel'), 0.07, -0.35, 0, 10), cyl(0.009, 0.009, 0.004, M('ledstrip'), 0.08, h * 0.25, r + 0.003, 10));
       return g;
     } },
   washer: { label: 'Washing machine', cat: 'Other', w: 0.6, d: 0.6, h: 0.85, spec: 'Front-load washer-dryer',
@@ -483,7 +528,8 @@ function kitchenBase({ w, d, h }, kind) {
     neck.position.set(0, h + 0.3, -d / 2 + 0.12); neck.rotation.y = Math.PI / 2;
     g.add(cyl(0.012, 0.012, 0.3, M('brass'), 0, h, -d / 2 + 0.02 + 0.1), neck);
   }
-  if (kind === 'hob') g.add(box(w - 0.05, 0.006, d - 0.08, M('blackglass'), 0, h, 0), box(w - 0.04, 0.5, 0.004, M('blackglass'), 0, 0.15, d / 2 - 0.009));
+  if (kind === 'hob') g.add(box(w - 0.05, 0.006, d - 0.08, M('blackglass'), 0, h, 0.04), box(w - 0.04, 0.5, 0.004, M('blackglass'), 0, 0.15, d / 2 - 0.009),
+    box(w - 0.08, 0.03, 0.06, M('blackglass'), 0, h, -d / 2 + 0.08));                // downdraft extractor bar (window above, no hood)
   return g;
 }
 
