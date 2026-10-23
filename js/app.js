@@ -16,7 +16,9 @@ const SNAP = 0.05, KEY = 'wadi-houf-design-v2';
 
 // ---------- renderer / scene ----------
 const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+// Phones get a lighter pipeline so iOS doesn't kill the tab for GPU memory.
+const PHONE = matchMedia('(pointer: coarse)').matches;
+renderer.setPixelRatio(Math.min(devicePixelRatio, PHONE ? 1.5 : 2));
 renderer.setSize(innerWidth, innerHeight);
 renderer.toneMapping = THREE.NeutralToneMapping;
 renderer.toneMappingExposure = 0.9;
@@ -42,7 +44,7 @@ const sun = new THREE.DirectionalLight('#fff4e6', 2.2);
 sun.position.set(CENTER.x - 9, 12, CENTER.z - 7);
 sun.target.position.copy(CENTER);
 sun.castShadow = true;
-sun.shadow.mapSize.set(4096, 4096);
+sun.shadow.mapSize.setScalar(PHONE ? 2048 : 4096);
 sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.02;
 Object.assign(sun.shadow.camera, { left: -13, right: 13, top: 13, bottom: -13, near: 1, far: 40 });
 scene.add(sun, sun.target);
@@ -56,7 +58,7 @@ composer.addPass(new RenderPass(scene, camera));
 const gtao = new GTAOPass(scene, camera, innerWidth, innerHeight);
 gtao.updateGtaoMaterial({ radius: 0.35, distanceFallOff: 1, thickness: 1 });
 gtao.blendIntensity = 0.9;
-composer.addPass(gtao);
+if (!PHONE) composer.addPass(gtao);
 composer.addPass(new OutputPass());
 
 // ---------- architecture ----------
@@ -280,6 +282,9 @@ $('specs-print').onclick = () => window.print();
 const orbit = new OrbitControls(camera, renderer.domElement);
 orbit.enableDamping = true; orbit.maxPolarAngle = Math.PI / 2 - 0.02;
 const walk = new PointerLockControls(camera, document.body);
+// iPhone/iPad Safari has no Pointer Lock API (and no keyboard), so Walk mode is desktop-only.
+const canLock = 'requestPointerLock' in document.body;
+if (!canLock) $('v-walk').hidden = true;
 let mode = 'orbit', locked = true;
 const HELP = {
   orbit: 'Drag to rotate · Right-drag / two fingers to pan · Scroll / pinch to zoom',
@@ -301,7 +306,7 @@ function setMode(m) {
     setWalls(0);
     camera.position.set(4.6, 1.6, 3.7); camera.lookAt(2.0, 1.4, 1.2);
   } else {
-    walk.unlock();
+    if (walk.isLocked) walk.unlock();
     orbit.target.copy(CENTER);
     const k = Math.max(1, 1.3 / camera.aspect); // pull back on narrow (phone) screens so the whole flat fits
     if (m === 'top') camera.position.set(CENTER.x, 24 * k, CENTER.z + 0.01);
@@ -352,7 +357,7 @@ const pick = e => { ndc.set((e.clientX / innerWidth) * 2 - 1, -(e.clientY / inne
 const rootOf = o => { while (o && o.parent !== furn) o = o.parent; return o; };
 renderer.domElement.addEventListener('pointerdown', e => {
   if (photo) return;
-  if (mode === 'walk') { walk.lock(); return; }
+  if (mode === 'walk') { if (canLock) walk.lock(); return; }
   if (e.button !== 0 || locked) return;
   pick(e);
   const hit = ray.intersectObjects(furn.children.filter(o => o.visible), true)[0];
@@ -391,7 +396,7 @@ $('photo').onclick = async () => {
   $('photo').disabled = true; $('photo').textContent = 'Preparing…';
   try {
     const { WebGLPathTracer } = await import('https://esm.sh/three-gpu-pathtracer@0.0.27?external=three');
-    select(null); walk.unlock();
+    select(null); if (walk.isLocked) walk.unlock();
     const pt = new WebGLPathTracer(renderer);
     pt.tiles.set(2, 2); pt.filterGlossyFactor = 0.5; pt.renderDelay = 0; pt.fadeDuration = 0; pt.minSamples = 1;
     photo = pt; applyBackground();
