@@ -16,7 +16,7 @@ export const ROOMS = [
   { name: 'Kitchen',        rects: [[9.758, 0.377, 12.83, 3.161]], floor: 'travertine' },
   { name: 'Bedroom',        rects: [[13.137, 0.249, 16.343, 4.421]], floor: 'parquet' },
   { name: 'Master bedroom', rects: [[16.423, 1.261, 20.0, 5.512], [15.40, 4.56, 16.43, 5.512]], floor: 'parquet' },
-  { name: 'Corridor',       rects: [[7.20, 4.42, 15.28, 5.512], [7.85, 3.28, 12.98, 4.42]], floor: 'travertine', noLabel: true },
+  { name: 'Corridor',       rects: [[7.20, 4.42, 15.28, 5.512], [7.85, 3.28, 12.98, 4.42]], floor: 'existing_tile', noLabel: true },
 ];
 
 // Door openings (rect in plan) and the open leaf exactly as drawn on the plan.

@@ -260,7 +260,7 @@ const FINISH_SPEC = {
   Kitchen: 'Floor: travertine · Base units: handleless greige lacquer · Tall units: walnut · Worktop + splash: Calacatta 2 cm · Brass mixer',
   Bedroom: 'Floor: oak herringbone parquet · Bed wall: fluted walnut · Wardrobe: walnut to ceiling · Curtains: sheer + linen',
   'Master bedroom': 'Floor: oak herringbone parquet · Headboard wall: built-out full-height fluted walnut (hides the column) · Wardrobe: walnut to ceiling',
-  Corridor: 'Floor: travertine · Art lighting · Doors: flush walnut, 2.25 m, brass levers; entrance: armoured, dark walnut',
+  Corridor: 'Floor: existing glossy marble-look porcelain (kept, continues from dining) · Art lighting · Doors: flush walnut, 2.25 m, brass levers; entrance: armoured, dark walnut',
 };
 $('specs').onclick = () => {
   const groups = {};
