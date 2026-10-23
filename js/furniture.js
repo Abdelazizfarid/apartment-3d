@@ -325,11 +325,26 @@ export const CATALOG = {
       m.position.set(0, h / 2, d); halo.position.set(0, h / 2, 0.005);
       return group(m, halo);
     } },
-  shower: { label: 'Walk-in shower', cat: 'Bathroom', w: 0.75, d: 1.2, h: 2.0,
-    spec: 'Walk-in shower, fixed 8 mm clear glass with brass profile, ceiling rain head, linear drain',
-    build: ({ w, d, h }) => group(box(w, 0.012, d, M('calacatta'), 0, 0), box(0.012, h, 0.6, M('glass'), -w / 2, 0, -d / 2 + 0.3),
-      box(w, h, 0.012, M('glass'), 0, 0, -d / 2), box(w, 0.015, 0.015, M('brass'), 0, h, -d / 2), box(0.015, 0.015, 0.6, M('brass'), -w / 2, h, -d / 2 + 0.3),
-      box(0.3, 0.012, 0.3, M('brass'), 0.05, 2.2, 0), box(0.03, 0.03, 0.4, M('brass'), w / 2 - 0.02, 1.0, 0.1), box(0.6, 0.004, 0.04, M('steel'), 0, 0.012, d / 2 - 0.08)) },
+  shower: { label: 'Shower cabin (black frame)', cat: 'Bathroom', w: 0.8, d: 0.9, h: 2.0,
+    spec: 'Corner shower cabin: 8 mm tinted glass in bold matt-black aluminium frame, sliding door with full-height bar handle, low white tray, black rain head + hand shower on rail, thermostatic mixer, wall shelf',
+    // back (-z) and right (+x) sides are walls; glass on the front (+z, sliding door) and left (-x)
+    build: ({ w, d, h }) => {
+      const k = M('blackmetal'), gl = M('showerglass'), F = 0.035, y0 = 0.06, ph = h - y0, fz = d / 2 - 0.02, lx = -w / 2 + 0.02;
+      const g = group(rbox(w, y0, d, 0.012, M('ceramic')), box(0.09, 0.003, 0.09, M('steel'), 0, y0, 0.05));
+      // glass: left side panel, fixed front half, sliding door (on the inner track)
+      g.add(box(0.008, ph, d - 0.04, gl, lx, y0, 0), box(w / 2, ph, 0.008, gl, -w / 4, y0, fz), box(w / 2 + 0.04, ph - 0.03, 0.008, gl, w / 4 - 0.02, y0 + 0.015, fz - 0.035));
+      // bold black frame: posts, top + bottom rails on both glass sides, door edge profiles, handle
+      g.add(box(F, ph, F, k, lx, y0, fz), box(F, ph, F, k, w / 2 - F / 2, y0, fz), box(F, ph, F, k, lx, y0, -d / 2 + F / 2));
+      for (const y of [y0, h - F]) g.add(box(w, F, F, k, 0, y, fz), box(F, F, d, k, lx, y, 0), box(w / 2 + 0.04, F * 0.6, F * 0.6, k, w / 4 - 0.02, y, fz - 0.035));
+      g.add(box(0.02, ph - 0.03, 0.02, k, -0.04, y0 + 0.015, fz - 0.035), box(0.02, ph - 0.03, 0.02, k, w / 2 - 0.03, y0 + 0.015, fz - 0.035));
+      g.add(box(0.025, 0.6, 0.03, k, 0.02, 0.75, fz - 0.065), box(0.025, 0.6, 0.03, k, 0.02, 0.75, fz - 0.005));
+      // fittings on the back wall: mixer, hand shower on a rail, rain head on an arm; shelf on the side wall
+      g.add(box(0.14, 0.1, 0.035, k, 0.15, 1.05, -d / 2 + 0.018), cyl(0.022, 0.022, 0.04, k, 0.15, 1.08, -d / 2 + 0.05, 16));
+      g.add(box(0.025, 0.85, 0.025, k, -0.12, 0.95, -d / 2 + 0.03), cyl(0.04, 0.03, 0.12, k, -0.12, 1.55, -d / 2 + 0.07, 16));
+      g.add(box(0.025, 0.025, 0.32, k, 0, 2.05, -d / 2 + 0.16), box(0.26, 0.012, 0.26, k, 0, 2.03, -d / 2 + 0.3));
+      g.add(box(0.12, 0.015, 0.32, k, w / 2 - 0.06, 1.3, -0.05), box(0.05, 0.16, 0.05, M('ceramic'), w / 2 - 0.06, 1.315, -0.12), box(0.05, 0.12, 0.05, M('matteceramic'), w / 2 - 0.06, 1.315, -0.04));
+      return g;
+    } },
   washer: { label: 'Washing machine', cat: 'Other', w: 0.6, d: 0.6, h: 0.85, spec: 'Front-load washer-dryer',
     build: ({ w, d, h }) => {
       const door = mesh(new THREE.CircleGeometry(0.16, 48), M('blackglass')), ring = mesh(new THREE.TorusGeometry(0.17, 0.015, 12, 64), M('steel'));
@@ -340,6 +355,10 @@ export const CATALOG = {
     spec: 'Ceiling track, wave-pleat white sheer + sand linen side drapes (lined)',
     build: ({ w, d, h }, fab) => group(drape(w, h, M('sheer'), 0.035, 0.11, -d / 2 + 0.02, 0),
       drape(w * 0.22, h, fab, 0.05, 0.09, d / 2 - 0.03, -w / 2 + w * 0.11), drape(w * 0.22, h, fab, 0.05, 0.09, d / 2 - 0.03, w / 2 - w * 0.11),
+      box(w + 0.1, 0.03, 0.06, M('ceiling'), 0, h - 0.01, 0)) },
+  curtain_open: { label: 'Curtains – open side drapes', cat: 'Decor', w: 3.3, d: 0.12, h: 2.86, tint: 'linen', color: '#d9c9b2', curtain: true,
+    spec: 'Ceiling track, sand linen drapes stacked at both ends to keep the panorama view clear',
+    build: ({ w, d, h }, fab) => group(drape(0.45, h, fab, 0.055, 0.08, 0, -w / 2 + 0.25), drape(0.45, h, fab, 0.055, 0.08, 0, w / 2 - 0.25),
       box(w + 0.1, 0.03, 0.06, M('ceiling'), 0, h - 0.01, 0)) },
 };
 

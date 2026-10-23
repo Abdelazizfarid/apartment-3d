@@ -88,6 +88,7 @@ const DEFS = {
   blackmetal: { tile: 1, p: () => ({ color: '#1c1c1c', metalness: 0.7, roughness: 0.45 }) },
   steel:      { tile: 1, p: () => ({ color: '#9da3a8', metalness: 1, roughness: 0.3 }) },
   glass:      { tile: 1, p: () => ({ color: '#ffffff', metalness: 0, roughness: 0.02, transmission: 1, thickness: 0.01, ior: 1.5, transparent: true, opacity: 0.25, depthWrite: false }) },
+  showerglass:{ tile: 1, p: () => ({ color: '#bcd6dc', roughness: 0.05, metalness: 0.1, transparent: true, opacity: 0.38, depthWrite: false, side: THREE.DoubleSide }) },
   mirror:     { tile: 1, p: () => ({ color: '#ffffff', metalness: 1, roughness: 0.02 }) },
   ceramic:    { tile: 1, p: () => ({ color: '#f6f4f0', roughness: 0.12, clearcoat: 0.8 }) },
   matteceramic:{ tile: 1, p: () => ({ color: '#d8d0c4', roughness: 0.7 }) },

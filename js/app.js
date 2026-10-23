@@ -7,7 +7,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
-import { PLAN, WALL_H, SILL, WIN_TOP, DOOR_H, ROOMS, DOORS, CLADDING, LIGHTS, PROPOSAL } from './plan.js';
+import { PLAN, WALL_H, SILL, WIN_TOP, DOOR_H, ROOMS, DOORS, CLADDING, LIGHTS, PROPOSAL, PANORAMA, BALCONY } from './plan.js';
 import { M, mesh, PHONE } from './materials.js';
 import { CATALOG, build, loadModels, box, fluted, channels } from './furniture.js';
 
@@ -23,7 +23,7 @@ fetch('version.txt', { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then
     location.replace(location.pathname + '?v=' + encodeURIComponent(v));
   }
 }).catch(() => {});
-const SNAP = 0.05, KEY = 'wadi-houf-design-v2';
+const SNAP = 0.05, KEY = 'wadi-houf-design-v3';
 
 // ---------- renderer / scene ----------
 const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
@@ -87,7 +87,9 @@ function buildArchitecture(H) {
   for (const r of PLAN.floor) arch.add(slab(r, -0.02, 0, M('travertine')));
   for (const room of ROOMS) if (room.floor !== 'travertine') for (const r of room.rects) arch.add(slab(r, 0, 0.003, M(room.floor)));
 
+  const inPano = ([a, b, c, d]) => a >= PANORAMA[0] - 0.01 && c <= PANORAMA[2] + 0.01 && b >= PANORAMA[1] - 0.01 && d <= PANORAMA[3] + 0.01;
   for (const r of PLAN.walls) {
+    if (inPano(r)) continue;
     arch.add(slab(r, 0, H, M('paint')));
     if (H > 0.1) arch.add(slab([r[0] - 0.012, r[1] - 0.012, r[2] + 0.012, r[3] + 0.012], 0, 0.1, M('skirting')));
   }
@@ -122,6 +124,7 @@ function buildArchitecture(H) {
   }
 
   for (const w of PLAN.windows) {
+    if (inPano(w)) continue;
     const s = span(w);
     arch.add(slab(w, 0, Math.min(SILL, H), M('paint')));
     if (H > WIN_TOP) arch.add(slab(w, WIN_TOP, H, M('paint')));
@@ -134,6 +137,42 @@ function buildArchitecture(H) {
     part((s.a + s.b) / 2 - 0.025, (s.a + s.b) / 2 + 0.025, 0.03, SILL, top, M('blackmetal'));
     part(s.a, s.b, 0.03, SILL, SILL + 0.05, M('blackmetal'));
     if (H >= WIN_TOP) part(s.a, s.b, 0.03, WIN_TOP - 0.05, WIN_TOP, M('blackmetal'));
+  }
+
+  // Panorama: floor-to-ceiling black-framed sliding glass (4 panels on two tracks) onto the balcony.
+  {
+    const [x1, z1, x2, z2] = PANORAMA, mx = (x1 + x2) / 2, top = Math.min(2.7, H), n = 4, pw = (z2 - z1) / n;
+    arch.add(slab([x1, z1, x2, z2], -0.02, 0, M('travertine')));
+    if (H > 2.7) arch.add(slab([x1, z1, x2, z2], 2.7, H, M('paint')));
+    const part = (za, zb, x, t, y1, y2, mat) => arch.add(slab([x - t, za, x + t, zb], y1, y2, mat));
+    for (let i = 0; i < n; i++) {
+      const za = z1 + i * pw - (i ? 0.02 : 0), zb = z1 + (i + 1) * pw + (i < n - 1 ? 0.02 : 0), x = mx + (i % 2 ? 0.035 : -0.035);
+      part(za, zb, x, 0.005, 0.02, top - 0.03, M('glass'));
+      part(za, za + 0.04, x, 0.025, 0, top, M('blackmetal')); part(zb - 0.04, zb, x, 0.025, 0, top, M('blackmetal'));
+      part(za, zb, x, 0.025, 0, 0.05, M('blackmetal')); if (H >= 2.7) part(za, zb, x, 0.025, top - 0.05, top, M('blackmetal'));
+    }
+    part(z1, z2, mx, 0.14, 0, 0.012, M('blackmetal'));
+  }
+  // Balcony: stone slab, fascia band and a black-framed glass railing on the open edges; canopy when walls are full.
+  {
+    const shape = new THREE.Shape(BALCONY.map(([x, z]) => new THREE.Vector2(x, z)));
+    const slabGeo = new THREE.ExtrudeGeometry(shape, { depth: 0.18, bevelEnabled: false });
+    const bal = mesh(slabGeo, M('travertine')); bal.rotation.x = Math.PI / 2; bal.position.y = -0.02; arch.add(bal);
+    if (H >= WALL_H) {
+      const roof = mesh(new THREE.ExtrudeGeometry(shape, { depth: 0.22, bevelEnabled: false }), M('paint'));
+      roof.rotation.x = Math.PI / 2; roof.position.y = WALL_H + 0.22; arch.add(roof);
+    }
+    const [A, B, C] = BALCONY;
+    for (const [p, q] of [[A, B], [B, C]]) {
+      const len = Math.hypot(q[0] - p[0], q[1] - p[1]), g = new THREE.Group();
+      g.position.set((p[0] + q[0]) / 2, 0, (p[1] + q[1]) / 2); g.rotation.y = -Math.atan2(q[1] - p[1], q[0] - p[0]);
+      g.add(box(len, 0.2, 0.04, M('paint'), 0, -0.2, 0));                                  // fascia band on the slab edge
+      g.add(box(len, 0.05, 0.06, M('blackmetal'), 0, 1.05, 0), box(len, 0.03, 0.04, M('blackmetal'), 0, 0.05, 0));
+      g.add(box(len - 0.04, 0.95, 0.012, M('showerglass'), 0, 0.09, 0));
+      const posts = Math.max(2, Math.round(len / 1.0) + 1);
+      for (let i = 0; i < posts; i++) g.add(box(0.045, 1.08, 0.045, M('blackmetal'), -len / 2 + 0.02 + (len - 0.04) * i / (posts - 1), 0, 0));
+      arch.add(g);
+    }
   }
 
   for (const d of DOORS) {
@@ -186,7 +225,7 @@ function buildArchitecture(H) {
 
   // Ceiling with recessed downlights (shown only when the camera is inside).
   for (const r of PLAN.floor) ceiling.add(slab(r, WALL_H, WALL_H + 0.05, M('ceiling')));
-  for (const room of ROOMS) for (const [a, b, c, d] of room.rects) {
+  for (const room of ROOMS.filter(r => !r.outdoor)) for (const [a, b, c, d] of room.rects) {
     const nx = Math.max(1, Math.round((c - a - 1) / 1.3)), nz = Math.max(1, Math.round((d - b - 1) / 1.3));
     for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
       const disc = mesh(new THREE.CircleGeometry(0.045, 24), M('glow'), { shadow: false });
@@ -294,9 +333,10 @@ function setWalls(m) {
 
 // Specs sheet: finishes per room + every piece with its size, grouped by room.
 const FINISH_SPEC = {
-  Reception: 'Floor: existing glossy marble-look porcelain, 60×60 (kept) · Walls: warm greige matte (≈ #E6DDD1) · TV wall: full-height fluted walnut · Ceiling: gypsum, recessed 2700 K downlights · Curtains: ceiling track, sheer + linen',
+  Reception: 'Floor: existing glossy marble-look porcelain, 60×60 (kept) · West side: full-height panorama glazing to the balcony · Walls: warm greige matte (≈ #E6DDD1) · TV wall: full-height fluted walnut · Ceiling: gypsum, recessed 2700 K downlights · Curtains: ceiling track, sheer + linen',
   Dining: 'Floor: existing glossy marble-look porcelain (kept) · Pendants ×2 over table at 75 cm above top · Walls: warm greige',
-  'Main bathroom': 'Floor + walls: Calacatta large-format (marble or porcelain), full height · Brushed-brass fittings · Walk-in glass shower with linear drain',
+  'Main bathroom': 'Floor + walls: Calacatta large-format (marble or porcelain), full height · Sink by the door, shower cabin in the back corner beside the WC · Black-framed glass cabin',
+  Balcony: 'Reception west wall opened as floor-to-ceiling panorama: 4 black-aluminium sliding glass panels · Balcony: stone floor, painted fascia, black-framed glass railing 1.1 m',
   Kitchen: 'Floor: travertine · Base units: handleless greige lacquer · Tall units: walnut · Worktop + splash: Calacatta 2 cm · Brass mixer',
   Bedroom: 'Floor: existing wood-look porcelain planks (≈15×60, taupe-brown) with matching dark skirting (kept) · Bed wall: fluted walnut · Wardrobe: cream lacquer + light oak to ceiling, mirror doors, open lit shelf column · Curtains: sheer + linen',
   'Master bedroom': 'Floor: existing wood-look porcelain planks with matching dark skirting (kept) · Headboard wall: built-out full-height fluted walnut (hides the column) · Wardrobe: cream lacquer + light oak to ceiling, mirror doors, open lit shelf column',

@@ -8,9 +8,15 @@ export const SILL = 0.9;
 export const WIN_TOP = 2.2;
 export const DOOR_H = 2.25;
 
+// Reception west wall replaced by floor-to-ceiling panorama glazing onto the triangular balcony
+// (balcony outline from the as-built PDF: 1.20 m deep at the north end, tapering to the wall at the south).
+export const PANORAMA = [-0.023, 0.94, 0.275, 4.2];
+export const BALCONY = [[0, 0.678], [-1.208, 0.678], [0, 4.156]];
+
 // Room interiors (axis-aligned rectangles, inner wall faces) used for floor finishes, labels and lights.
 export const ROOMS = [
   { name: 'Reception',      rects: [[0.252, 0.405, 4.6, 4.286]], floor: 'existing_tile' },
+  { name: 'Balcony',        rects: [[-1.208, 0.678, -0.023, 4.156]], floor: 'travertine', outdoor: true },
   { name: 'Dining',         rects: [[4.6, 0.758, 7.730, 4.286]], floor: 'existing_tile' },
   { name: 'Main bathroom',  rects: [[7.851, 0.779, 9.420, 3.161]], floor: 'calacatta' },
   { name: 'Kitchen',        rects: [[9.758, 0.377, 12.83, 3.161]], floor: 'travertine' },
@@ -65,8 +71,7 @@ export const PROPOSAL = [
   ['tv', 2.15, 4.21, 180, 1.68, 0.04, 0.97, 1.0],
   ['lounge_chair', 0.95, 3.4, 135],
   ['floor_lamp', 0.55, 2.8, 0],
-  ['art', 0.27, 3.4, 90, 0.75, 0.04, 0.5, 1.3],
-  ['curtain', 0.33, 1.83, 90, 1.8], ['curtain', 2.715, 0.48, 0, 2.6],
+  ['curtain_open', 0.355, 2.57, 90, 3.4], ['curtain', 2.715, 0.48, 0, 2.6],
   // Dining
   ['dining_table', 5.95, 2.15, 0, 1.8, 0.95],
   ['dining_chair', 5.55, 1.45, 0], ['dining_chair', 6.35, 1.45, 0],
@@ -80,9 +85,10 @@ export const PROPOSAL = [
   ['curtain', 6.53, 0.83, 0, 1.4],
   // Bathroom
   ['toilet', 8.06, 1.07, 0],
-  ['vanity', 9.19, 1.3, -90, 0.8, 0.46],
-  ['mirror_led', 9.40, 1.3, -90, 0.7, 0.03, 0.7, 1.25],
-  ['shower', 9.045, 2.45, 0, 0.75, 1.0],
+  // Bathroom: sink by the door, shower cabin in the back corner beside the toilet
+  ['vanity', 9.17, 2.62, -90, 0.8, 0.46],
+  ['mirror_led', 9.40, 2.62, -90, 0.7, 0.03, 0.7, 1.25],
+  ['shower', 9.0, 1.25, 0, 0.8, 0.9],
   // Kitchen
   ['counter', 10.184, 0.677, 0, 0.85], ['sink_unit', 11.06, 0.677, 0, 0.9],
   ['dishwasher', 11.81, 0.677, 0, 0.6], ['counter', 12.47, 0.677, 0, 0.72],
@@ -112,6 +118,8 @@ export const PROPOSAL = [
   ['armchair', 17.35, 4.85, 135],
   ['plant_bush', 16.8, 4.6, 0],
   ['curtain', 19.92, 3.375, -90, 2.3],
+  // Balcony
+  ['plant_tree', -0.4, 1.05, 0], ['plant_bush', -0.3, 1.75, 0],
   // Corridor
   ['washer', 7.55, 5.1, 90],
   ['art', 10.0, 5.49, 180, 0.9, 0.04, 0.6, 1.2], ['art', 11.4, 5.49, 180, 0.9, 0.04, 0.6, 1.2],
