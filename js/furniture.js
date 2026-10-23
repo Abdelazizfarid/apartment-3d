@@ -262,28 +262,61 @@ export const CATALOG = {
         const plant = model('calathea', 0.3, 0.28, 0.3); plant.position.set(scx, P + inner * 4 / 6 + 0.025, -0.02);
         g.add(vase, plant);
       }
-      // door modules: pairs of cream doors with top boxes; the middle one is mirror doors over drawers
-      const xa = x0 + sw + (sw ? T : 0), xb = w / 2 - T, rest = xb - xa;
+      // door modules: pairs of cream doors with top boxes; the middle one is mirror doors over drawers.
+      // Every door is on a hinge pivot and every drawer slides (userData.part), so they can be opened in Inside mode.
+      const xa = x0 + sw + (sw ? T : 0), xb = w / 2 - T, rest = xb - xa, mid = (xa + xb) / 2;
       const n = Math.max(1, Math.round(rest / 0.85)), mw = rest / n, mirrorAt = n >= 2 ? Math.floor(n / 2) : -1;
-      const split = h - T - 0.55, fz = d / 2 - 0.01, gap = 0.004;
-      g.add(box(rest, inner, d - 0.04, oak, (xa + xb) / 2, P, -0.02));
+      const split = h - T - 0.55, fz = d / 2 - 0.01, gap = 0.004, cz = -0.03, cd = d - 0.08;
+      // hollow carcass: back, dividers, top-box shelf
+      g.add(box(rest, inner, 0.015, oak, mid, P, -d / 2 + 0.03), box(rest, 0.02, cd, oak, mid, split - 0.02, cz));
+      for (let i = 1; i < n; i++) g.add(box(T, inner, cd, oak, xa + mw * i, P, cz));
+      const COLORS = ['#e9e4da', '#c7b8a3', '#6e6a4c', '#2f3a4a', '#9c6b4e', '#f2f0eb', '#3a3a3c', '#b9a48a'];
+      let seed = 3; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+      const stack = (x, y, z, wd) => { for (let k = 0; k < 3 + Math.floor(rnd() * 2); k++) g.add(box(wd, 0.055, 0.28, M('linen', COLORS[Math.floor(rnd() * 8)]), x, y + k * 0.057, z)); };
+      const doorLeaf = (hx, dir, y, dw, dh, mat, handle, mirror) => {
+        const p = new THREE.Group(); p.position.set(hx, 0, fz);
+        p.add(box(dw, dh, 0.02, mat, dir * dw / 2, y, 0));
+        if (mirror) p.add(box(dw - 0.012, dh - 0.01, 0.003, M('mirror'), dir * dw / 2, y + 0.005, 0.0115));
+        if (handle) p.add(box(0.018, 0.95, 0.025, oak, dir * (dw - 0.045), 0.75, 0.022));
+        p.userData.part = { kind: 'hinge', angle: dir > 0 ? -1.75 : 1.75 };
+        g.add(p);
+      };
       for (let i = 0; i < n; i++) {
-        const cx = xa + mw * (i + 0.5), hw = mw / 2 - gap;
-        for (const sx of [-1, 1]) g.add(box(hw, h - T - split - gap, 0.02, door, cx + sx * mw / 4, split + gap / 2, fz));
+        const cx = xa + mw * (i + 0.5), hw = mw / 2 - gap, L = cx - mw / 2 + gap, R = cx + mw / 2 - gap;
+        // top cupboard: two hinged doors, storage baskets inside
+        doorLeaf(L, 1, split + gap / 2, hw, h - T - split - gap, door, false);
+        doorLeaf(R, -1, split + gap / 2, hw, h - T - split - gap, door, false);
+        for (const sx of [-1, 1]) g.add(box(mw * 0.4, 0.26, 0.36, M('linen', '#c9b79c'), cx + sx * mw / 4, split + 0.01, cz));
         if (i === mirrorAt) {
+          // two sliding drawers with folded clothes, shelves with folded stacks behind the mirror doors
           for (let k = 0; k < 2; k++) {
-            g.add(box(mw - gap * 2, 0.215, 0.02, oak, cx, P + 0.003 + k * 0.22, fz));
-            g.add(box(0.16, 0.014, 0.02, oak, cx, P + 0.11 + k * 0.22, fz + 0.02));
+            const dr = new THREE.Group(), y = P + 0.003 + k * 0.22;
+            dr.add(box(mw - gap * 2, 0.215, 0.02, oak, cx, y, fz), box(0.16, 0.014, 0.02, oak, cx, y + 0.107, fz + 0.02));
+            dr.add(box(mw - 0.06, 0.012, 0.45, oak, cx, y + 0.01, fz - 0.235), box(mw - 0.06, 0.16, 0.012, oak, cx, y + 0.01, fz - 0.455));
+            for (const sx of [-1, 1]) dr.add(box(0.012, 0.16, 0.45, oak, cx + sx * (mw / 2 - 0.035), y + 0.01, fz - 0.235));
+            for (let c = 0; c < 4; c++) dr.add(box(mw * 0.18, 0.07, 0.36, M('linen', COLORS[(c + k * 3) % 8]), cx - mw * 0.32 + c * mw * 0.21, y + 0.022, fz - 0.25));
+            dr.userData.part = { kind: 'slide', dist: 0.38 };
+            g.add(dr);
           }
-          for (const sx of [-1, 1]) {
-            g.add(box(hw, split - P - 0.45, 0.02, oak, cx + sx * mw / 4, P + 0.445, fz - 0.002));
-            g.add(box(hw - 0.012, split - P - 0.46, 0.003, M('mirror'), cx + sx * mw / 4, P + 0.45, fz + 0.0095));
+          const top = P + 0.45, step = (split - 0.02 - top) / 3;
+          for (let k = 0; k < 3; k++) {
+            const y = top + k * step;
+            g.add(box(mw - 0.01, 0.02, cd, oak, cx, y, cz));
+            stack(cx - mw * 0.22, y + 0.02, cz + 0.02, mw * 0.36); stack(cx + mw * 0.22, y + 0.02, cz + 0.02, mw * 0.36);
           }
+          doorLeaf(L, 1, P + 0.445, hw, split - P - 0.45, oak, false, true);
+          doorLeaf(R, -1, P + 0.445, hw, split - P - 0.45, oak, false, true);
         } else {
-          for (const sx of [-1, 1]) {
-            g.add(box(hw, split - P - gap, 0.02, door, cx + sx * mw / 4, P + gap / 2, fz));
-            g.add(box(0.018, 0.95, 0.025, oak, cx + sx * 0.045, 0.75, fz + 0.022));
+          // hanging rail with clothes, shoe shelf at the bottom
+          const railY = split - 0.1, count = Math.floor((mw - 0.1) / 0.075);
+          g.add(box(mw - 0.03, 0.025, 0.025, M('steel'), cx, railY, cz), box(mw - 0.01, 0.02, cd, oak, cx, P + 0.2, cz));
+          for (let k = 0; k < count; k++) {
+            const len = 0.65 + rnd() * 0.45, x = cx - mw / 2 + 0.07 + k * 0.075;
+            g.add(box(0.03, len, 0.42, M('linen', COLORS[Math.floor(rnd() * 8)]), x, railY - 0.04 - len, cz), box(0.006, 0.05, 0.36, M('blackmetal'), x, railY - 0.04, cz));
           }
+          for (let k = 0; k < Math.floor(mw / 0.2); k++) g.add(box(0.1, 0.09, 0.26, M('leather'), cx - mw / 2 + 0.12 + k * 0.2, P + 0.22, cz + 0.05));
+          doorLeaf(L, 1, P + gap / 2, hw, split - P - gap, door, true);
+          doorLeaf(R, -1, P + gap / 2, hw, split - P - gap, door, true);
         }
       }
       return g;

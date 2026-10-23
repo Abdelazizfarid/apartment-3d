@@ -269,9 +269,16 @@ function rebuildItem(it) {
   const old = furn.children.find(o => o.userData.item === it);
   if (old) furn.remove(old);
   const obj = build(it); obj.userData.item = it; place(obj); furn.add(obj);
+  collectParts();
   return obj;
 }
-const rebuildAll = () => { furn.clear(); items.forEach(rebuildItem); select(null); };
+const rebuildAll = () => { furn.clear(); items.forEach(rebuildItem); select(null); collectParts(); };
+// Openable furniture parts (wardrobe doors / drawers) tagged by the builders with userData.part
+let parts = [];
+function collectParts() {
+  parts = [];
+  furn.traverse(o => { if (o.userData.part) { o.userData.part.open ??= false; o.userData.part.z0 ??= o.position.z; parts.push(o); } });
+}
 
 // ---------- UI ----------
 const fields = { w: $('f-w'), d: $('f-d'), h: $('f-h'), y: $('f-y'), rot: $('f-r'), color: $('f-c') };
@@ -368,7 +375,7 @@ orbit.enableDamping = true; orbit.maxPolarAngle = Math.PI / 2 - 0.02;
 let mode = 'orbit', locked = true;
 const HELP = {
   orbit: 'Tap a room to step inside · Drag to rotate · Two fingers to pan · Pinch to zoom',
-  inside: 'Drag to look around · Joystick / WASD to walk · Tap the floor to walk there · Tap a door to open or close it',
+  inside: 'Drag to look around · Joystick / WASD to walk · Tap the floor to walk there · Tap a door, wardrobe door or drawer to open or close it',
   photo: 'Rendering a photo-real image… keep the camera still. Drag to change the angle (restarts).',
 };
 const helpText = () => mode === 'inside' ? HELP.inside : (locked ? '' : 'Drag furniture to move · R rotate · Del delete · ') + HELP.orbit;
@@ -464,6 +471,11 @@ addEventListener('pointerup', e => {
   pick(e);
   if (mode === 'inside') {
     const doorHit = ray.intersectObjects(doors.map(d => d.pivot), true)[0];
+    const furnHit = ray.intersectObjects(furn.children.filter(o => o.visible), true)[0];
+    let part = furnHit && furnHit.distance < 4 ? furnHit.object : null;
+    while (part && !part.userData.part && part.parent !== furn) part = part.parent;
+    part = part?.userData.part ? part : null;
+    if (part && (!doorHit || furnHit.distance < doorHit.distance)) { part.userData.part.open = !part.userData.part.open; return; }
     if (doorHit && doorHit.distance < 4) { const st = doorState[doorHit.object.userData.door]; st.open = !st.open; return; }
     const p = new THREE.Vector3();
     if (ray.ray.intersectPlane(floorPlane, p) && p.distanceTo(camera.position) < 14) walkTo = p;
@@ -560,6 +572,12 @@ function updateInside(dt) {
 }
 // Smoothly swing door leaves toward their open/closed angle.
 function updateDoors(dt) {
+  const k = Math.min(1, dt * 6);
+  for (const o of parts) {
+    const p = o.userData.part;
+    if (p.kind === 'hinge') o.rotation.y += ((p.open ? p.angle : 0) - o.rotation.y) * k;
+    else o.position.z += (p.z0 + (p.open ? p.dist : 0) - o.position.z) * k;
+  }
   doors.forEach((d, i) => {
     const target = doorState[i].open ? d.angOpen : d.angClosed, r = d.pivot.rotation;
     r.y += (target - r.y) * Math.min(1, dt * 6);
@@ -640,4 +658,4 @@ renderer.setAnimationLoop(() => {
   if (photo) { photo.renderSample(); $('samples').textContent = `${Math.floor(photo.samples)} samples`; }
   else composer.render();
 });
-window.__app = { tryMove, blockers: (x, z) => solids().filter(([a, b, c, d]) => x > a - R && x < c + R && z > b - R && z < d + R), scene, camera, orbit, items, setWalls, setMode, enterInside, doorState, get mode() { return mode; } };
+window.__app = { view: (x, z, tx, tz, p = -0.1) => { camera.position.set(x, EYE, z); yaw = Math.atan2(-(tx - x), -(tz - z)); pitch = p; }, parts: () => parts, tryMove, blockers: (x, z) => solids().filter(([a, b, c, d]) => x > a - R && x < c + R && z > b - R && z < d + R), scene, camera, orbit, items, setWalls, setMode, enterInside, doorState, get mode() { return mode; } };
