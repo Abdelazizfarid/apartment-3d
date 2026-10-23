@@ -64,12 +64,16 @@ function calacattaTexture() {
 const DEFS = {
   // The client's existing reception/dining floor, built from their photo: glossy marble-look porcelain, 60×60 assumed.
   existing_tile: { tile: 1.2, p: () => ({ map: tex('assets/tex/existing_tile/diff.jpg', true), roughnessMap: tex('assets/tex/existing_tile/rough.jpg'), roughness: 1, clearcoat: 0.7, clearcoatRoughness: 0.08 }) },
+  // Client's existing bedroom floor (from photo): wood-look porcelain planks 15×60 assumed, taupe-brown, staggered, light grout.
+  wood_tile:  { tile: 1.2, p: () => ({ map: tex('assets/tex/wood_tile/diff.jpg', true), roughnessMap: tex('assets/tex/wood_tile/rough.jpg'), roughness: 1 }) },
+  wood_skirt: { tile: 1, p: () => ({ color: '#4b3b36', roughness: 0.5 }) },
   travertine: { tile: 1.6, p: () => ({ ...scan('marble_01', { normal: 0.6 }), roughness: 0.75, clearcoat: 0.25, clearcoatRoughness: 0.35 }) },
   parquet:    { tile: 1.8, p: () => ({ ...scan('herringbone_parquet', { normal: 0.8 }), roughness: 1 }) },
   calacatta:  { tile: 1.5, p: () => ({ map: calacattaTexture(), color: '#ffffff', roughness: 0.18, clearcoat: 0.6, clearcoatRoughness: 0.08 }) },
   cream:      { tile: 1.2, p: () => ({ map: calacattaTexture(), color: '#eadfcd', roughness: 0.25, clearcoat: 0.5, clearcoatRoughness: 0.1 }) },
   walnut_v:   { tile: 1.2, p: () => ({ ...scan('smoked_walnut_veneer', { normal: 0.5, rotate: true }), roughness: 1, clearcoat: 0.15, clearcoatRoughness: 0.5 }) },
   walnut:     { tile: 1.2, p: () => ({ ...scan('smoked_walnut_veneer', { normal: 0.5 }), roughness: 1, clearcoat: 0.15, clearcoatRoughness: 0.5 }) },
+  lightoak:   { tile: 1.0, p: () => ({ ...scan('white_oak_veneer', { normal: 0.4 }), color: '#fff0dc', roughness: 1 }) },
   oak:        { tile: 1.2, p: () => ({ ...scan('oak_veneer_01', { normal: 0.5 }), roughness: 1 }) },
   paint:      { tile: 2.5, p: () => ({ ...scan('plastered_wall_04', { color: false, normal: 0.25 }), color: '#e6ddd1', roughness: 0.9 }) },
   ceiling:    { tile: 2.5, p: () => ({ color: '#f5f2ed', roughness: 0.95 }) },

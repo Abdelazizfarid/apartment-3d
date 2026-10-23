@@ -242,15 +242,48 @@ export const CATALOG = {
     spec: 'Upholstered velvet bench on brushed-brass frame',
     build: ({ w, d, h }, fab) => group(rbox(w, 0.14, d, 0.05, fab, 0, h - 0.14), box(w - 0.06, 0.02, d - 0.06, M('brass'), 0, 0.06),
       ...[-1, 1].flatMap(sx => [-1, 1].map(sz => box(0.02, h - 0.14, 0.02, M('brass'), sx * (w / 2 - 0.04), 0, sz * (d / 2 - 0.04))))) },
-  wardrobe: { label: 'Wardrobe (floor-to-ceiling)', cat: 'Bedroom', w: 1.8, d: 0.6, h: 2.85,
-    spec: 'Built-in wardrobe to ceiling, walnut veneer doors, slim brass bar handles, LED inside',
-    build: ({ w, d, h }) => {
-      const g = group(box(w, h - 0.08, d - 0.02, M('walnut_v'), 0, 0.08, -0.01), box(w - 0.04, 0.08, d - 0.08, M('shadowgap'), 0, 0, -0.03));
-      const n = Math.max(1, Math.round(w / 0.5)), dw = w / n;
+  wardrobe: { label: 'Wardrobe (cream & oak, mirror)', cat: 'Bedroom', w: 2.4, d: 0.6, h: 2.85, tint: 'lacquer', color: '#ebe3d6',
+    spec: 'Built-in wardrobe to ceiling: matte cream lacquer doors with top boxes, light-oak frame & plinth, long oak bar handles, central mirror doors over 2 oak drawers, open oak shelf column with warm LED under each shelf',
+    build: ({ w, d, h }, door) => {
+      const oak = M('lightoak'), T = 0.02, P = 0.08, inner = h - P - T, g = new THREE.Group();
+      g.add(box(w, P, d - 0.03, oak, 0, 0, -0.015), box(w, T, d, oak, 0, h - T));
+      for (const sx of [-1, 1]) g.add(box(T, inner, d, oak, sx * (w / 2 - T / 2), P));
+      // open shelf column on the left, lit under every shelf
+      const sw = w >= 1.6 ? 0.42 : 0, x0 = -w / 2 + T, scx = x0 + sw / 2;
+      if (sw) {
+        g.add(box(sw, inner, 0.02, oak, scx, P, -d / 2 + 0.035), box(T, inner, d, oak, x0 + sw + T / 2, P));
+        for (let k = 1; k <= 5; k++) {
+          const y = P + inner * k / 6;
+          g.add(box(sw, 0.025, d - 0.04, oak, scx, y, -0.01), box(sw - 0.04, 0.006, 0.012, M('ledstrip'), scx, y - 0.006, d / 2 - 0.07));
+        }
+        g.add(box(sw - 0.04, 0.006, 0.012, M('ledstrip'), scx, h - T - 0.006, d / 2 - 0.07));
+        const vase = model('ceramicvase', 0.16, 0.24, 0.16); vase.position.set(scx, P + inner * 2 / 6 + 0.025, -0.02);
+        const plant = model('calathea', 0.3, 0.28, 0.3); plant.position.set(scx, P + inner * 4 / 6 + 0.025, -0.02);
+        g.add(vase, plant);
+      }
+      // door modules: pairs of cream doors with top boxes; the middle one is mirror doors over drawers
+      const xa = x0 + sw + (sw ? T : 0), xb = w / 2 - T, rest = xb - xa;
+      const n = Math.max(1, Math.round(rest / 0.85)), mw = rest / n, mirrorAt = n >= 2 ? Math.floor(n / 2) : -1;
+      const split = h - T - 0.55, fz = d / 2 - 0.01, gap = 0.004;
+      g.add(box(rest, inner, d - 0.04, oak, (xa + xb) / 2, P, -0.02));
       for (let i = 0; i < n; i++) {
-        const x = -w / 2 + dw * (i + 0.5);
-        g.add(box(dw - 0.004, h - 0.09, 0.02, M('walnut_v'), x, 0.085, d / 2 - 0.01));
-        g.add(box(0.012, 0.45, 0.025, M('brass'), x + (i % 2 ? -1 : 1) * (dw / 2 - 0.04), 0.95, d / 2 + 0.01));
+        const cx = xa + mw * (i + 0.5), hw = mw / 2 - gap;
+        for (const sx of [-1, 1]) g.add(box(hw, h - T - split - gap, 0.02, door, cx + sx * mw / 4, split + gap / 2, fz));
+        if (i === mirrorAt) {
+          for (let k = 0; k < 2; k++) {
+            g.add(box(mw - gap * 2, 0.215, 0.02, oak, cx, P + 0.003 + k * 0.22, fz));
+            g.add(box(0.16, 0.014, 0.02, oak, cx, P + 0.11 + k * 0.22, fz + 0.02));
+          }
+          for (const sx of [-1, 1]) {
+            g.add(box(hw, split - P - 0.45, 0.02, oak, cx + sx * mw / 4, P + 0.445, fz - 0.002));
+            g.add(box(hw - 0.012, split - P - 0.46, 0.003, M('mirror'), cx + sx * mw / 4, P + 0.45, fz + 0.0095));
+          }
+        } else {
+          for (const sx of [-1, 1]) {
+            g.add(box(hw, split - P - gap, 0.02, door, cx + sx * mw / 4, P + gap / 2, fz));
+            g.add(box(0.018, 0.95, 0.025, oak, cx + sx * 0.045, 0.75, fz + 0.022));
+          }
+        }
       }
       return g;
     } },

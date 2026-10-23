@@ -92,6 +92,35 @@ function buildArchitecture(H) {
     if (H > 0.1) arch.add(slab([r[0] - 0.012, r[1] - 0.012, r[2] + 0.012, r[3] + 0.012], 0, 0.1, M('skirting')));
   }
 
+  // Rooms with their own skirting (bedrooms: dark wood-tile): strips on the wall face along each room edge,
+  // wherever a wall sits just outside it (door openings stay clear); 1.6 cm proud to cover the generic skirting.
+  const solid = PLAN.walls.concat(PLAN.windows);
+  // Nearest wall surface facing the room along a short probe across the room edge (walls can be several stacked boxes).
+  const faceAt = (x, z, nx, nz) => {
+    const n = nx || nz, along = nz ? z : x, s1 = along - n * 0.04, s2 = along + n * 0.08, lo = Math.min(s1, s2), hi = Math.max(s1, s2);
+    const hits = solid.filter(([a, b, c, d]) => nz ? x >= a && x <= c && b <= hi && d >= lo : z >= b && z <= d && a <= hi && c >= lo);
+    if (!hits.length) return undefined;
+    // nearest surface toward the room: smallest near-face when the wall lies on the + side, largest far-face on the - side
+    return n > 0 ? Math.min(...hits.map(h => nz ? h[1] : h[0])) : Math.max(...hits.map(h => nz ? h[3] : h[2]));
+  };
+  if (H > 0.1) for (const room of ROOMS.filter(r => r.skirting)) for (const [x1, z1, x2, z2] of room.rects) {
+    for (const [ax, az, bx, bz, nx, nz] of [[x1, z1, x2, z1, 0, -1], [x1, z2, x2, z2, 0, 1], [x1, z1, x1, z2, -1, 0], [x2, z1, x2, z2, 1, 0]]) {
+      const len = Math.hypot(bx - ax, bz - az), steps = Math.max(1, Math.round(len / 0.05));
+      let start = null, face = null;
+      for (let i = 0; i <= steps; i++) {
+        const t = i / steps, px = ax + (bx - ax) * t, pz = az + (bz - az) * t;
+        const f = i < steps ? faceAt(px, pz, nx, nz) : undefined;
+        if (start !== null && f !== face) {
+          const s0 = start * len, s1 = t * len, out = -(nx || nz); // room side direction along the normal axis
+          const lo = Math.min(face, face + out * 0.016), hi = Math.max(face, face + out * 0.016);
+          arch.add(slab(nz ? [ax + s0, lo, ax + s1, hi] : [lo, az + s0, hi, az + s1], 0, 0.101, M(room.skirting)));
+          start = null;
+        }
+        if (f !== undefined && start === null) { start = t; face = f; }
+      }
+    }
+  }
+
   for (const w of PLAN.windows) {
     const s = span(w);
     arch.add(slab(w, 0, Math.min(SILL, H), M('paint')));
@@ -269,8 +298,8 @@ const FINISH_SPEC = {
   Dining: 'Floor: existing glossy marble-look porcelain (kept) · Pendants ×2 over table at 75 cm above top · Walls: warm greige',
   'Main bathroom': 'Floor + walls: Calacatta large-format (marble or porcelain), full height · Brushed-brass fittings · Walk-in glass shower with linear drain',
   Kitchen: 'Floor: travertine · Base units: handleless greige lacquer · Tall units: walnut · Worktop + splash: Calacatta 2 cm · Brass mixer',
-  Bedroom: 'Floor: oak herringbone parquet · Bed wall: fluted walnut · Wardrobe: walnut to ceiling · Curtains: sheer + linen',
-  'Master bedroom': 'Floor: oak herringbone parquet · Headboard wall: built-out full-height fluted walnut (hides the column) · Wardrobe: walnut to ceiling',
+  Bedroom: 'Floor: existing wood-look porcelain planks (≈15×60, taupe-brown) with matching dark skirting (kept) · Bed wall: fluted walnut · Wardrobe: cream lacquer + light oak to ceiling, mirror doors, open lit shelf column · Curtains: sheer + linen',
+  'Master bedroom': 'Floor: existing wood-look porcelain planks with matching dark skirting (kept) · Headboard wall: built-out full-height fluted walnut (hides the column) · Wardrobe: cream lacquer + light oak to ceiling, mirror doors, open lit shelf column',
   Corridor: 'Floor: existing glossy marble-look porcelain (kept, continues from dining) · Art lighting · Doors: flush walnut, 2.25 m, brass levers; entrance: armoured, dark walnut',
 };
 $('specs').onclick = () => {

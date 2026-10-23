@@ -14,8 +14,8 @@ export const ROOMS = [
   { name: 'Dining',         rects: [[4.6, 0.758, 7.730, 4.286]], floor: 'existing_tile' },
   { name: 'Main bathroom',  rects: [[7.851, 0.779, 9.420, 3.161]], floor: 'calacatta' },
   { name: 'Kitchen',        rects: [[9.758, 0.377, 12.83, 3.161]], floor: 'travertine' },
-  { name: 'Bedroom',        rects: [[13.137, 0.249, 16.343, 4.421]], floor: 'parquet' },
-  { name: 'Master bedroom', rects: [[16.423, 1.261, 20.0, 5.512], [15.40, 4.56, 16.43, 5.512]], floor: 'parquet' },
+  { name: 'Bedroom',        rects: [[13.137, 0.249, 16.343, 4.421]], floor: 'wood_tile', skirting: 'wood_skirt' },
+  { name: 'Master bedroom', rects: [[16.423, 1.261, 20.0, 5.512], [15.40, 4.56, 16.43, 5.512]], floor: 'wood_tile', skirting: 'wood_skirt' },
   { name: 'Corridor',       rects: [[7.20, 4.42, 15.28, 5.512], [7.85, 3.28, 12.98, 4.42]], floor: 'existing_tile', noLabel: true },
 ];
 
@@ -98,7 +98,7 @@ export const PROPOSAL = [
   ['bench', 15.45, 1.64, 90, 1.3, 0.42],
   ['desk', 15.1, 4.17, 180, 1.27, 0.5], ['vanity_stool', 15.1, 3.72, 0],
   ['mirror_round', 15.1, 4.40, 180, 0.7, 0.03, 0.7, 1.15],
-  ['wardrobe', 16.043, 3.51, -90, 1.8, 0.6, 2.85],
+  ['wardrobe', 16.043, 3.185, -90, 2.47, 0.6, 2.85],
   ['curtain', 14.826, 0.33, 0, 2.0], ['curtain', 16.26, 0.8, -90, 1.0],
   // Master bedroom
   ['bed', 18.62, 2.48, 0, 1.8, 2.1],
@@ -106,7 +106,7 @@ export const PROPOSAL = [
   ['table_lamp', 17.5, 1.655, 0, 0.32, 0.32, 0.55, 0.5], ['table_lamp', 19.72, 1.655, 0, 0.32, 0.32, 0.55, 0.5],
   ['rug', 18.62, 2.95, 0, 2.6, 3.0],
   ['bench', 18.62, 3.8, 0, 1.5, 0.42],
-  ['wardrobe', 16.723, 3.255, 90, 2.0, 0.6, 2.85],
+  ['wardrobe', 16.723, 2.85, 90, 2.7, 0.6, 2.85],
   ['desk', 19.26, 5.262, 180, 1.4, 0.5], ['vanity_stool', 19.26, 4.8, 0],
   ['mirror_round', 19.26, 5.49, 180, 0.8, 0.03, 0.8, 1.15],
   ['armchair', 17.35, 4.85, 135],
