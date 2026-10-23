@@ -280,12 +280,13 @@ $('specs-print').onclick = () => window.print();
 const orbit = new OrbitControls(camera, renderer.domElement);
 orbit.enableDamping = true; orbit.maxPolarAngle = Math.PI / 2 - 0.02;
 const walk = new PointerLockControls(camera, document.body);
-let mode = 'orbit';
+let mode = 'orbit', locked = true;
 const HELP = {
-  orbit: 'Drag furniture to move · Drag empty space to rotate · Right-drag to pan · Scroll to zoom · R rotate · Del delete',
+  orbit: 'Drag to rotate · Right-drag / two fingers to pan · Scroll / pinch to zoom',
   walk: 'Click the view to look around · WASD / arrows to walk · Esc to release the mouse',
   photo: 'Rendering a photo-real image… keep the camera still. Drag to change the angle (restarts).',
 };
+const helpText = () => mode === 'walk' ? HELP.walk : (locked ? '' : 'Drag furniture to move · R rotate · Del delete · ') + HELP.orbit;
 function applyBackground() {
   scene.background = (wallMode === 0 || photo) && sky ? sky : BG;
   scene.environment = photo && sky ? sky : envPMREM; // the path tracer needs an equirect environment
@@ -294,7 +295,7 @@ function applyBackground() {
 function setMode(m) {
   mode = m;
   ['orbit', 'top', 'walk'].forEach(k => $('v-' + k).classList.toggle('on', k === m));
-  $('help').textContent = HELP[m === 'walk' ? 'walk' : 'orbit'];
+  $('help').textContent = helpText();
   orbit.enabled = m !== 'walk';
   if (m === 'walk') {
     setWalls(0);
@@ -302,8 +303,9 @@ function setMode(m) {
   } else {
     walk.unlock();
     orbit.target.copy(CENTER);
-    if (m === 'top') camera.position.set(CENTER.x, 24, CENTER.z + 0.01);
-    else camera.position.set(CENTER.x - 3, 13, CENTER.z + 12);
+    const k = Math.max(1, 1.3 / camera.aspect); // pull back on narrow (phone) screens so the whole flat fits
+    if (m === 'top') camera.position.set(CENTER.x, 24 * k, CENTER.z + 0.01);
+    else camera.position.set(CENTER.x - 3 * k, 13 * k, CENTER.z + 12 * k);
   }
   applyBackground();
 }
@@ -326,6 +328,23 @@ $('v-eye').onclick = () => {
   applyBackground();
 };
 
+// Furniture is locked on every load so nothing moves by accident; unlocking needs a confirm.
+$('lock').onclick = () => {
+  if (locked && !confirm('Unlock furniture for editing? Pieces can then be moved, resized or deleted.')) return;
+  locked = !locked;
+  if (locked) select(null);
+  $('lock').textContent = locked ? '🔒 Furniture locked' : '🔓 Editing — click to lock';
+  $('lock').classList.toggle('on', !locked);
+  $('edit-tools').hidden = locked;
+  $('help').textContent = helpText();
+};
+$('menu-btn').onclick = () => {
+  const open = $('panel').hidden;
+  $('panel').hidden = !open;
+  $('menu-btn').textContent = open ? '✕ Close' : '☰ Menu';
+  $('menu-btn').setAttribute('aria-expanded', open);
+};
+
 // drag-to-move on the floor
 const ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), floorPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 let drag = null;
@@ -334,7 +353,7 @@ const rootOf = o => { while (o && o.parent !== furn) o = o.parent; return o; };
 renderer.domElement.addEventListener('pointerdown', e => {
   if (photo) return;
   if (mode === 'walk') { walk.lock(); return; }
-  if (e.button !== 0) return;
+  if (e.button !== 0 || locked) return;
   pick(e);
   const hit = ray.intersectObjects(furn.children.filter(o => o.visible), true)[0];
   const obj = hit && rootOf(hit.object);
@@ -357,7 +376,7 @@ const keys = {};
 addEventListener('keydown', e => {
   if (['INPUT', 'SELECT'].includes(e.target.tagName)) return;
   keys[e.code] = true;
-  if (mode !== 'walk' && !photo) {
+  if (mode !== 'walk' && !photo && !locked) {
     if (e.code === 'KeyR') rotate(e.shiftKey ? 15 : -90);
     if (e.code === 'Delete' || e.code === 'Backspace') $('del').click();
     if (e.code === 'Escape') select(null);
