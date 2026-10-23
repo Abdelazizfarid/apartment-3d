@@ -137,3 +137,57 @@ export function mesh(geo, mat, { shadow = true } = {}) {
   m.receiveShadow = true;
   return m;
 }
+
+// ---------- Rugs: patterned wool textures drawn once per (pattern, size), so the design is never stretched ----------
+const RUG = { ivory: '#ece4d6', sand: '#d6c8b4', greige: '#b8ac9b', taupe: '#8c7b69', olive: '#6e6a4c', bronze: '#a88d62', terra: '#9c6b4e' };
+const rugCache = new Map();
+export function rugMaterial(pattern, w, d) {
+  const key = `${pattern}|${w}|${d}`;
+  if (rugCache.has(key)) return rugCache.get(key);
+  const W = 1024, H = Math.max(128, Math.round(W * d / w)), ppm = W / w;
+  const c = document.createElement('canvas'); c.width = W; c.height = H;
+  const g = c.getContext('2d');
+  let seed = pattern.length * 97 + Math.round(w * 13 + d * 7); const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const band = (inset, width, color) => { g.strokeStyle = color; g.lineWidth = width; g.strokeRect(inset, inset, W - inset * 2, H - inset * 2); };
+  if (pattern === 'abstract') {           // marbled, softly blurred bands with fine taupe veins and a slim ivory edge
+    g.fillStyle = RUG.sand; g.fillRect(0, 0, W, H);
+    g.filter = 'blur(18px)';
+    for (let i = 0; i < 7; i++) {
+      g.strokeStyle = [RUG.ivory, RUG.greige, '#e3d7c4'][i % 3]; g.globalAlpha = 0.65; g.lineWidth = 50 + rnd() * 110;
+      g.beginPath(); g.moveTo(-50, rnd() * H);
+      g.bezierCurveTo(W * 0.3, rnd() * H, W * 0.6, rnd() * H, W + 50, rnd() * H); g.stroke();
+    }
+    g.filter = 'none'; g.globalAlpha = 0.6;
+    for (let i = 0; i < 6; i++) {
+      g.strokeStyle = i % 2 ? RUG.taupe : RUG.bronze; g.lineWidth = 2;
+      g.beginPath(); g.moveTo(-20, rnd() * H); g.bezierCurveTo(W * 0.35, rnd() * H, W * 0.65, rnd() * H, W + 20, rnd() * H); g.stroke();
+    }
+    g.globalAlpha = 1; band(ppm * 0.03, ppm * 0.03, RUG.ivory);
+  } else if (pattern === 'border') {      // calm ivory field framed by a taupe band and a fine bronze line
+    g.fillStyle = RUG.ivory; g.fillRect(0, 0, W, H);
+    band(ppm * 0.12, ppm * 0.06, RUG.taupe); band(ppm * 0.2, ppm * 0.012, RUG.bronze);
+  } else if (pattern === 'geo') {         // runner: sand ground, taupe diamond lattice, greige edge
+    g.fillStyle = RUG.sand; g.fillRect(0, 0, W, H);
+    g.strokeStyle = RUG.taupe; g.globalAlpha = 0.55; g.lineWidth = Math.max(2, ppm * 0.012);
+    const s = ppm * 0.22;
+    for (let x = -H; x < W + H; x += s) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x + H, H); g.stroke(); g.beginPath(); g.moveTo(x, H); g.lineTo(x + H, 0); g.stroke(); }
+    g.globalAlpha = 1; band(ppm * 0.05, ppm * 0.08, RUG.greige); band(ppm * 0.1, ppm * 0.01, RUG.olive);
+  } else if (pattern === 'shag') {        // deep ivory pile: soft cloudy tone variation
+    g.fillStyle = RUG.ivory; g.fillRect(0, 0, W, H); g.filter = 'blur(10px)';
+    for (let i = 0; i < 160; i++) { g.fillStyle = rnd() < 0.5 ? '#f4eee4' : '#ddd2c1'; g.globalAlpha = 0.5; g.beginPath(); g.arc(rnd() * W, rnd() * H, 10 + rnd() * 40, 0, 7); g.fill(); }
+    g.filter = 'none'; g.globalAlpha = 1;
+  } else if (pattern === 'round') {       // concentric greige rings on sand
+    g.fillStyle = RUG.sand; g.fillRect(0, 0, W, H);
+    for (let r = 0.48; r > 0.05; r -= 0.07) { g.strokeStyle = r > 0.4 ? RUG.taupe : RUG.ivory; g.lineWidth = W * 0.012; g.beginPath(); g.arc(W / 2, H / 2, W * r, 0, 7); g.stroke(); }
+  } else {                                // bath: ivory cotton with ribbing
+    g.fillStyle = RUG.ivory; g.fillRect(0, 0, W, H);
+    g.fillStyle = '#ddd3c4'; for (let y = 0; y < H; y += 14) g.fillRect(0, y, W, 5);
+  }
+  // woven speckle so it reads as wool, not print
+  for (let i = 0; i < W * H / 60; i++) { g.fillStyle = rnd() < 0.5 ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)'; g.fillRect(rnd() * W, rnd() * H, 2, 2); }
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+  const props = { map: t, roughness: 1, ...(PHONE ? {} : { sheen: 0.6, sheenRoughness: 0.9, sheenColor: '#ffffff' }) };
+  const mat = PHONE ? new THREE.MeshStandardMaterial(props) : new THREE.MeshPhysicalMaterial(props);
+  rugCache.set(key, mat);
+  return mat;
+}

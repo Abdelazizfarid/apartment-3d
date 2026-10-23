@@ -503,7 +503,7 @@ addEventListener('keyup', e => { keys[e.code] = false; });
 // ---------- Inside mode: first-person, eye height, walls / furniture / closed doors are solid ----------
 const EYE = 1.6, R = 0.22;
 let yaw = 0, pitch = 0, walkTo = null, furnBoxes = null, fly = null;
-const SKIP = new Set(['rug', 'curtain', 'curtain_open', 'pendant', 'art', 'mirror_round', 'mirror_led', 'tv', 'hood', 'flowers', 'vase', 'ceramic_vase', 'table_lamp']);
+const SKIP = new Set(['rug', 'rug_abstract', 'rug_border', 'rug_runner', 'rug_shag', 'rug_round', 'bath_mat', 'curtain', 'curtain_open', 'pendant', 'art', 'mirror_round', 'mirror_led', 'tv', 'hood', 'flowers', 'vase', 'ceramic_vase', 'table_lamp']);
 const inPanoRect = ([a, b, c, d]) => a >= PANORAMA[0] - 0.01 && c <= PANORAMA[2] + 0.01 && b >= PANORAMA[1] - 0.01 && d <= PANORAMA[3] + 0.01;
 const STATIC = PLAN.walls.concat(PLAN.windows).filter(r => !inPanoRect(r)).concat([PANORAMA]);
 function solids() {

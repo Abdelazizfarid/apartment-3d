@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { M, mesh, PHONE } from './materials.js';
+import { M, mesh, PHONE, rugMaterial } from './materials.js';
 import { WALL_H } from './plan.js';
 
 // ---------- primitives (y = bottom of the part) ----------
@@ -164,6 +164,18 @@ export const CATALOG = {
     spec: '75" OLED, flush wall mount', build: ({ w, d, h }) => group(box(w, h, d, M('blackmetal')), box(w - 0.02, h - 0.02, 0.002, M('blackglass'), 0, 0.01, d / 2)) },
   rug: { label: 'Rug (hand-tufted)', cat: 'Living', w: 2.4, d: 1.7, h: 0.012, tint: 'boucle', color: '#d9cfc0',
     spec: 'Hand-tufted wool rug, low pile, oatmeal', build: ({ w, d, h }, fab) => rbox(w, h, d, 0.005, fab) },
+  rug_abstract: { label: 'Rug – marbled abstract', cat: 'Rugs', w: 3.2, d: 2.3, h: 0.015,
+    spec: 'Hand-tufted wool & viscose rug, marbled abstract in sand / ivory / greige with fine bronze veins', build: ({ w, d, h }) => box(w, h, d, rugMaterial('abstract', w, d)) },
+  rug_border: { label: 'Rug – ivory with border', cat: 'Rugs', w: 2.7, d: 2.3, h: 0.015,
+    spec: 'Flat-weave wool rug, ivory field, taupe border band with fine bronze line', build: ({ w, d, h }) => box(w, h, d, rugMaterial('border', w, d)) },
+  rug_runner: { label: 'Runner – diamond lattice', cat: 'Rugs', w: 3.0, d: 0.8, h: 0.012,
+    spec: 'Wool runner, sand ground with taupe diamond lattice, greige + olive edge', build: ({ w, d, h }) => box(w, h, d, rugMaterial('geo', w, d)) },
+  rug_shag: { label: 'Rug – plush ivory', cat: 'Rugs', w: 2.9, d: 1.9, h: 0.03,
+    spec: 'Deep-pile plush wool rug, ivory', build: ({ w, d, h }) => rbox(w, h, d, 0.012, rugMaterial('shag', w, d)) },
+  rug_round: { label: 'Rug – round rings', cat: 'Rugs', w: 1.6, d: 1.6, h: 0.015,
+    spec: 'Round tufted wool rug Ø160, sand with greige / ivory rings', build: ({ w, h }) => cyl(w / 2, w / 2, h, rugMaterial('round', w, w), 0, 0, 0, 64) },
+  bath_mat: { label: 'Bath mat', cat: 'Rugs', w: 0.8, d: 0.5, h: 0.015,
+    spec: 'Ribbed cotton bath mat, ivory, anti-slip back', build: ({ w, d, h }) => box(w, h, d, rugMaterial('bath', w, d)) },
   floor_lamp: { label: 'Floor lamp', cat: 'Living', w: 0.4, d: 0.4, h: 1.6,
     spec: 'Brass floor lamp with pleated linen drum shade, 2700 K',
     build: ({ w, h }) => group(cyl(0.14, 0.15, 0.025, M('blackmetal')), cyl(0.012, 0.012, h - 0.3, M('brass'), 0, 0.025),
