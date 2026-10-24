@@ -562,62 +562,54 @@ export const CATALOG = {
     } },
   // Corridor office nook: uses the old laundry niche walls (west, south, bathroom wall) as its own walls and only adds a curved front.
   // Local origin = niche's NW inner corner; x runs east along the corridor (length w), z runs south to the back wall (depth d).
-  office_nook: { label: 'Office nook (curved front)', cat: 'Bedroom', w: 2.21, d: 1.06, h: 2.9,
-    spec: 'Built-in study nook in the former laundry niche: existing walls kept, new curved front in cream lacquer with brass inlay lines from the end of the bathroom wall, rounded corner, oak canopy to the ceiling with hidden warm LED; reeded-glass pivot door in an oak frame; desk on the end wall facing left, fluted walnut feature wall, lit bookshelf, oak floor',
+  // Corridor office nook: uses the old laundry niche walls (west, south, bathroom wall) as its own walls and only adds a front.
+  // Local origin = NW corner of the nook's front line; x runs east along the corridor (length w), z runs south to the back wall (depth d).
+  // West of wallEnd the nook only starts at z = E (the bathroom wall); east of it the front is pushed out E into the corridor.
+  office_nook: { label: 'Office nook (curved front)', cat: 'Bedroom', w: 4.0, d: 1.41, h: 2.9,
+    spec: 'Built-in study nook in the former laundry niche: existing walls kept, new cream lacquer front with brass inlay lines pushed 35 cm into the corridor past the bathroom wall, rounded end, oak canopy to the ceiling with hidden warm LED; reeded-glass pivot door in an oak frame; 1.8 m desk along the back (left) wall with drawers and a lit bookshelf above, fluted walnut end wall, oak floor',
     build: ({ w: L, d: D, h }) => {
-      const oak = M('lightoak'), cream = M('lacquer', '#efe8dd'), g = new THREE.Group(), R = 0.5, TOP = 0.15, sh = h - TOP, T = 0.04, wallEnd = 0.909;
-      // curved shell: fixed straight part is the door; curve + east face in cream lacquer
+      const oak = M('lightoak'), cream = M('lacquer', '#efe8dd'), g = new THREE.Group(), R = 0.5, TOP = 0.15, sh = h - TOP, T = 0.04, wallEnd = 0.909, E = D - 1.062;
+      // rounded end + east face
       const curve = mesh(new THREE.CylinderGeometry(R, R, sh, 28, 1, true, Math.PI / 2, Math.PI / 2), cream); curve.position.set(L - R, sh / 2, R); g.add(curve);
       g.add(box(T, sh, D - R, cream, L - T / 2, 0, R + (D - R) / 2));
-      for (let a = 0.15; a < Math.PI / 2; a += 0.3) { const s = box(0.004, sh, 0.01, M('brass'), L - R + Math.sin(a) * (R + 0.002), 0, R - Math.cos(a) * (R + 0.002)); s.rotation.y = a; g.add(s); }
-      g.add(box(0.035, sh, 0.06, oak, wallEnd + 0.0175, 0, 0.03));                              // oak jamb at the wall end
-      // oak canopy to the ceiling + plinth line, following the outline
-      const s = new THREE.Shape(); s.moveTo(0, 0); s.lineTo(L - R, 0); s.absarc(L - R, R, R, -Math.PI / 2, 0, false); s.lineTo(L, D); s.lineTo(0, D); s.closePath();
-      for (const [y, th, mat] of [[sh, TOP, oak], [0, 0.008, oak]]) { const c = mesh(new THREE.ExtrudeGeometry(s, { depth: th, bevelEnabled: false }), mat); c.rotation.x = Math.PI / 2; c.position.y = y + th; g.add(c); }
+      for (let a = 0.15; a < Math.PI / 2; a += 0.3) { const b = box(0.004, sh, 0.01, M('brass'), L - R + Math.sin(a) * (R + 0.002), 0, R - Math.cos(a) * (R + 0.002)); b.rotation.y = a; g.add(b); }
+      // short return from the end of the bathroom wall out to the new front line
+      if (E > 0.01) g.add(box(T, sh, E, cream, wallEnd + T / 2, 0, E / 2));
+      g.add(box(0.035, sh, 0.06, oak, wallEnd + 0.0175, 0, 0.03));
+      // straight front from the return to the door, brass inlays
+      const DW = 0.8, fx1 = L - R - DW - 0.04;
+      g.add(box(fx1 - wallEnd, sh, T, cream, (wallEnd + fx1) / 2, 0, T / 2), box(0.035, sh, 0.06, oak, fx1 + 0.0175, 0, 0.03));
+      for (let x = wallEnd + 0.3; x < fx1 - 0.1; x += 0.3) g.add(box(0.01, sh, 0.004, M('brass'), x, 0, -0.002));
+      // oak canopy to the ceiling + floor, following the outline
+      const s = new THREE.Shape(); s.moveTo(0, E); s.lineTo(wallEnd, E); s.lineTo(wallEnd, 0); s.lineTo(L - R, 0); s.absarc(L - R, R, R, -Math.PI / 2, 0, false); s.lineTo(L, D); s.lineTo(0, D); s.closePath();
+      for (const [y, th] of [[sh, TOP], [0, 0.008]]) { const c = mesh(new THREE.ExtrudeGeometry(s, { depth: th, bevelEnabled: false }), oak); c.rotation.x = Math.PI / 2; c.position.y = y + th; g.add(c); }
       g.add(box(L - R - wallEnd, 0.012, 0.012, M('ledstrip'), (wallEnd + L - R) / 2, sh - 0.012, -0.006));
       const led = mesh(new THREE.TorusGeometry(R + 0.006, 0.006, 6, 24, Math.PI / 2), M('ledstrip')); led.rotation.x = -Math.PI / 2; led.position.set(L - R, sh - 0.006, R); g.add(led);
-      g.add(box(L - 0.3, 0.006, 0.015, M('ledstrip'), L / 2, sh - 0.01, D / 2));
-      // inside: fluted walnut on the end wall, desk facing left with drawers, lit shelf with books
-      const fw = fluted(D - 0.02, sh); fw.rotation.y = Math.PI / 2; fw.position.set(0.012, 0, D / 2); g.add(fw);
-      const dx = 0.3, dy = 0.775;
-      g.add(box(0.56, 0.035, D - 0.06, oak, dx, 0.74, D / 2), box(0.5, 0.6, 0.4, oak, dx, 0.12, D - 0.23));
-      for (const y of [0.32, 0.52]) g.add(box(0.004, 0.004, 0.36, M('shadowgap'), dx + 0.25, y, D - 0.23));
-      g.add(box(0.26, 0.025, D - 0.1, oak, 0.15, 1.5, D / 2), box(0.012, 0.006, D - 0.14, M('ledstrip'), 0.27, 1.494, D / 2));
+      g.add(box(L - 0.3, 0.006, 0.015, M('ledstrip'), L / 2, sh - 0.01, (E + D) / 2));
+      // fluted walnut end wall
+      const fw = fluted(D - E - 0.02, sh); fw.rotation.y = Math.PI / 2; fw.position.set(0.012, 0, (E + D) / 2); g.add(fw);
+      // desk along the back wall (left as you walk in), drawer pedestal, lit bookshelf above
+      const DL = 1.8, DD = 0.55, dxc = 0.1 + DL / 2, dz = D - DD / 2, dy = 0.775, back = D - 0.06;
+      g.add(box(DL, 0.035, DD, oak, dxc, 0.74, dz), box(0.42, 0.6, DD - 0.05, oak, 0.1 + DL - 0.23, 0.12, dz + 0.02), box(0.03, 0.74, 0.03, M('blackmetal'), 0.13, 0, D - DD + 0.03));
+      for (const y of [0.32, 0.52]) g.add(box(0.38, 0.004, 0.004, M('shadowgap'), 0.1 + DL - 0.23, y, D - DD - 0.005));
+      g.add(box(DL, 0.025, 0.26, oak, dxc, 1.5, D - 0.13), box(DL - 0.04, 0.006, 0.012, M('ledstrip'), dxc, 1.494, D - 0.25));
       const COLS = ['#e9e2d6', '#6e6a4c', '#2f3a4a', '#9c6b4e', '#b9a48a'];
-      for (let i = 0; i < 20; i++) g.add(box(0.18, 0.2 + (i % 3) * 0.03, 0.03, M('linen', COLS[i % 5]), 0.13, 1.525, 0.12 + i * 0.034));
-      g.add(cyl(0.04, 0.035, 0.12, M('ceramic', '#b9a48a'), 0.14, 1.525, D - 0.12, 20));
-      // desk styling: monitor, keyboard + mouse, laptop, lamp, books, mug, pen pot, notebook, phone
-      const mz = D / 2;
-      g.add(box(0.025, 0.35, 0.6, M('blackmetal'), 0.1, 0.95, mz), box(0.003, 0.33, 0.58, M('blackglass'), 0.114, 0.96, mz), box(0.04, 0.2, 0.04, M('blackmetal'), 0.08, dy, mz), box(0.16, 0.012, 0.2, M('blackmetal'), 0.1, dy, mz));
-      g.add(box(0.13, 0.018, 0.42, M('steel'), dx + 0.12, dy, mz), box(0.09, 0.02, 0.06, M('steel'), dx + 0.12, dy, mz + 0.3));
-      g.add(box(0.21, 0.015, 0.3, M('steel'), 0.15, dy, D - 0.2), box(0.2, 0.012, 0.29, M('linen', '#2f3a4a'), 0.15, dy + 0.015, D - 0.2));
-      g.add(cyl(0.06, 0.07, 0.015, M('blackmetal'), 0.08, dy, 0.14, 20)); { const a1 = box(0.012, 0.34, 0.012, M('blackmetal'), 0.08, dy + 0.015, 0.14); a1.rotation.z = -0.3; g.add(a1); }
-      g.add(cyl(0.03, 0.06, 0.08, M('blackmetal'), 0.24, dy + 0.27, 0.14, 20), cyl(0.05, 0.05, 0.003, M('glow'), 0.24, dy + 0.267, 0.14, 20));
-      [['#2f3a4a', 0.24], ['#e9e2d6', 0.22], ['#9c6b4e', 0.2]].forEach(([c, bw], i) => { const b = box(0.16, 0.03, bw, M('linen', c), 0.42, dy + i * 0.03, 0.16); b.rotation.y = (i - 1) * 0.12; g.add(b); });
-      const mug = cyl(0.035, 0.032, 0.09, M('ceramic', '#e9e2d6'), dx + 0.2, dy, D - 0.1, 20), hdl = mesh(new THREE.TorusGeometry(0.025, 0.007, 6, 14), M('ceramic', '#e9e2d6')); hdl.position.set(dx + 0.2, dy + 0.045, D - 0.06); hdl.rotation.y = Math.PI / 2; g.add(mug, hdl);
-      g.add(cyl(0.03, 0.03, 0.09, oak, dx + 0.22, dy, 0.38, 16));
-      for (let i = 0; i < 4; i++) { const pn = cyl(0.004, 0.004, 0.14, M(['blackmetal', 'brass', 'steel', 'blackmetal'][i]), dx + 0.22 + (i - 1.5) * 0.012, dy + 0.02, 0.38, 6); pn.rotation.x = (i - 1.5) * 0.12; g.add(pn); }
-      const nb = box(0.21, 0.012, 0.29, M('linen', '#f4efe7'), dx + 0.1, dy, 0.33); nb.rotation.y = 0.2; g.add(nb);
-      g.add(rbox(0.155, 0.009, 0.075, 0.006, M('blackglass'), dx + 0.2, dy, D - 0.32));
-      // oak floor inside
-      g.add(box(L - 0.05, 0.006, D - 0.02, oak, (L - 0.05) / 2, 0, D / 2));
-      // fixed cream front from the wall end up to the door, with brass inlay lines
-      const DW = 0.8, fx1 = L - R - DW - 0.04, COL2 = ['#e9e2d6', '#6e6a4c', '#2f3a4a', '#9c6b4e', '#b9a48a'];
-      if (fx1 > wallEnd + 0.05) {
-        g.add(box(fx1 - wallEnd, sh, T, cream, (wallEnd + fx1) / 2, 0, T / 2), box(0.035, sh, 0.06, oak, fx1 + 0.0175, 0, 0.03));
-        for (let x = wallEnd + 0.3; x < fx1 - 0.1; x += 0.3) g.add(box(0.01, sh, 0.004, M('brass'), x, 0, -0.002));
-        // long oak credenza on the back wall with books, plant and lamp
-        const cx0 = 1.0, cx1 = L - R - 0.1, cw = cx1 - cx0;
-        if (cw > 0.6) {
-          g.add(box(cw, 0.6, 0.45, oak, cx0 + cw / 2, 0.1, D - 0.24), box(cw - 0.02, 0.012, 0.47, M('cream'), cx0 + cw / 2, 0.7, D - 0.24));
-          for (let x = cx0 + 0.45; x < cx1 - 0.1; x += 0.45) g.add(box(0.004, 0.5, 0.004, M('shadowgap'), x, 0.15, D - 0.465));
-          g.add(box(cw, 0.025, 0.26, oak, cx0 + cw / 2, 1.5, D - 0.14), box(cw - 0.04, 0.006, 0.012, M('ledstrip'), cx0 + cw / 2, 1.494, D - 0.27));
-          for (let i = 0; i < Math.floor(cw / 0.034) - 10; i++) g.add(box(0.03, 0.2 + (i % 3) * 0.03, 0.18, M('linen', COL2[i % 5]), cx0 + 0.1 + i * 0.034, 1.525, D - 0.13));
-          const pl = model('pachira', 0.5, 1.0, 0.5); pl.position.set(cx1 - 0.25, 0.96, D - 0.24); g.add(pl, cyl(0.12, 0.1, 0.25, M('matteceramic'), cx1 - 0.25, 0.71, D - 0.24, 20));
-          g.add(cyl(0.05, 0.03, 0.3, M('matteceramic', '#b9a48a'), cx0 + 0.3, 0.71, D - 0.24, 20), cyl(0.1, 0.12, 0.14, M('sheer', '#f3e9d8'), cx0 + 0.3, 1.0, D - 0.24, 24, true));
-          const lt = lampLight(1.05, 0.8, 2.5); lt.position.set(cx0 + 0.3, 1.05, D - 0.24); g.add(lt);
-        }
-      }
+      for (let i = 0; i < 38; i++) g.add(box(0.03, 0.2 + (i % 3) * 0.03, 0.18, M('linen', COLS[i % 5]), 0.2 + i * 0.034, 1.525, D - 0.12));
+      g.add(cyl(0.04, 0.035, 0.12, M('ceramic', '#b9a48a'), 1.6, 1.525, D - 0.12, 20), cyl(0.035, 0.03, 0.1, M('matteceramic'), 1.75, 1.525, D - 0.12, 16));
+      // desk styling (facing the back wall): monitor, keyboard + mouse, laptop, lamp, books, mug, pen pot, notebook, phone
+      g.add(box(0.6, 0.35, 0.025, M('blackmetal'), 0.95, 0.95, back), box(0.58, 0.33, 0.003, M('blackglass'), 0.95, 0.96, back - 0.014), box(0.04, 0.2, 0.04, M('blackmetal'), 0.95, dy, back + 0.02), box(0.2, 0.012, 0.16, M('blackmetal'), 0.95, dy, back));
+      g.add(box(0.42, 0.018, 0.13, M('steel'), 0.95, dy, D - 0.38), box(0.06, 0.02, 0.09, M('steel'), 1.25, dy, D - 0.38));
+      g.add(box(0.3, 0.015, 0.21, M('steel'), 1.5, dy, D - 0.25), box(0.29, 0.012, 0.2, M('linen', '#2f3a4a'), 1.5, dy + 0.015, D - 0.25));
+      g.add(cyl(0.06, 0.07, 0.015, M('blackmetal'), 0.3, dy, back, 20)); { const a1 = box(0.012, 0.34, 0.012, M('blackmetal'), 0.3, dy + 0.015, back); a1.rotation.x = 0.3; g.add(a1); }
+      g.add(cyl(0.03, 0.06, 0.08, M('blackmetal'), 0.3, dy + 0.27, back - 0.16, 20), cyl(0.05, 0.05, 0.003, M('glow'), 0.3, dy + 0.267, back - 0.16, 20));
+      [['#2f3a4a', 0.24], ['#e9e2d6', 0.22], ['#9c6b4e', 0.2]].forEach(([c, bw], i) => { const b = box(bw, 0.03, 0.16, M('linen', c), 0.5, dy + i * 0.03, D - 0.3); b.rotation.y = (i - 1) * 0.12; g.add(b); });
+      const mug = cyl(0.035, 0.032, 0.09, M('ceramic', '#e9e2d6'), 1.3, dy, D - 0.15, 20), hdl = mesh(new THREE.TorusGeometry(0.025, 0.007, 6, 14), M('ceramic', '#e9e2d6')); hdl.position.set(1.34, dy + 0.045, D - 0.15); g.add(mug, hdl);
+      g.add(cyl(0.03, 0.03, 0.09, oak, 0.2, dy, D - 0.42, 16));
+      for (let i = 0; i < 4; i++) { const pn = cyl(0.004, 0.004, 0.14, M(['blackmetal', 'brass', 'steel', 'blackmetal'][i]), 0.2 + (i - 1.5) * 0.012, dy + 0.02, D - 0.42, 6); pn.rotation.z = (i - 1.5) * 0.12; g.add(pn); }
+      const nb = box(0.29, 0.012, 0.21, M('linen', '#f4efe7'), 0.6, dy, D - 0.45); nb.rotation.y = 0.2; g.add(nb);
+      g.add(rbox(0.075, 0.009, 0.155, 0.006, M('blackglass'), 1.75, dy, D - 0.45));
+      // tall plant in the open part near the door
+      const pl = model('pachira', 0.6, 1.4, 0.6); pl.position.set(L - R - 0.45, 0.38, D - 0.35); g.add(pl, cyl(0.2, 0.16, 0.4, M('matteceramic'), L - R - 0.45, 0, D - 0.35, 24));
       // reeded-glass pivot door next to the rounded end: hinge at the curve, opens inward
       const door = new THREE.Group(); door.position.set(L - R, 0, 0.02);
       for (const x of [-0.02, -DW + 0.02]) door.add(box(0.04, sh - 0.01, 0.035, oak, x, 0.005, 0));
