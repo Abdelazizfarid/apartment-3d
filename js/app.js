@@ -23,7 +23,7 @@ fetch('version.txt', { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then
     location.replace(location.pathname + '?v=' + encodeURIComponent(v));
   }
 }).catch(() => {});
-const SNAP = 0.05, KEY = 'wadi-houf-design-v4';
+const SNAP = 0.05, KEY = 'wadi-houf-design-v5';
 
 // ---------- renderer / scene ----------
 const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
@@ -293,7 +293,7 @@ let parts = [], ticks = [];
 function collectParts() {
   parts = []; ticks = [];
   furn.traverse(o => {
-    if (o.userData.part) { o.userData.part.open ??= false; o.userData.part.z0 ??= o.position.z; parts.push(o); }
+    if (o.userData.part) { o.userData.part.open ??= false; o.userData.part.z0 ??= o.position.z; o.userData.part.x0 ??= o.position.x; o.userData.part.t ??= 0; parts.push(o); }
     if (o.userData.tick) ticks.push(o.userData.tick);
   });
 }
@@ -364,7 +364,7 @@ function setWalls(m) {
 const FINISH_SPEC = {
   Reception: 'Floor: wall-to-wall wool carpet (marbled sand / ivory) over the existing tile, ~20 cm tile margin · West side: full-height panorama glazing to the balcony · Walls: warm greige matte (≈ #E6DDD1) · TV wall: full-height fluted walnut · Ceiling: gypsum, recessed 2700 K downlights · Curtains: ceiling track, sheer + linen',
   Dining: 'Floor: wall-to-wall wool carpet, ivory with taupe border, over the existing tile · Pendants ×2 over table at 75 cm above top · Walls: warm greige',
-  'Main bathroom': 'Floor + walls: warm grey concrete-look porcelain 60×120, full height, fine joints · Sink by the door, walk-in shower in the back corner beside the WC · Frameless glass with hinged door; rain head, hand shower, mixer and 2 body jets on the right wall; niche with 3 LED-lit shelves on the front wall · 50 L electric water heater on the left wall · Warm dim lighting',
+  'Main bathroom': 'Floor + walls: warm grey concrete-look porcelain 60×120, full height, fine joints · Sink by the door, walk-in shower in the back corner beside the WC · Full-length cabin to the sink, frameless glass, minibus-style sliding door on the front; rain head, hand shower, mixer and 2 body jets on the right wall; niche with 3 LED-lit shelves on the front wall · 50 L electric water heater on the left wall · Warm dim lighting',
   Balcony: 'Reception west wall opened as floor-to-ceiling panorama: 4 black-aluminium sliding glass panels · Balcony: stone floor, painted fascia, black-framed glass railing 1.1 m',
   Kitchen: 'Floor: travertine · Hob under the window (downdraft extractor), sink on the left wall, fridge column straight ahead from the door · Base units: handleless greige lacquer · Tall units: walnut · Worktop + splash: Calacatta 2 cm · Brass mixer',
   Bedroom: 'Floor: wall-to-wall plush ivory carpet over the existing wood-look tile; dark skirting kept · Two single beds 90×200 on the fluted walnut wall, shared nightstand · L-shaped study desk with PC + laptop where the wardrobe was · Curtains: sheer + linen',
@@ -533,7 +533,7 @@ function solids() {
   });
   // shower: solid while its glass door is shut (unless you are already standing inside it)
   const showers = furn.children.filter(o => o.userData.item.type === 'shower').flatMap(o => {
-    let open = false; o.traverse(c => { if (c.userData.part?.kind === 'hinge' && c.userData.part.open) open = true; });
+    let open = false; o.traverse(c => { if (c.userData.part && c.userData.part.kind !== 'toggle' && c.userData.part.open) open = true; });
     const b = new THREE.Box3().setFromObject(o), c = camera.position;
     const inside = c.x > b.min.x && c.x < b.max.x && c.z > b.min.z && c.z < b.max.z;
     return open || inside ? [] : [[b.min.x + 0.04, b.min.z + 0.04, b.max.x - 0.04, b.max.z - 0.04]];
@@ -604,6 +604,11 @@ function updateDoors(dt) {
     const p = o.userData.part;
     if (p.kind === 'hinge') o.rotation.y += ((p.open ? p.angle : 0) - o.rotation.y) * k;
     else if (p.kind === 'slide') o.position.z += (p.z0 + (p.open ? p.dist : 0) - o.position.z) * k;
+    else if (p.kind === 'van') {                                  // minibus door: out first, then along the track
+      p.t += Math.sign((p.open ? 1 : 0) - p.t) * Math.min(Math.abs((p.open ? 1 : 0) - p.t), dt * 1.2);
+      o.position.x = p.x0 + p.out * Math.min(1, p.t / 0.25);
+      o.position.z = p.z0 + p.slide * Math.max(0, (p.t - 0.25) / 0.75);
+    }
   }
   for (const t of ticks) t(dt);
   doors.forEach((d, i) => {

@@ -421,22 +421,25 @@ export const CATALOG = {
       return group(m, halo);
     } },
   shower: { label: 'Walk-in shower (rain + body jets)', cat: 'Bathroom', w: 0.8, d: 0.9, h: 2.0,
-    spec: 'Walk-in shower: frameless 8 mm clear glass, hinged door with gunmetal pull handle, flush grey porcelain floor with linear drain; on the right wall: gunmetal Ø30 rain head on arm, hand shower, thermostatic mixer and 2 body jets; niche with 3 LED-lit shelves on the front wall',
+    spec: 'Full-length walk-in shower (wall to the sink): frameless 8 mm clear glass, minibus-style sliding door on the front (pops out and glides back on a top track) with gunmetal pull handle, flush grey porcelain floor with linear drain; on the right wall: gunmetal Ø30 rain head on arm, hand shower, thermostatic mixer and 2 body jets; niche with 3 LED-lit shelves on the front wall',
     // local frame: back (-z) and right (+x) are walls; glass on the front (+z, hinged door) and left (-x).
     // Tap the door to open/close it; tap any fitting on the right wall to turn the water on/off.
     build: ({ w, d, h }) => {
-      const k = M('gunmetal'), gl = M('showerglass'), fz = d / 2 - 0.02, lx = -w / 2 + 0.01, bz = -d / 2, rx = w / 2, zc = -0.05;
+      const k = M('gunmetal'), gl = M('showerglass'), fz = d / 2 - 0.01, lx = -w / 2 + 0.01, bz = -d / 2, rx = w / 2, zc = 0;
       const g = group(box(w, 0.006, d, M('stone_grey')), box(w - 0.1, 0.004, 0.035, k, 0, 0.004, bz + 0.06));
-      g.add(box(0.008, h, d - 0.02, gl, lx, 0.01, 0), box(0.012, 0.012, d, k, lx, 0.006, 0));
-      // hinged glass door, pivot on the left post, swings out
-      const door = new THREE.Group(), W = w - 0.03; door.position.set(lx, 0, fz);
-      door.add(box(W, h - 0.02, 0.008, gl, W / 2, 0.02, 0));
-      for (const y of [0.25, h - 0.3]) door.add(box(0.06, 0.08, 0.03, k, 0.03, y, 0));
-      door.add(box(0.02, 0.35, 0.02, k, W - 0.1, 0.95, 0.035), box(0.02, 0.02, 0.05, k, W - 0.1, 0.96, 0.015), box(0.02, 0.02, 0.05, k, W - 0.1, 1.28, 0.015));
-      door.userData.part = { kind: 'hinge', angle: -1.6 };
+      // front (-x, facing the room): fixed glass at the back + minibus-style sliding door at the front end;
+      // the end next to the sink (+z) is fixed glass. Top + bottom tracks in gunmetal.
+      const DW = Math.min(0.7, d * 0.5), fixedLen = d - DW;
+      g.add(box(0.008, h, fixedLen, gl, lx, 0.01, bz + fixedLen / 2), box(w - 0.02, h, 0.008, gl, 0, 0.01, fz));
+      g.add(box(0.03, 0.03, d, k, lx - 0.04, h - 0.01, 0), box(0.02, 0.012, d, k, lx - 0.04, 0.006, 0), box(0.03, h, 0.03, k, lx, 0, fz));
+      const door = new THREE.Group(); door.position.set(lx - 0.04, 0, fz - DW / 2 - 0.01);
+      door.add(box(0.008, h - 0.03, DW, gl, 0, 0.02, 0), box(0.012, h - 0.03, 0.02, k, 0, 0.02, DW / 2 - 0.01), box(0.012, h - 0.03, 0.02, k, 0, 0.02, -DW / 2 + 0.01));
+      for (const zz of [-DW / 2 + 0.08, DW / 2 - 0.08]) door.add(box(0.03, 0.05, 0.05, k, 0, h - 0.04, zz));         // rollers on the top track
+      door.add(box(0.02, 0.45, 0.02, k, -0.04, 0.85, DW / 2 - 0.08), box(0.04, 0.02, 0.02, k, -0.02, 0.86, DW / 2 - 0.08), box(0.04, 0.02, 0.02, k, -0.02, 1.28, DW / 2 - 0.08));
+      door.userData.part = { kind: 'van', out: -0.05, slide: -(DW - 0.05) };                     // pops out, then slides back
       g.add(door);
       // right-wall fittings: riser, arm + rain head, hand shower, mixer, two body jets (one tappable group)
-      const fit = new THREE.Group(), hx = rx - 0.4;
+      const fit = new THREE.Group(), hx = rx - 0.45;
       fit.add(cyl(0.012, 0.012, 1.1, k, rx - 0.04, 1.0, zc, 12), box(0.38, 0.024, 0.024, k, rx - 0.22, 2.08, zc));
       fit.add(cyl(0.15, 0.15, 0.02, k, hx, 2.04, zc, 48), cyl(0.145, 0.145, 0.002, M('shadowgap'), hx, 2.038, zc, 48));
       const hs = cyl(0.035, 0.02, 0.22, k, rx - 0.07, 1.5, zc + 0.08, 16); hs.rotation.z = 0.4; fit.add(hs);
