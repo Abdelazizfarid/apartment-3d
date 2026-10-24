@@ -130,8 +130,8 @@ export const PROPOSAL = [
   ['rug_runner', 10.4, 3.85, 0, 4.8, 0.95], ['rug_runner', 14.075, 5.035, 0, 2.15, 0.63],
   ['art', 12.4, 5.49, 180, 0.9, 0.04, 0.6, 1.3],
   // curved office pod (sliding curved glass door) with ergonomic chair
-  ['office_capsule', 8.19, 4.994, 0, 1.9, 1.0, 2.5], ['office_chair', 8.06, 4.994, -90],   // corner capsule, desk on the end wall
+  ['office_nook', 7.236, 4.432, 0, 2.21, 1.062, 2.9], ['office_chair', 8.15, 4.96, -90],   // nook in the old laundry niche, curved front, desk facing left
   // shoe cabinet with mirror and wall lights on the freed wall
-  ['shoe_cabinet', 10.3, 5.334, 180, 1.4, 0.32, 0.85, 0.12], ['mirror_round', 10.3, 5.474, 180, 0.8, 0.03, 0.8, 1.3],
-  ['wall_sconce', 9.4, 5.42, 180], ['wall_sconce', 11.2, 5.42, 180],
+  ['shoe_cabinet', 10.65, 5.334, 180, 1.4, 0.32, 0.85, 0.12], ['mirror_round', 10.65, 5.474, 180, 0.8, 0.03, 0.8, 1.3],
+  ['wall_sconce', 9.8, 5.42, 180], ['wall_sconce', 11.5, 5.42, 180],
 ];
