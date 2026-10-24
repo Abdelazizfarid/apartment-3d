@@ -423,6 +423,42 @@ export const CATALOG = {
       }
       return g;
     } },
+  vanity_set: { label: 'Vanity: skincare, perfume & makeup', cat: 'Bedroom', w: 1.1, d: 0.42, h: 0.3, y: 0.76,
+    spec: 'Dressing-table styling: mirrored tray of perfumes, skincare bottles & jars, lipstick and makeup organiser, brush cup, jewellery box, LED makeup mirror, candle, flowers',
+    build: ({ w }) => {
+      const g = new THREE.Group(), gold = M('brass'), glassM = M('glass'), pink = c => M('ceramic', c);
+      // mirrored tray with perfumes (back left)
+      const tx = -w / 2 + 0.2;
+      g.add(rbox(0.32, 0.012, 0.2, 0.01, M('mirror'), tx, 0, -0.06), box(0.33, 0.016, 0.004, gold, tx, 0, 0.04), box(0.33, 0.016, 0.004, gold, tx, 0, -0.16));
+      [[-0.1, 0.11, 0.06, '#e8c9b5'], [-0.02, 0.14, 0.045, '#f3e2c4'], [0.06, 0.09, 0.07, '#d7b8c9'], [0.12, 0.12, 0.04, '#c9a46a']].forEach(([x, hh, r, c], i) => {
+        const bx = tx + x, bz = -0.06 + (i % 2 ? 0.03 : -0.03);
+        g.add(i % 2 ? cyl(r / 2, r / 2, hh, glassM, bx, 0.012, bz, 20) : box(r, hh, r * 0.7, glassM, bx, 0.012, bz));
+        g.add(box(r * 0.7, hh * 0.85, r * 0.45, pink(c), bx, 0.016, bz), cyl(0.012, 0.012, 0.03, gold, bx, 0.012 + hh, bz, 16));
+      });
+      // skincare line-up (back middle): pump bottles, dropper serums, cream jars
+      const sx = -0.08;
+      [[0, 0.17, '#f2ede6'], [0.06, 0.14, '#efe2d2'], [0.12, 0.1, '#e6d3c3']].forEach(([x, hh, c]) => g.add(cyl(0.022, 0.022, hh, pink(c), sx + x, 0, -0.12, 20), cyl(0.008, 0.008, 0.03, gold, sx + x, hh, -0.12, 10), box(0.03, 0.006, 0.006, gold, sx + x - 0.01, hh + 0.03, -0.12)));
+      [[0.18, '#b97a4a'], [0.22, '#c79a6a']].forEach(([x, c]) => g.add(cyl(0.015, 0.015, 0.08, M('amber'), sx + x, 0, -0.13, 16), cyl(0.008, 0.006, 0.04, M('blackmetal'), sx + x, 0.08, -0.13, 10)));
+      [[0.02, '#f6f1ea'], [0.1, '#ead9c7']].forEach(([x, c]) => g.add(cyl(0.035, 0.035, 0.035, pink(c), sx + x, 0, -0.02, 24), cyl(0.036, 0.036, 0.015, gold, sx + x, 0.035, -0.02, 24)));
+      // acrylic makeup organiser with lipsticks + brush cup (right)
+      const ox = w / 2 - 0.22;
+      g.add(box(0.2, 0.09, 0.1, glassM, ox, 0, -0.1));
+      for (let i = 0; i < 6; i++) g.add(cyl(0.008, 0.008, 0.06, i % 2 ? gold : M('blackmetal'), ox - 0.075 + i * 0.03, 0.02, -0.12, 10), cyl(0.006, 0.006, 0.02, pink(['#a8323e', '#c45b6a', '#8a2c3a'][i % 3]), ox - 0.075 + i * 0.03, 0.08, -0.12, 10));
+      g.add(rbox(0.18, 0.025, 0.06, 0.01, pink('#d9a7a0'), ox, 0.01, -0.06));                    // palette
+      g.add(cyl(0.035, 0.03, 0.1, pink('#e9d9cc'), ox + 0.14, 0, -0.1, 20));
+      for (let i = 0; i < 5; i++) { const b = cyl(0.005, 0.004, 0.17, M('blackmetal'), ox + 0.14 + (i - 2) * 0.01, 0.06, -0.1, 8); b.rotation.z = (i - 2) * 0.08; g.add(b);
+        const t = cyl(0.012, 0.005, 0.04, M('ceramic', '#3a2a22'), ox + 0.14 + (i - 2) * 0.01 - Math.sin((i - 2) * 0.08) * 0.17, 0.2, -0.1, 10); t.rotation.z = (i - 2) * 0.08; g.add(t); }
+      // jewellery box (front right), candle + flowers (front left), small LED makeup mirror (centre front)
+      g.add(rbox(0.16, 0.06, 0.1, 0.01, M('velvet', '#c9a7a0'), ox, 0, 0.07), box(0.16, 0.004, 0.1, gold, ox, 0.06, 0.07));
+      g.add(cyl(0.035, 0.035, 0.07, pink('#f4efe7'), tx + 0.08, 0, 0.1, 20), cyl(0.03, 0.03, 0.002, M('glow'), tx + 0.08, 0.07, 0.1, 20));
+      const fl = model('flowers', 0.18, 0.2, 0.12); fl.position.set(tx - 0.07, 0, 0.1); g.add(fl);
+      const mr = new THREE.Group(); mr.position.set(0.12, 0, 0.02);
+      mr.add(cyl(0.06, 0.07, 0.015, gold), cyl(0.006, 0.006, 0.12, gold, 0, 0.015, 0, 8));
+      const face = mesh(new THREE.CircleGeometry(0.1, 40), M('mirror')); face.position.set(0, 0.24, 0.005); mr.add(face);
+      const ring = mesh(new THREE.TorusGeometry(0.1, 0.008, 10, 48), M('ledstrip')); ring.position.set(0, 0.24, 0); mr.add(ring);
+      g.add(mr);
+      return g;
+    } },
   // ---- worktop accessories (stand on the 90 cm worktop, back to the wall, facing +z) ----
   coffee_machine: { label: 'Coffee machine', cat: 'Kitchen', w: 0.26, d: 0.36, h: 0.36, y: 0.9, spec: 'Bean-to-cup espresso machine, black / steel',
     build: ({ w, d, h }) => group(rbox(w, h, d, 0.02, M('blackmetal')), box(w - 0.04, 0.04, 0.08, M('steel'), 0, 0.02, d / 2 - 0.03), box(w * 0.5, 0.08, 0.04, M('steel'), 0, h * 0.55, d / 2 + 0.01),
