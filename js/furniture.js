@@ -555,13 +555,13 @@ export const CATALOG = {
       return g;
     } },
   water_heater: { label: 'Electric water heater', cat: 'Bathroom', w: 0.45, d: 0.45, h: 0.8, y: 1.35,
-    spec: 'Wall-mounted 50 L electric water heater, white enamel tank with thermostat dial; hot / cold pipes concealed below',
+    spec: 'Compact wall-mounted 30 L electric water heater, mounted high, white enamel tank with thermostat dial; hot / cold pipes concealed below',
     build: ({ w, h }) => {
       const r = w / 2, g = group(cyl(r, r, h, M('ceramic'), 0, 0, 0, 40), mesh(new THREE.SphereGeometry(r, 32, 12, 0, 6.283, 0, Math.PI / 2), M('ceramic')),
         box(0.12, 0.05, 0.2, M('gunmetal'), 0, h * 0.3, -r + 0.02), box(0.12, 0.05, 0.2, M('gunmetal'), 0, h * 0.75, -r + 0.02));
       g.children[1].position.y = h; g.children[1].scale.y = 0.35;
       const dial = cyl(0.04, 0.04, 0.02, M('gunmetal'), 0, 0, 0, 24); dial.rotation.x = Math.PI / 2; dial.position.set(0, h * 0.25, r + 0.005); g.add(dial);
-      g.add(cyl(0.012, 0.012, 0.35, M('steel'), -0.07, -0.35, 0, 10), cyl(0.012, 0.012, 0.35, M('steel'), 0.07, -0.35, 0, 10), cyl(0.009, 0.009, 0.004, M('ledstrip'), 0.08, h * 0.25, r + 0.003, 10));
+      g.add(cyl(0.012, 0.012, 0.1, M('gunmetal'), -0.06, -0.1, -r + 0.03, 10), cyl(0.012, 0.012, 0.1, M('gunmetal'), 0.06, -0.1, -r + 0.03, 10), cyl(0.009, 0.009, 0.004, M('ledstrip'), 0.08, h * 0.25, r + 0.003, 10));
       return g;
     } },
   washer: { label: 'Washing machine', cat: 'Other', w: 0.6, d: 0.6, h: 0.85, spec: 'Front-load washer-dryer',

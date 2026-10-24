@@ -83,7 +83,7 @@ export const PROPOSAL = [
   ['curtain', 6.53, 0.83, 0, 1.4],
   // Bathroom
   ['toilet', 8.06, 1.07, 0],
-  ['water_heater', 8.11, 1.95, 90],
+  ['water_heater', 8.065, 1.95, 90, 0.36, 0.36, 0.55, 2.0],   // compact 30 L, high up near the ceiling
   ['bath_mat', 8.55, 2.75, 0, 0.8, 0.5],
   // Bathroom: sink by the door, shower cabin in the back corner beside the toilet
   ['vanity', 9.17, 2.62, -90, 0.8, 0.46],
