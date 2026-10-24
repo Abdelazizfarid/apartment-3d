@@ -492,7 +492,7 @@ export const CATALOG = {
       return group(m, halo);
     } },
   shower: { label: 'Walk-in shower (rain + body jets)', cat: 'Bathroom', w: 0.8, d: 0.9, h: 2.0,
-    spec: 'Full-length walk-in shower (wall to the sink): frameless 8 mm clear glass, minibus-style sliding door on the front (pops out and glides back on a top track) with gunmetal pull handle, flush grey porcelain floor with linear drain; on the right wall: gunmetal Ø30 rain head on arm, hand shower, thermostatic mixer and 2 body jets; niche with 3 LED-lit shelves on the front wall',
+    spec: 'Full-length walk-in shower (wall to the sink): frameless 8 mm clear glass, minibus-style sliding door on the front (pops out and glides back on a top track) with gunmetal pull handle, flush grey porcelain floor with linear drain; on the right wall: gunmetal Ø30 rain head on arm, hand shower, thermostatic mixer and 2 body jets mounted high, angled down; niche with 3 LED-lit shelves on the front wall',
     // local frame: back (-z) and right (+x) are walls; glass on the front (+z, hinged door) and left (-x).
     // Tap the door to open/close it; tap any fitting on the right wall to turn the water on/off.
     build: ({ w, d, h }) => {
@@ -509,14 +509,19 @@ export const CATALOG = {
       door.add(box(0.02, 0.45, 0.02, k, -0.04, 0.85, DW / 2 - 0.08), box(0.04, 0.02, 0.02, k, -0.02, 0.86, DW / 2 - 0.08), box(0.04, 0.02, 0.02, k, -0.02, 1.28, DW / 2 - 0.08));
       door.userData.part = { kind: 'van', out: -0.05, slide: -(DW - 0.05) };                     // pops out, then slides back
       g.add(door);
-      // right-wall fittings: riser, arm + rain head, hand shower, mixer, two body jets (one tappable group)
-      const fit = new THREE.Group(), hx = rx - 0.45;
-      fit.add(cyl(0.012, 0.012, 1.1, k, rx - 0.04, 1.0, zc, 12), box(0.38, 0.024, 0.024, k, rx - 0.22, 2.08, zc));
-      fit.add(cyl(0.15, 0.15, 0.02, k, hx, 2.04, zc, 48), cyl(0.145, 0.145, 0.002, M('shadowgap'), hx, 2.038, zc, 48));
+      // big ceiling rain head for two (50 × 90 cm) on two drop rods, mixer + hand shower on the right wall,
+      // two body jets high on the right wall angled down into the middle. One tappable group.
+      const fit = new THREE.Group(), hx = 0.02, HW = 0.5, HD = 0.9, HY = 2.15;
+      fit.add(box(HW, 0.03, HD, k, hx, HY, zc), box(HW - 0.03, 0.002, HD - 0.03, M('shadowgap'), hx, HY - 0.002, zc));
+      for (const zz of [-HD / 2 + 0.15, HD / 2 - 0.15]) fit.add(cyl(0.012, 0.012, 2.9 - HY - 0.03, k, hx, HY + 0.03, zc + zz, 12));
       const hs = cyl(0.035, 0.02, 0.22, k, rx - 0.07, 1.5, zc + 0.08, 16); hs.rotation.z = 0.4; fit.add(hs);
-      fit.add(box(0.03, 0.22, 0.16, k, rx - 0.015, 0.95, zc), cyl(0.03, 0.03, 0.05, k, rx - 0.045, 1.05, zc, 16), cyl(0.03, 0.03, 0.05, k, rx - 0.045, 0.98, zc, 16));
-      const jets = [zc - 0.25, zc + 0.25].map(z => new THREE.Vector3(rx - 0.03, 1.15, z));
-      for (const j of jets) { const n = cyl(0.04, 0.04, 0.03, k, 0, 0, 0, 24); n.rotation.z = Math.PI / 2; n.position.copy(j); fit.add(n); }
+      fit.add(box(0.03, 0.22, 0.16, k, rx - 0.015, 0.95, zc), cyl(0.03, 0.03, 0.05, k, rx - 0.045, 1.05, zc, 16), cyl(0.03, 0.03, 0.05, k, rx - 0.045, 0.98, zc, 16),
+              cyl(0.012, 0.012, 0.5, k, rx - 0.035, 1.07, zc + 0.08, 12));
+      const jets = [zc - 0.42, zc + 0.42].map(z => new THREE.Vector3(rx - 0.04, 1.95, z));
+      for (const j of jets) {
+        const n = cyl(0.045, 0.03, 0.07, k, 0, 0, 0, 24); n.geometry.translate(0, -0.035, 0);
+        n.position.copy(j); n.rotation.z = -Math.PI / 4; fit.add(n, box(0.02, 0.08, 0.08, k, rx - 0.01, j.y - 0.04, j.z));
+      }
       fit.userData.part = { kind: 'toggle', open: false };
       g.add(fit);
       // niche on the front (back) wall, right of the window
@@ -529,10 +534,10 @@ export const CATALOG = {
       }
       // running water: rain from the head, two jets spraying into the middle
       const wm = new THREE.LineBasicMaterial({ color: '#dceff8', transparent: true, opacity: 0.75 });
-      const R = 260, J = 70, pos = new Float32Array((R + J * 2) * 6), geo = new THREE.BufferGeometry();
+      const R = 420, J = 80, pos = new Float32Array((R + J * 2) * 6), geo = new THREE.BufferGeometry();
       geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
       const water = new THREE.LineSegments(geo, wm); water.frustumCulled = false; water.raycast = () => {}; water.visible = false;
-      const drops = Array.from({ length: R }, () => { const a = Math.random() * 6.283, r = Math.sqrt(Math.random()) * 0.13; return [hx + Math.cos(a) * r, zc + Math.sin(a) * r, Math.random(), Math.cos(a), Math.sin(a)]; });
+      const drops = Array.from({ length: R }, () => [hx + (Math.random() - 0.5) * (HW - 0.04), zc + (Math.random() - 0.5) * (HD - 0.04), Math.random(), 0, 0]);
       const jetP = jets.flatMap(j => Array.from({ length: J }, () => [j, Math.random(), (Math.random() - 0.5) * 0.25, (Math.random() - 0.5) * 0.12]));
       g.add(water);
       g.userData.tick = dt => {
@@ -541,14 +546,14 @@ export const CATALOG = {
         let o = 0;
         for (const dr of drops) {
           dr[2] = (dr[2] + dt * 2.3) % 1;
-          const t = dr[2], y = 2.02 - t * 2.0, spread = t * 0.08;
+          const t = dr[2], y = HY - 0.01 - t * (HY - 0.02), spread = 0;
           pos.set([dr[0] + dr[3] * spread, y, dr[1] + dr[4] * spread, dr[0] + dr[3] * spread, y - 0.09, dr[1] + dr[4] * spread], o); o += 6;
         }
-        for (const p of jetP) {
-          p[1] = (p[1] + dt * 1.8) % 1;
-          const [j, s, sz, sy] = p, dx = hx - j.x, dz = zc - j.z + sz, len = Math.hypot(dx, dz);
-          const x = j.x + dx / len * s * 0.45, z = j.z + dz / len * s * 0.45, y = j.y + sy * s - 0.35 * s * s;
-          pos.set([x, y, z, x - dx / len * 0.04, y + 0.7 * s * 0.04, z - dz / len * 0.04], o); o += 6;
+        for (const p of jetP) {                                          // jets: down and inward at ~45°, then gravity
+          p[1] = (p[1] + dt * 1.6) % 1;
+          const [j, s, sz, sy] = p, v = 1.1, t = s * 0.9, dz = (zc - j.z) * 0.25 + sz;
+          const x = j.x - v * 0.7 * t, y = j.y - v * 0.7 * t - 2.2 * t * t + sy * t, z = j.z + dz * t;
+          pos.set([x, y, z, x + 0.03, y + 0.03 + 0.09 * t, z - dz * 0.03], o); o += 6;
         }
         geo.attributes.position.needsUpdate = true;
       };
