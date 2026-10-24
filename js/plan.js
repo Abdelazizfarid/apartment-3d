@@ -130,6 +130,6 @@ export const PROPOSAL = [
   // curved office pod (sliding curved glass door) with ergonomic chair
   ['office_nook', 7.236, 4.432, 0, 2.546, 1.062, 2.9], ['office_chair', 8.0, 4.8, 0],   // nook in the old laundry niche, front flush with the bathroom wall end (clear of the open dining door), ends at the wall pier, desk on the back (left) wall
   // shoe cabinet with mirror and wall lights on the freed wall
-  ['shoe_cabinet', 10.52, 5.334, 180, 1.4, 0.32, 0.85, 0.12], ['mirror_round', 10.52, 5.474, 180, 0.8, 0.03, 0.8, 1.3],   // directly after the office nook
-  ['wall_sconce', 9.95, 5.42, 180], ['wall_sconce', 11.09, 5.42, 180],
+  ['shoe_cabinet', 11.2, 5.334, 180, 1.4, 0.32, 0.85, 0.12], ['mirror_round', 11.2, 5.474, 180, 0.8, 0.03, 0.8, 1.3],   // centred between the office nook and the kitchen doorway
+  ['wall_sconce', 10.63, 5.42, 180], ['wall_sconce', 11.77, 5.42, 180],
 ];
