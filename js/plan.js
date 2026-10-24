@@ -119,8 +119,10 @@ export const PROPOSAL = [
   ['rug_border', 18.2, 3.39, 0, 3.2, 3.88],
   ['bench', 18.62, 3.8, 0, 1.5, 0.42],
   ['wardrobe', 16.723, 2.85, 90, 2.7, 0.6, 2.85],
-  ['desk', 19.26, 5.262, 180, 1.4, 0.5], ['vanity_stool', 19.26, 4.8, 0],
-  ['mirror_round', 19.26, 5.49, 180, 0.8, 0.03, 0.8, 1.15],
+  // TV wall facing the bed, on the free wall between wardrobe and dresser
+  ['tv', 18.19, 5.368, 180, 1.23, 0.04, 0.71, 1.15], ['tv_console', 18.19, 5.20, 180, 1.1, 0.38, 0.3, 0.3],
+  ['desk', 19.37, 5.262, 180, 1.2, 0.5], ['vanity_stool', 19.37, 4.8, 0],
+  ['mirror_round', 19.37, 5.49, 180, 0.8, 0.03, 0.8, 1.15],
   ['curtain', 19.92, 3.375, -90, 2.3],
   // Balcony
   ['plant_tree', -0.4, 1.05, 0], ['plant_bush', -0.3, 1.75, 0],
