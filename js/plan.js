@@ -94,6 +94,10 @@ export const PROPOSAL = [
   ['dishwasher', 11.81, 0.677, 0, 0.6], ['fridge', 12.52, 0.677, 0, 0.61, 0.6, 2.4],
   ['counter', 10.058, 1.14, 90, 0.32], ['sink_unit', 10.058, 1.75, 90, 0.9], ['counter', 10.058, 2.375, 90, 0.35],
   ['counter', 10.058, 2.855, 90, 0.61],
+  // worktop accessories
+  ['coffee_machine', 10.05, 0.58, 0], ['kettle', 10.4, 0.6, 0],
+  ['knife_block', 11.85, 0.6, 0], ['cutlery_caddy', 9.95, 1.12, 90], ['utensil_jar', 9.92, 2.33, 90], ['oil_set', 9.92, 2.62, 90],
+  ['fruit_bowl', 10.66, 2.9, 180], ['toaster', 11.35, 2.98, 180],
   // upper kitchen: wall cabinets on the left wall, left of the window and over the counter by the door
   ['wall_cab', 9.933, 1.955, 90, 2.4, 0.35, 0.8, 1.5], ['wall_cab', 10.19, 0.572, 0, 0.8, 0.35, 0.8, 1.5],
   ['wall_cab', 11.02, 2.986, 180, 1.32, 0.35, 0.8, 1.5],

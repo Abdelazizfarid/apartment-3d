@@ -392,19 +392,74 @@ export const CATALOG = {
   washer_int: { label: 'Washer-dryer (built in)', cat: 'Kitchen', w: 0.6, d: 0.6, h: 0.9,
     spec: 'Front-load washer-dryer built in under the worktop (water + drain from the sink wall)', build: it => kitchenBase(it, 'washer') },
   wall_cab: { label: 'Kitchen wall cabinets', cat: 'Kitchen', w: 1.2, d: 0.35, h: 0.8, y: 1.5,
-    spec: 'Upper wall cabinets to match: handleless greige lacquer with finger-pull top, one glass-front display door per run, warm LED strip underneath',
+    spec: 'Upper wall cabinets to match: handleless greige lacquer doors (tap to open), one glass display door in an oak frame per run, shelf inside, warm LED strip underneath',
     build: ({ w, d, h }) => {
-      const g = group(box(w, h, d - 0.02, M('lacquer'), 0, 0, -0.01), box(w - 0.04, 0.006, 0.015, M('ledstrip'), 0, -0.006, d / 2 - 0.05));
-      const n = Math.max(1, Math.round(w / 0.45)), dw = w / n;
+      const L = M('lacquer'), T = 0.018, g = group(box(w - 0.04, 0.006, 0.015, M('ledstrip'), 0, -0.006, d / 2 - 0.05));
+      // hollow carcass: back, top, bottom, ends, one shelf
+      g.add(box(w, T, d - 0.02, L, 0, 0, -0.01), box(w, T, d - 0.02, L, 0, h - T, -0.01), box(w, h, 0.01, L, 0, 0, -d / 2 + 0.005),
+            box(T, h, d - 0.02, L, -w / 2 + T / 2, 0, -0.01), box(T, h, d - 0.02, L, w / 2 - T / 2, 0, -0.01), box(w - 2 * T, 0.015, d - 0.05, L, 0, h / 2, -0.02));
+      const n = Math.max(1, Math.round(w / 0.45)), dw = w / n, fz = d / 2 - 0.009, oak = M('lightoak');
       for (let i = 0; i < n; i++) {
         const x = -w / 2 + dw * (i + 0.5), glass = i === n - 1 && n > 1;
-        g.add(box(dw - 0.004, h - 0.04, 0.018, glass ? M('lightoak') : M('lacquer'), x, 0, d / 2 - 0.009));
-        if (glass) g.add(box(dw - 0.06, h - 0.1, 0.004, M('glass'), x, 0.03, d / 2 + 0.002), box(dw - 0.08, 0.012, d - 0.06, M('lacquer'), x, h / 2, -0.01),
-          ...[0.12, 0.5].map(y => cyl(0.05, 0.04, 0.1, M('ceramic'), x - 0.06, y, -0.02, 20)), ...[0.12, 0.5].map(y => cyl(0.035, 0.035, 0.16, M('glass'), x + 0.08, y, -0.02, 16)));
-        g.add(box(dw - 0.004, 0.004, 0.003, M('shadowgap'), x, h - 0.03, d / 2 + 0.001));
+        if (i < n - 1) g.add(box(0.015, h - 2 * T, d - 0.04, L, -w / 2 + dw * (i + 1), T, -0.02));
+        // contents: plates / bowls below, glasses or mugs above; jars in the display bay
+        const lo = T + 0.005, hi = h / 2 + 0.01;
+        if (glass) { for (const xx of [-0.08, 0.06]) g.add(cyl(0.035, 0.03, 0.14, M('glass'), x + xx, lo, -0.02, 16), cyl(0.04, 0.04, 0.16, M('glass'), x + xx, hi, -0.03, 16), cyl(0.032, 0.032, 0.02, oak, x + xx, hi + 0.16, -0.03, 16)); }
+        else {
+          for (let k = 0; k < 8; k++) g.add(cyl(0.12, 0.1, 0.012, M('ceramic'), x - dw * 0.15, lo + k * 0.014, -0.03, 32));
+          for (let k = 0; k < 4; k++) g.add(cyl(0.075, 0.05, 0.05, M('ceramic', '#e7dfd2'), x + dw * 0.22, lo + k * 0.03, -0.03, 28));
+          for (let k = 0; k < 3; k++) g.add(cyl(0.04, 0.035, 0.1, M('matteceramic', ['#b9a48a', '#6e6a4c', '#e9e2d6'][k]), x - dw * 0.25 + k * 0.1, hi, -0.02, 20));
+        }
+        // door on a hinge at its outer edge (alternating), swings out
+        const left = i % 2 === 0, p = new THREE.Group(), W = dw - 0.004;
+        p.position.set(left ? x - dw / 2 + 0.002 : x + dw / 2 - 0.002, 0, fz);
+        const sx = left ? 1 : -1;
+        if (glass) {
+          for (const [bw, bh, bx, by] of [[W, 0.04, W / 2, 0], [W, 0.04, W / 2, h - 0.044], [0.04, h - 0.04, 0.02, 0], [0.04, h - 0.04, W - 0.02, 0]]) p.add(box(bw, bh, T, oak, sx * bx, by, 0));
+          p.add(box(W - 0.08, h - 0.1, 0.004, M('glass'), sx * W / 2, 0.04, 0));
+        } else p.add(box(W, h - 0.004, T, L, sx * W / 2, 0.002, 0), box(W, 0.004, 0.003, M('shadowgap'), sx * W / 2, h - 0.03, 0.01));
+        p.userData.part = { kind: 'hinge', angle: left ? -1.6 : 1.6 };
+        g.add(p);
       }
       return g;
     } },
+  // ---- worktop accessories (stand on the 90 cm worktop, back to the wall, facing +z) ----
+  coffee_machine: { label: 'Coffee machine', cat: 'Kitchen', w: 0.26, d: 0.36, h: 0.36, y: 0.9, spec: 'Bean-to-cup espresso machine, black / steel',
+    build: ({ w, d, h }) => group(rbox(w, h, d, 0.02, M('blackmetal')), box(w - 0.04, 0.04, 0.08, M('steel'), 0, 0.02, d / 2 - 0.03), box(w * 0.5, 0.08, 0.04, M('steel'), 0, h * 0.55, d / 2 + 0.01),
+      cyl(0.035, 0.03, 0.08, M('ceramic'), 0, 0.06, d / 2 - 0.05, 20), box(0.08, 0.05, 0.003, M('ledstrip'), w * 0.25, h - 0.08, d / 2 + 0.001)) },
+  kettle: { label: 'Kettle', cat: 'Kitchen', w: 0.2, d: 0.16, h: 0.24, y: 0.9, spec: 'Brushed-steel electric kettle',
+    build: ({ h }) => { const hd = mesh(new THREE.TorusGeometry(0.06, 0.012, 8, 20, Math.PI), M('blackmetal')); hd.position.set(-0.06, h * 0.55, 0); hd.rotation.z = Math.PI / 2;
+      return group(cyl(0.085, 0.085, 0.02, M('blackmetal')), cyl(0.065, 0.08, h - 0.04, M('steel'), 0, 0.02, 0, 28), cyl(0.03, 0.03, 0.03, M('blackmetal'), 0, h - 0.03, 0, 16), hd); } },
+  toaster: { label: 'Toaster', cat: 'Kitchen', w: 0.28, d: 0.16, h: 0.19, y: 0.9, spec: '2-slice toaster, cream',
+    build: ({ w, d, h }) => group(rbox(w, h, d, 0.03, M('ceramic', '#efe8dc')), box(0.12, 0.004, 0.025, M('shadowgap'), -0.04, h, -0.03), box(0.12, 0.004, 0.025, M('shadowgap'), -0.04, h, 0.03), box(0.02, 0.03, 0.02, M('steel'), w / 2 - 0.04, h * 0.4, d / 2)) },
+  knife_block: { label: 'Knife block + board', cat: 'Kitchen', w: 0.5, d: 0.3, h: 0.3, y: 0.9, spec: 'Oak knife block with 5 knives, end-grain oak chopping board',
+    build: () => { const b = box(0.12, 0.2, 0.1, M('lightoak'), 0.17, 0, -0.08); b.rotation.x = -0.25; const g = group(b, rbox(0.38, 0.03, 0.26, 0.01, M('lightoak'), -0.06, 0, 0.0));
+      for (let i = 0; i < 5; i++) { const k = box(0.018, 0.1, 0.018, M('blackmetal'), 0.13 + (i % 3) * 0.035, 0.2, -0.11 + Math.floor(i / 3) * 0.03); k.rotation.x = -0.25; g.add(k); }
+      g.add(box(0.03, 0.002, 0.2, M('steel'), -0.1, 0.031, 0.02), box(0.02, 0.015, 0.1, M('blackmetal'), -0.1, 0.031, 0.17));
+      return g; } },
+  cutlery_caddy: { label: 'Cutlery caddy', cat: 'Kitchen', w: 0.22, d: 0.12, h: 0.25, y: 0.9, spec: 'Brushed-steel cutlery caddy with forks, spoons and knives',
+    build: () => { const g = group(box(0.22, 0.12, 0.11, M('steel')));
+      for (let c = 0; c < 3; c++) for (let i = 0; i < 4; i++) {
+        const x = -0.07 + c * 0.07 + (i % 2) * 0.015, z = -0.025 + Math.floor(i / 2) * 0.03, s = box(0.012, 0.13, 0.004, M('steel'), x, 0.1, z);
+        s.rotation.z = (i - 1.5) * 0.06; g.add(s);
+        if (c === 0) g.add(box(0.022, 0.05, 0.003, M('steel'), x, 0.22, z));                                   // fork heads
+        else if (c === 1) { const sp = mesh(new THREE.SphereGeometry(0.018, 12, 8), M('steel')); sp.scale.set(1, 1.5, 0.3); sp.position.set(x, 0.24, z); g.add(sp); } // spoon bowls
+        else g.add(box(0.016, 0.07, 0.003, M('steel'), x, 0.22, z));                                          // knife blades
+      }
+      return g; } },
+  utensil_jar: { label: 'Utensil jar', cat: 'Kitchen', w: 0.14, d: 0.14, h: 0.35, y: 0.9, spec: 'Ceramic jar with olive-wood spatulas, ladle and whisk',
+    build: () => { const g = group(cyl(0.06, 0.055, 0.15, M('matteceramic', '#cbbfae'), 0, 0, 0, 24));
+      [[-0.02, 0.1], [0.02, -0.1], [0, 0], [0.025, 0.15]].forEach(([x, a], i) => { const s = cyl(0.007, 0.007, 0.28, i === 2 ? M('steel') : M('walnut'), x, 0.05, 0, 8); s.rotation.z = a; g.add(s);
+        const head = i === 2 ? mesh(new THREE.SphereGeometry(0.03, 12, 8), M('steel')) : box(0.05, 0.07, 0.008, M('walnut')); head.position.set(x - Math.sin(a) * 0.28, 0.36, 0); g.add(head); });
+      return g; } },
+  oil_set: { label: 'Oil + salt & pepper', cat: 'Kitchen', w: 0.25, d: 0.12, h: 0.28, y: 0.9, spec: 'Glass oil & vinegar bottles, oak salt and pepper mills on a marble tray',
+    build: () => group(box(0.25, 0.012, 0.12, M('calacatta')), cyl(0.03, 0.03, 0.22, M('amber'), -0.08, 0.012, 0, 16), cyl(0.026, 0.026, 0.2, M('glass'), -0.02, 0.012, 0, 16),
+      cyl(0.024, 0.02, 0.17, M('lightoak'), 0.05, 0.012, 0, 16), cyl(0.024, 0.02, 0.17, M('walnut'), 0.1, 0.012, 0, 16)) },
+  fruit_bowl: { label: 'Fruit bowl', cat: 'Kitchen', w: 0.3, d: 0.3, h: 0.14, y: 0.9, spec: 'Ceramic fruit bowl',
+    build: () => { const g = group(cyl(0.15, 0.08, 0.08, M('matteceramic', '#e9e2d6'), 0, 0, 0, 32));
+      [['#e8892b', -0.05, 0], ['#e8892b', 0.05, 0.03], ['#9cba3a', 0, -0.06], ['#b5262b', 0.02, 0.06], ['#f2d03b', -0.04, 0.07]].forEach(([c, x, z]) => {
+        const s = mesh(new THREE.SphereGeometry(0.04, 16, 12), M('ceramic', c)); s.material = s.material.clone(); s.material.roughness = 0.5; s.position.set(x, 0.1, z); g.add(s); });
+      return g; } },
   counter: { label: 'Kitchen base unit', cat: 'Kitchen', w: 0.8, d: 0.6, h: 0.9,
     spec: 'Handleless base unit, greige matte lacquer, 2 cm Calacatta worktop', build: it => kitchenBase(it) },
   sink_unit: { label: 'Kitchen sink unit', cat: 'Kitchen', w: 0.9, d: 0.6, h: 0.9,
@@ -541,6 +596,25 @@ function kitchenBase({ w, d, h }, kind) {
   const g = group(box(w - 0.004, 0.1, d - 0.08, M('shadowgap'), 0, 0, -0.04), box(w - 0.004, h - 0.14, d - 0.02, M('lacquer'), 0, 0.1, -0.01),
     box(w, 0.02, d, M('calacatta'), 0, h - 0.02), box(w - 0.004, 0.02, 0.01, M('shadowgap'), 0, h - 0.06, d / 2 - 0.02));
   if (kind !== 'panel' && kind !== 'hob' && kind !== 'washer') for (const y of [0.32, 0.55]) g.add(box(w - 0.004, 0.004, 0.003, M('shadowgap'), 0, y, d / 2 - 0.01));
+  if (!kind && w >= 0.4) {                                   // top drawer: tap to slide out, cutlery organiser inside
+    const dr = new THREE.Group(), y0 = 0.565, dh = h - 0.07 - y0, iw = w - 0.06, dd = d - 0.12;
+    dr.add(box(w - 0.004, dh, 0.02, M('lacquer'), 0, y0, d / 2 - 0.002), box(iw, 0.01, dd, M('lightoak'), 0, y0 + 0.01, d / 2 - 0.02 - dd / 2),
+           box(iw, dh - 0.04, 0.01, M('lightoak'), 0, y0 + 0.01, d / 2 - 0.02 - dd), ...[-1, 1].map(s => box(0.01, dh - 0.04, dd, M('lightoak'), s * iw / 2, y0 + 0.01, d / 2 - 0.02 - dd / 2)));
+    const zc = d / 2 - 0.02 - dd / 2;
+    for (let c = 0; c < 4; c++) {
+      const x = -iw / 2 + iw * (c + 0.5) / 4;
+      if (c) dr.add(box(0.006, 0.05, dd - 0.02, M('lightoak'), x - iw / 8, y0 + 0.02, zc));
+      for (let k = 0; k < 4; k++) {
+        const xx = x - iw / 16 + k * iw / 40, len = c === 3 ? 0.22 : 0.18;
+        dr.add(box(0.012, 0.004, len, M('steel'), xx, y0 + 0.022 + k * 0.004, zc));
+        if (c === 0) dr.add(box(0.024, 0.003, 0.05, M('steel'), xx, y0 + 0.026 + k * 0.004, zc - len / 2));                   // forks
+        if (c === 1) { const b = mesh(new THREE.SphereGeometry(0.016, 10, 6), M('steel')); b.scale.set(1, 0.3, 1.6); b.position.set(xx, y0 + 0.028 + k * 0.004, zc - len / 2); dr.add(b); } // spoons
+        if (c === 2) dr.add(box(0.018, 0.003, 0.07, M('steel'), xx, y0 + 0.026 + k * 0.004, zc - len / 2 + 0.01));             // knives
+      }
+    }
+    dr.userData.part = { kind: 'slide', dist: d - 0.15 };
+    g.add(dr);
+  }
   if (kind === 'sink') {
     g.add(box(Math.min(0.6, w - 0.12), 0.003, d * 0.6, M('steel'), 0, h + 0.0005, 0.02));
     const neck = mesh(new THREE.TorusGeometry(0.1, 0.01, 10, 24, Math.PI), M('brass'));
