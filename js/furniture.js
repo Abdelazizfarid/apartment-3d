@@ -380,6 +380,22 @@ export const CATALOG = {
       for (const sx of [-1, 1]) g.add(box(0.04, 0.2, 0.04, k, sx * 0.27, 0.48, -0.02), box(0.06, 0.025, 0.26, k, sx * 0.27, 0.68, 0.0));
       return g;
     } },
+  bookcase: { label: 'Bookcase (oak, with books)', cat: 'Living', w: 0.9, d: 0.35, h: 2.4,
+    spec: 'Open light-oak bookcase to the ceiling line, 5 shelves, styled with books, vases and small objects',
+    build: ({ w, d, h }) => {
+      const oak = M('lightoak'), g = group(box(w, h, 0.015, oak, 0, 0, -d / 2 + 0.008), box(0.025, h, d, oak, -w / 2 + 0.0125, 0), box(0.025, h, d, oak, w / 2 - 0.0125, 0));
+      let seed = Math.round(w * 97 + h * 13); const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+      const COLS = ['#e9e2d6', '#c7b8a3', '#6e6a4c', '#2f3a4a', '#9c6b4e', '#8a7560', '#3a3a3c', '#b9a48a'];
+      const n = 6, step = (h - 0.05) / n;
+      for (let k = 0; k <= n; k++) g.add(box(w - 0.05, 0.025, d - 0.02, oak, 0, k * step, 0.0));
+      for (let k = 0; k < n; k++) {
+        const y = k * step + 0.025; let x = -w / 2 + 0.04;
+        const stop = k % 2 ? w * 0.35 : w / 2 - 0.05;
+        while (x < stop) { const bw = 0.025 + rnd() * 0.03, bh = step * (0.55 + rnd() * 0.3); g.add(box(bw, bh, d * 0.7, M('linen', COLS[Math.floor(rnd() * 8)]), x + bw / 2, y, 0.01)); x += bw + 0.003; }
+        if (k % 2) g.add(cyl(0.05, 0.04, step * 0.5, M('matteceramic', ['#b9a48a', '#e9e2d6'][k % 2 ? 1 : 0]), w * 0.38, y, 0, 20));
+      }
+      return g;
+    } },
   desk: { label: 'Dresser / desk', cat: 'Bedroom', w: 1.2, d: 0.5, h: 0.76,
     spec: 'Walnut dressing desk with drawer, slim brass legs',
     build: ({ w, d, h }) => group(rbox(w, 0.035, d, 0.01, M('walnut'), 0, h - 0.035), box(w - 0.04, 0.12, d - 0.04, M('walnut'), 0, h - 0.155),
