@@ -19,7 +19,7 @@ export const ROOMS = [
   { name: 'Balcony',        rects: [[-1.208, 0.678, -0.023, 4.156]], floor: 'travertine', outdoor: true },
   { name: 'Dining',         rects: [[4.6, 0.758, 7.730, 4.286]], floor: 'existing_tile' , cove: true },
   { name: 'Main bathroom',  rects: [[7.851, 0.779, 9.420, 3.161]], floor: 'stone_grey' },
-  { name: 'Kitchen',        rects: [[9.758, 0.377, 12.83, 3.161]], floor: 'travertine' },
+  { name: 'Kitchen',        rects: [[9.758, 0.377, 12.83, 3.161]], floor: 'white_porcelain' },
   { name: 'Bedroom',        rects: [[13.137, 0.249, 16.343, 4.421]], floor: 'wood_tile', skirting: 'wood_skirt' , cove: true },
   { name: 'Master bedroom', rects: [[16.423, 1.261, 20.0, 5.512], [15.40, 4.56, 16.43, 5.512]], floor: 'wood_tile', skirting: 'wood_skirt' , cove: true },
   { name: 'Corridor',       rects: [[7.20, 4.42, 15.28, 5.512], [7.85, 3.28, 12.98, 4.42]], floor: 'existing_tile', noLabel: true },
@@ -94,7 +94,10 @@ export const PROPOSAL = [
   ['dishwasher', 11.81, 0.677, 0, 0.6], ['fridge', 12.52, 0.677, 0, 0.61, 0.6, 2.4],
   ['counter', 10.058, 1.14, 90, 0.32], ['sink_unit', 10.058, 1.75, 90, 0.9], ['counter', 10.058, 2.375, 90, 0.35],
   ['counter', 10.058, 2.855, 90, 0.61],
-  ['counter', 11.02, 2.861, 180, 1.32],
+  // upper kitchen: wall cabinets on the left wall, left of the window and over the counter by the door
+  ['wall_cab', 9.933, 1.955, 90, 2.4, 0.35, 0.8, 1.5], ['wall_cab', 10.19, 0.572, 0, 0.8, 0.35, 0.8, 1.5],
+  ['wall_cab', 11.02, 2.986, 180, 1.32, 0.35, 0.8, 1.5],
+  ['washer_int', 10.66, 2.861, 180, 0.6], ['counter', 11.32, 2.861, 180, 0.72],
   ['rug_runner', 11.45, 1.45, 0, 1.8, 0.7],
   // Bedroom: two single beds with a shared nightstand; L-shaped study desk where the wardrobe was
   ['bed', 14.14, 0.82, 90, 0.9, 2.0], ['bed', 14.14, 2.27, 90, 0.9, 2.0],
@@ -118,7 +121,7 @@ export const PROPOSAL = [
   // Balcony
   ['plant_tree', -0.4, 1.05, 0], ['plant_bush', -0.3, 1.75, 0],
   // Corridor
-  ['washer', 7.55, 5.1, 90],
+  ['wardrobe', 7.536, 5.01, 90, 1.1, 0.6, 2.6],   // former laundry spot closed off: built-in coat / linen cupboard
   ['rug_runner', 10.4, 4.4, 0, 4.8, 1.9], ['rug_runner', 14.075, 5.035, 0, 2.15, 0.63],
   ['art', 10.0, 5.49, 180, 0.9, 0.04, 0.6, 1.2], ['art', 11.4, 5.49, 180, 0.9, 0.04, 0.6, 1.2],
 ];

@@ -51,6 +51,25 @@ function stoneTexture() {
   return (stoneCanvas = t);
 }
 
+// Light white glossy porcelain, 60×60 with very soft grey veining (texture = 1.2 m = 2×2 tiles).
+let whiteCanvas = null;
+function whitePorcelainTexture() {
+  if (whiteCanvas) return whiteCanvas;
+  const c = document.createElement('canvas'); c.width = c.height = 1024;
+  const g = c.getContext('2d');
+  let seed = 23; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  g.fillStyle = '#f3f2ef'; g.fillRect(0, 0, 1024, 1024);
+  g.filter = 'blur(25px)';
+  for (let i = 0; i < 30; i++) { g.fillStyle = 'rgba(225,222,216,0.4)'; g.beginPath(); g.arc(rnd() * 1024, rnd() * 1024, 60 + rnd() * 140, 0, 7); g.fill(); }
+  g.filter = 'blur(1.2px)'; g.strokeStyle = 'rgba(170,166,160,0.35)'; g.lineWidth = 1.5;
+  for (let i = 0; i < 10; i++) { g.beginPath(); let x = rnd() * 1024, y = 0; g.moveTo(x, y); while (y < 1024) { x += (rnd() - 0.5) * 40; y += 20; g.lineTo(x, y); } g.stroke(); }
+  g.filter = 'none'; g.fillStyle = '#d9d6d1';
+  for (const k of [0, 512, 1022]) { g.fillRect(k - 1, 0, 3, 1024); g.fillRect(0, k - 1, 1024, 3); }
+  const t = new THREE.CanvasTexture(c);
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+  return (whiteCanvas = t);
+}
+
 let calacattaCanvas = null;
 function calacattaTexture() {
   if (calacattaCanvas) return calacattaCanvas;
@@ -95,6 +114,7 @@ const DEFS = {
   stone_grey: { tile: 1.2, p: () => ({ map: stoneTexture(), normalMap: tex('assets/tex/plastered_wall_04/nor.jpg'), normalScale: new THREE.Vector2(0.35, 0.35), roughness: 0.55, clearcoat: 0.15, clearcoatRoughness: 0.4 }) },
   gunmetal:   { tile: 1, p: () => ({ color: '#2b2b2d', metalness: 0.9, roughness: 0.35 }) },
   amber:      { tile: 1, p: () => ({ color: '#2e1607', roughness: 0.08, metalness: 0, clearcoat: 1 }) },
+  white_porcelain: { tile: 1.2, p: () => ({ map: whitePorcelainTexture(), roughness: 0.12, clearcoat: 0.6, clearcoatRoughness: 0.05 }) },
   calacatta:  { tile: 1.5, p: () => ({ map: calacattaTexture(), color: '#ffffff', roughness: 0.18, clearcoat: 0.6, clearcoatRoughness: 0.08 }) },
   cream:      { tile: 1.2, p: () => ({ map: calacattaTexture(), color: '#eadfcd', roughness: 0.25, clearcoat: 0.5, clearcoatRoughness: 0.1 }) },
   walnut_v:   { tile: 1.2, p: () => ({ ...scan('smoked_walnut_veneer', { normal: 0.5, rotate: true }), roughness: 1, clearcoat: 0.15, clearcoatRoughness: 0.5 }) },

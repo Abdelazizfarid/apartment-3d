@@ -23,7 +23,7 @@ fetch('version.txt', { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then
     location.replace(location.pathname + '?v=' + encodeURIComponent(v));
   }
 }).catch(() => {});
-const SNAP = 0.05, KEY = 'wadi-houf-design-v6';
+const SNAP = 0.05, KEY = 'wadi-houf-design-v7';
 
 // ---------- renderer / scene ----------
 const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
@@ -370,10 +370,10 @@ const FINISH_SPEC = {
   Dining: 'Floor: wall-to-wall wool carpet, ivory with taupe border, over the existing tile · Pendants ×2 over table at 75 cm above top · Walls: warm greige',
   'Main bathroom': 'Floor + walls: warm grey concrete-look porcelain 60×120, full height, fine joints · Sink by the door, walk-in shower in the back corner beside the WC · Full-length cabin to the sink, frameless glass, minibus-style sliding door on the front; rain head, hand shower, mixer and 2 body jets on the right wall; niche with 3 LED-lit shelves on the front wall · 50 L electric water heater on the left wall · Warm dim lighting',
   Balcony: 'Reception west wall opened as floor-to-ceiling panorama: 4 black-aluminium sliding glass panels · Balcony: stone floor, painted fascia, black-framed glass railing 1.1 m',
-  Kitchen: 'Floor: travertine · Hob under the window (downdraft extractor), sink on the left wall, fridge column straight ahead from the door · Base units: handleless greige lacquer · Tall units: walnut · Worktop + splash: Calacatta 2 cm · Brass mixer',
+  Kitchen: 'Floor: light white glossy porcelain 60×60 · Wall cabinets above on three walls with LED under-light · Washer-dryer built in under the worktop on the run by the door · Hob under the window (downdraft extractor), sink on the left wall, fridge column straight ahead from the door · Base units: handleless greige lacquer · Tall units: walnut · Worktop + splash: Calacatta 2 cm · Brass mixer',
   Bedroom: 'Floor: wall-to-wall plush ivory carpet over the existing wood-look tile; dark skirting kept · Two single beds 90×200 on the fluted walnut wall, shared nightstand · L-shaped study desk with PC + laptop where the wardrobe was · Curtains: sheer + linen',
   'Master bedroom': 'Floor: wall-to-wall ivory carpet with taupe border over the existing wood-look tile; dark skirting kept · Headboard wall: built-out full-height fluted walnut (hides the column) · Wardrobe: cream lacquer + light oak to ceiling, mirror doors, open lit shelf column',
-  Corridor: 'Floor: wall-to-wall wool carpet, sand diamond lattice, over the existing tile · Art lighting · Doors: flush walnut, 2.25 m, brass levers; entrance: armoured, dark walnut',
+  Corridor: 'Former laundry niche closed off as a built-in cream & oak cupboard (coats / linen) · Floor: wall-to-wall wool carpet, sand diamond lattice, over the existing tile · Art lighting · Doors: flush walnut, 2.25 m, brass levers; entrance: armoured, dark walnut',
 };
 $('quality').textContent = PHONE ? '⚡ Quality: Fast' : '✨ Quality: High';
 $('quality').hidden = TOUCH;

@@ -389,6 +389,22 @@ export const CATALOG = {
     spec: 'Round velvet pouf Ø45 cm, brass base ring',
     build: ({ w, h }, fab) => group(cyl(w * 0.42, w * 0.42, 0.04, M('brass')), rbox(w, h - 0.04, w, w * 0.3, fab, 0, 0.04)) },
   // Kitchen (counter modules share one builder)
+  washer_int: { label: 'Washer-dryer (built in)', cat: 'Kitchen', w: 0.6, d: 0.6, h: 0.9,
+    spec: 'Front-load washer-dryer built in under the worktop (water + drain from the sink wall)', build: it => kitchenBase(it, 'washer') },
+  wall_cab: { label: 'Kitchen wall cabinets', cat: 'Kitchen', w: 1.2, d: 0.35, h: 0.8, y: 1.5,
+    spec: 'Upper wall cabinets to match: handleless greige lacquer with finger-pull top, one glass-front display door per run, warm LED strip underneath',
+    build: ({ w, d, h }) => {
+      const g = group(box(w, h, d - 0.02, M('lacquer'), 0, 0, -0.01), box(w - 0.04, 0.006, 0.015, M('ledstrip'), 0, -0.006, d / 2 - 0.05));
+      const n = Math.max(1, Math.round(w / 0.45)), dw = w / n;
+      for (let i = 0; i < n; i++) {
+        const x = -w / 2 + dw * (i + 0.5), glass = i === n - 1 && n > 1;
+        g.add(box(dw - 0.004, h - 0.04, 0.018, glass ? M('lightoak') : M('lacquer'), x, 0, d / 2 - 0.009));
+        if (glass) g.add(box(dw - 0.06, h - 0.1, 0.004, M('glass'), x, 0.03, d / 2 + 0.002), box(dw - 0.08, 0.012, d - 0.06, M('lacquer'), x, h / 2, -0.01),
+          ...[0.12, 0.5].map(y => cyl(0.05, 0.04, 0.1, M('ceramic'), x - 0.06, y, -0.02, 20)), ...[0.12, 0.5].map(y => cyl(0.035, 0.035, 0.16, M('glass'), x + 0.08, y, -0.02, 16)));
+        g.add(box(dw - 0.004, 0.004, 0.003, M('shadowgap'), x, h - 0.03, d / 2 + 0.001));
+      }
+      return g;
+    } },
   counter: { label: 'Kitchen base unit', cat: 'Kitchen', w: 0.8, d: 0.6, h: 0.9,
     spec: 'Handleless base unit, greige matte lacquer, 2 cm Calacatta worktop', build: it => kitchenBase(it) },
   sink_unit: { label: 'Kitchen sink unit', cat: 'Kitchen', w: 0.9, d: 0.6, h: 0.9,
@@ -524,12 +540,17 @@ function bottles(x, y, z, n) {
 function kitchenBase({ w, d, h }, kind) {
   const g = group(box(w - 0.004, 0.1, d - 0.08, M('shadowgap'), 0, 0, -0.04), box(w - 0.004, h - 0.14, d - 0.02, M('lacquer'), 0, 0.1, -0.01),
     box(w, 0.02, d, M('calacatta'), 0, h - 0.02), box(w - 0.004, 0.02, 0.01, M('shadowgap'), 0, h - 0.06, d / 2 - 0.02));
-  if (kind !== 'panel' && kind !== 'hob') for (const y of [0.32, 0.55]) g.add(box(w - 0.004, 0.004, 0.003, M('shadowgap'), 0, y, d / 2 - 0.01));
+  if (kind !== 'panel' && kind !== 'hob' && kind !== 'washer') for (const y of [0.32, 0.55]) g.add(box(w - 0.004, 0.004, 0.003, M('shadowgap'), 0, y, d / 2 - 0.01));
   if (kind === 'sink') {
     g.add(box(Math.min(0.6, w - 0.12), 0.003, d * 0.6, M('steel'), 0, h + 0.0005, 0.02));
     const neck = mesh(new THREE.TorusGeometry(0.1, 0.01, 10, 24, Math.PI), M('brass'));
     neck.position.set(0, h + 0.3, -d / 2 + 0.12); neck.rotation.y = Math.PI / 2;
     g.add(cyl(0.012, 0.012, 0.3, M('brass'), 0, h, -d / 2 + 0.02 + 0.1), neck);
+  }
+  if (kind === 'washer') {                                       // built-in washer-dryer under the worktop
+    const fz = d / 2 - 0.005, door = mesh(new THREE.CircleGeometry(0.16, 48), M('blackglass')), ring = mesh(new THREE.TorusGeometry(0.175, 0.018, 12, 64), M('steel'));
+    door.position.set(0, 0.42, fz + 0.012); ring.position.set(0, 0.42, fz + 0.014);
+    g.add(box(w - 0.02, h - 0.17, 0.012, M('ceramic'), 0, 0.1, fz), door, ring, box(w - 0.06, 0.07, 0.006, M('blackglass'), 0, h - 0.17, fz + 0.007));
   }
   if (kind === 'hob') g.add(box(w - 0.05, 0.006, d - 0.08, M('blackglass'), 0, h, 0.04), box(w - 0.04, 0.5, 0.004, M('blackglass'), 0, 0.15, d / 2 - 0.009),
     box(w - 0.08, 0.03, 0.06, M('blackglass'), 0, h, -d / 2 + 0.08));                // downdraft extractor bar (window above, no hood)
