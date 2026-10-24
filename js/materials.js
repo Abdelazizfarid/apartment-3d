@@ -3,7 +3,10 @@ import * as THREE from 'three';
 
 // Phones (iOS especially) get a simpler shading path: their GPUs render the physical
 // extras (clearcoat, sheen, transmission) and area lights with black/grainy artifacts.
-export const PHONE = matchMedia('(pointer: coarse)').matches || new URLSearchParams(location.search).has('phone');
+// "Fast" pipeline (standard materials, point lights, no post-processing) is the default on every device so laptops
+// with integrated graphics stay smooth; "High" is opt-in from the menu (stored in localStorage, needs a reload).
+export const TOUCH = matchMedia('(pointer: coarse)').matches;
+export const PHONE = TOUCH || new URLSearchParams(location.search).has('phone') || localStorage.getItem('quality') !== 'high';
 const PHYSICAL_ONLY = ['clearcoat', 'clearcoatRoughness', 'sheen', 'sheenRoughness', 'sheenColor', 'transmission', 'thickness', 'ior'];
 
 const loader = new THREE.TextureLoader();

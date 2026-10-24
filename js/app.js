@@ -8,7 +8,7 @@ import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { PLAN, WALL_H, SILL, WIN_TOP, DOOR_H, ROOMS, DOORS, CLADDING, LIGHTS, PROPOSAL, PANORAMA, BALCONY } from './plan.js';
-import { M, mesh, PHONE } from './materials.js';
+import { M, mesh, PHONE, TOUCH } from './materials.js';
 import { CATALOG, build, loadModels, box, fluted, channels } from './furniture.js';
 
 const $ = id => document.getElementById(id);
@@ -28,12 +28,15 @@ const SNAP = 0.05, KEY = 'wadi-houf-design-v5';
 // ---------- renderer / scene ----------
 const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
 // Phones get a lighter pipeline so iOS doesn't kill the tab for GPU memory.
-renderer.setPixelRatio(Math.min(devicePixelRatio, PHONE ? 1.5 : 2));
+renderer.setPixelRatio(Math.min(devicePixelRatio, PHONE ? (TOUCH ? 1.5 : 1.25) : 2));
 renderer.setSize(innerWidth, innerHeight);
 renderer.toneMapping = THREE.ACESFilmicToneMapping; // filmic, camera-like highlight roll-off
 renderer.toneMappingExposure = 0.95;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFShadowMap;
+// Fast mode: the sun shadow map is re-rendered only when something moved, not every frame.
+renderer.shadowMap.autoUpdate = !PHONE;
+let shadowDirty = true;
 $('view').appendChild(renderer.domElement);
 if (!PHONE) RectAreaLightUniformsLib.init();
 
@@ -274,6 +277,7 @@ const save = () => localStorage.setItem(KEY, JSON.stringify(items));
 let items = load() ?? proposal(), selected = null, wallMode = 1;
 
 function place(obj) {
+  shadowDirty = true;
   const it = obj.userData.item;
   obj.position.set(it.x, it.y || 0, it.z);
   obj.rotation.y = THREE.MathUtils.degToRad(it.rot);
@@ -353,7 +357,7 @@ function download(href, name) { const a = document.createElement('a'); a.href = 
 $('shot').onclick = () => { if (!photo) composer.render(); download(renderer.domElement.toDataURL('image/png'), 'apartment.png'); };
 $('v-walls').onclick = () => setWalls((wallMode + 1) % 3);
 function setWalls(m) {
-  wallMode = m;
+  wallMode = m; shadowDirty = true;
   $('v-walls').textContent = 'Walls: ' + ['full', 'cut', 'off'][m];
   buildArchitecture([WALL_H, 1.15, 0.1][m]);
   furn.children.forEach(place);
@@ -371,6 +375,9 @@ const FINISH_SPEC = {
   'Master bedroom': 'Floor: wall-to-wall ivory carpet with taupe border over the existing wood-look tile; dark skirting kept · Headboard wall: built-out full-height fluted walnut (hides the column) · Wardrobe: cream lacquer + light oak to ceiling, mirror doors, open lit shelf column',
   Corridor: 'Floor: wall-to-wall wool carpet, sand diamond lattice, over the existing tile · Art lighting · Doors: flush walnut, 2.25 m, brass levers; entrance: armoured, dark walnut',
 };
+$('quality').textContent = PHONE ? '⚡ Quality: Fast' : '✨ Quality: High';
+$('quality').hidden = TOUCH;
+$('quality').onclick = () => { localStorage.setItem('quality', PHONE ? 'high' : 'fast'); location.reload(); };
 $('specs').onclick = () => {
   const groups = {};
   for (const it of items) (groups[roomAt(it.x, it.z)?.name ?? 'Other'] ??= []).push(it);
@@ -599,7 +606,7 @@ function updateInside(dt) {
 }
 // Smoothly swing door leaves toward their open/closed angle.
 function updateDoors(dt) {
-  const k = Math.min(1, dt * 6);
+  const k = Math.min(1, dt * 6), before = moveSig();
   for (const o of parts) {
     const p = o.userData.part;
     if (p.kind === 'hinge') o.rotation.y += ((p.open ? p.angle : 0) - o.rotation.y) * k;
@@ -615,7 +622,9 @@ function updateDoors(dt) {
     const target = doorState[i].open ? d.angOpen : d.angClosed, r = d.pivot.rotation;
     r.y += (target - r.y) * Math.min(1, dt * 6);
   });
+  if (Math.abs(moveSig() - before) > 1e-5) shadowDirty = true;
 }
+const moveSig = () => parts.reduce((s, o) => s + o.rotation.y + o.position.x + o.position.z, 0) + doors.reduce((s, d) => s + d.pivot.rotation.y, 0);
 
 // ---------- photo-real path tracing ----------
 let photo = null;
@@ -670,6 +679,7 @@ renderer.setAnimationLoop(() => {
   timer.update();
   const dt = Math.min(timer.getDelta(), 0.1);
   updateDoors(dt);
+  if (PHONE && shadowDirty) { renderer.shadowMap.needsUpdate = true; shadowDirty = false; }
   if (mode === 'flying') {
     fly.t = Math.min(1, fly.t + dt / 1.4);
     const e = fly.t < 0.5 ? 2 * fly.t * fly.t : 1 - (-2 * fly.t + 2) ** 2 / 2;
