@@ -426,6 +426,42 @@ export const CATALOG = {
       const out = door(-w / 4, fz - 0.02); out.userData.part = { kind: 'slidex', dist: w / 2 - 0.04 };
       return g;
     } },
+  office_pod_curve: { label: 'Curved office pod', cat: 'Bedroom', w: 1.9, d: 1.1, h: 2.5,
+    spec: 'Curved study pod: smooth cream lacquer curved shell, light-oak canopy and plinth bands with hidden warm LED, curved reeded-glass door with brass ribs that glides round behind the shell (tap to open), fluted walnut back wall, oak desk with drawers, lit shelf with books',
+    build: ({ w, d, h }) => {
+      const oak = M('lightoak'), cream = M('lacquer', '#efe8dd'), g = new THREE.Group(), bz = -d / 2, half = w / 2;
+      const zs = bz + 0.3, zf = d / 2, s = zf - zs, R = (half * half + s * s) / (2 * s), cz = zf - R, A = Math.asin(half / R);
+      const D2R = Math.PI / 180, doorA = 50 * D2R, P = 0.1, TOP = 0.16, sh = h - P - TOP;
+      const arc = (r, t0, tl, y0, hh, mat, seg = 64) => { const m = mesh(new THREE.CylinderGeometry(r, r, hh, seg, 1, true, t0, tl), mat); m.position.set(0, y0 + hh / 2, cz); return m; };
+      // smooth cream shell (fixed part), oak plinth + canopy following the curve
+      g.add(arc(R, -A + doorA, 2 * A - doorA, P, sh, cream));
+      const shape = new THREE.Shape(); shape.moveTo(-half, bz);
+      for (let i = 0; i <= 48; i++) { const t = -A + 2 * A * i / 48; shape.lineTo(Math.sin(t) * (R + 0.02), cz + Math.cos(t) * (R + 0.02)); }
+      shape.lineTo(half, bz); shape.closePath();
+      for (const [y, th, mat] of [[h - TOP, TOP, oak], [0, P, M('oak')]]) { const c = mesh(new THREE.ExtrudeGeometry(shape, { depth: th, bevelEnabled: false }), mat); c.rotation.x = Math.PI / 2; c.position.y = y + th;  g.add(c); }
+      g.add(arc(R + 0.03, -A, 2 * A, P - 0.03, 0.03, oak));                                   // oak plinth lip
+      const glow = arc(R + 0.025, -A, 2 * A, h - TOP - 0.012, 0.012, M('ledstrip')); g.add(glow);   // LED line under the canopy
+      for (const sx of [-1, 1]) g.add(box(0.05, h, zs - bz, oak, sx * (half - 0.025), 0, (bz + zs) / 2));
+      // interior
+      const back = fluted(w - 0.1, h - 0.1); back.position.set(0, 0.02, bz + 0.015); g.add(back);
+      g.add(box(w - 0.55, 0.035, 0.52, oak, 0, 0.74, bz + 0.27), box(0.4, 0.6, 0.45, oak, half - 0.5, 0.12, bz + 0.24));
+      g.add(box(0.6, 0.35, 0.025, M('blackmetal'), -0.1, 0.95, bz + 0.12), box(0.58, 0.33, 0.003, M('blackglass'), -0.1, 0.96, bz + 0.135), box(0.04, 0.2, 0.03, M('blackmetal'), -0.1, 0.775, bz + 0.1));
+      g.add(box(0.42, 0.018, 0.13, M('steel'), -0.1, 0.775, bz + 0.35));
+      const scr = box(0.3, 0.2, 0.008, M('steel'), 0.42, 0.787, bz + 0.215); scr.rotation.x = -0.25; g.add(box(0.3, 0.012, 0.21, M('steel'), 0.42, 0.775, bz + 0.32), scr);
+      g.add(box(w - 0.14, 0.025, 0.24, oak, 0, 1.55, bz + 0.14), box(w - 0.2, 0.006, 0.012, M('ledstrip'), 0, 1.544, bz + 0.25));
+      const COLS = ['#e9e2d6', '#6e6a4c', '#2f3a4a', '#9c6b4e', '#b9a48a'];
+      for (let i = 0; i < 16; i++) g.add(box(0.03, 0.2 + (i % 3) * 0.03, 0.18, M('linen', COLS[i % 5]), -half + 0.15 + i * 0.034, 1.575, bz + 0.13));
+      // curved reeded-glass door inside the shell line; pivot at the arc centre, rotating slides it behind the shell
+      const pivot = new THREE.Group(); pivot.position.set(0, 0, cz);
+      const rd = R - 0.05, gh = sh - 0.02, t0 = -A;
+      const gl = mesh(new THREE.CylinderGeometry(rd, rd, gh, 40, 1, true, t0, doorA), M('frosted')); gl.position.y = P + 0.01 + gh / 2; pivot.add(gl);
+      for (let t = t0 + 5 * D2R; t < t0 + doorA - 1e-3; t += 5 * D2R) { const r = box(0.008, gh, 0.008, M('brass'), Math.sin(t) * (rd + 0.006), P + 0.01, Math.cos(t) * (rd + 0.006)); r.rotation.y = t; pivot.add(r); }
+      for (const t of [t0, t0 + doorA]) { const e = box(0.03, gh, 0.035, oak, Math.sin(t) * rd, P + 0.01, Math.cos(t) * rd); e.rotation.y = t; pivot.add(e); }
+      const ht = t0 + doorA - 0.06, hd = box(0.018, 0.7, 0.03, M('brass'), Math.sin(ht) * (rd + 0.03), 0.7, Math.cos(ht) * (rd + 0.03)); hd.rotation.y = ht; pivot.add(hd);
+      pivot.userData.part = { kind: 'hinge', angle: doorA + 0.04 };
+      g.add(pivot);
+      return g;
+    } },
   coffee_bar: { label: 'Coffee corner', cat: 'Kitchen', w: 1.9, d: 0.6, h: 2.6,
     spec: 'Coffee corner: tall walnut pantry with brass bar handle; base unit with fluted walnut doors and cream marble top; Calacatta splash panel with two floating walnut shelves on brass rails, warm LED; walnut top cabinet; espresso machine, grinder, cups and jars',
     build: ({ w, d, h }) => {
