@@ -511,6 +511,55 @@ export const CATALOG = {
       g.add(pivot);
       return g;
     } },
+  // Built aligned to the world (rotation 0): x = length (west wall at -x), z = depth (corridor side -z, back wall +z).
+  office_capsule: { label: 'Office capsule (pivot door)', cat: 'Bedroom', w: 1.9, d: 1.0, h: 2.5,
+    spec: 'Study capsule in the corridor corner: cream lacquer walls with brass inlay lines, rounded corner, light-oak canopy and plinth with hidden warm LED; reeded-glass pivot door in an oak frame; desk on the end wall (85 × 55 cm) with drawers, shelf with books, fluted walnut feature wall; 1.35 m of chair space',
+    build: ({ w, d, h }) => {
+      const oak = M('lightoak'), cream = M('lacquer', '#efe8dd'), g = new THREE.Group(), X = w / 2, Z = d / 2, Rc = 0.32, P = 0.1, TOP = 0.16, sh = h - P - TOP, T = 0.04;
+      // walls: north (corridor side) straight, rounded NE corner, short east face beside the door
+      g.add(box(w - Rc, sh, T, cream, -Rc / 2, P, -Z + T / 2));
+      for (let x = -X + 0.3; x < X - Rc - 0.05; x += 0.3) g.add(box(0.01, sh, 0.004, M('brass'), x, P, -Z - 0.002));
+      const corner = mesh(new THREE.CylinderGeometry(Rc, Rc, sh, 24, 1, true, Math.PI / 2, Math.PI / 2), cream); corner.position.set(X - Rc, P + sh / 2, -Z + Rc); g.add(corner);
+      const DW = 0.66, dz0 = Z - DW - 0.01;                                       // door spans z dz0 → Z-0.01
+      g.add(box(T, sh, dz0 - (-Z + Rc), cream, X - T / 2, P, (dz0 + (-Z + Rc)) / 2));
+      // canopy + plinth: rounded-rectangle slabs
+      const s = new THREE.Shape(); s.moveTo(-X, Z); s.lineTo(-X, -Z); s.lineTo(X - Rc, -Z); s.absarc(X - Rc, -Z + Rc, Rc, -Math.PI / 2, 0, false); s.lineTo(X, Z); s.closePath();
+      for (const [y, th] of [[h - TOP, TOP], [0, P]]) { const c = mesh(new THREE.ExtrudeGeometry(s, { depth: th, bevelEnabled: false }), oak); c.rotation.x = Math.PI / 2; c.position.y = y + th; g.add(c); }
+      g.add(box(w - Rc - 0.05, 0.012, 0.012, M('ledstrip'), -Rc / 2, h - TOP - 0.012, -Z - 0.006), box(0.012, 0.012, d - Rc - 0.05, M('ledstrip'), X + 0.006, h - TOP - 0.012, Rc / 2));
+      // inside: fluted walnut feature wall at the desk end, LED in the canopy
+      const fw = fluted(d - 0.02, sh); fw.rotation.y = Math.PI / 2; fw.position.set(-X + 0.015, P, 0); g.add(fw);
+      g.add(box(w - 0.4, 0.006, 0.015, M('ledstrip'), 0, h - TOP - 0.01, 0));
+      // desk on the end wall, drawer pedestal, shelf above
+      const dy = 0.775, dx = -X + 0.275;
+      g.add(box(0.55, 0.035, d - 0.15, oak, dx, 0.74, 0.0), box(0.5, 0.6, 0.4, oak, dx, 0.12, Z - 0.27), box(0.03, 0.64, 0.03, M('blackmetal'), dx + 0.24, 0.1, -Z + 0.12));
+      for (const y of [0.32, 0.52]) g.add(box(0.004, 0.004, 0.36, M('shadowgap'), dx + 0.25, y, Z - 0.27));
+      g.add(box(0.25, 0.025, d - 0.15, oak, -X + 0.14, 1.5, 0), box(0.012, 0.006, d - 0.2, M('ledstrip'), -X + 0.25, 1.494, 0));
+      const COLS = ['#e9e2d6', '#6e6a4c', '#2f3a4a', '#9c6b4e', '#b9a48a'];
+      for (let i = 0; i < 18; i++) g.add(box(0.18, 0.2 + (i % 3) * 0.03, 0.03, M('linen', COLS[i % 5]), -X + 0.12, 1.525, -0.38 + i * 0.034));
+      g.add(cyl(0.04, 0.035, 0.12, M('ceramic', '#b9a48a'), -X + 0.13, 1.525, 0.32, 20));
+      // desk styling: monitor, keyboard + mouse, laptop, lamp, books, mug, pen pot, notebook, phone, plant, headphones
+      g.add(box(0.025, 0.35, 0.6, M('blackmetal'), -X + 0.1, 0.95, -0.02), box(0.003, 0.33, 0.58, M('blackglass'), -X + 0.114, 0.96, -0.02), box(0.04, 0.2, 0.04, M('blackmetal'), -X + 0.08, dy, -0.02), box(0.16, 0.012, 0.2, M('blackmetal'), -X + 0.1, dy, -0.02));
+      g.add(box(0.13, 0.018, 0.42, M('steel'), dx + 0.1, dy, -0.05), box(0.09, 0.02, 0.06, M('steel'), dx + 0.1, dy, 0.25));
+      g.add(box(0.21, 0.015, 0.3, M('steel'), -X + 0.13, dy, 0.3), box(0.2, 0.012, 0.29, M('linen', '#2f3a4a'), -X + 0.13, dy + 0.015, 0.3));
+      g.add(cyl(0.06, 0.07, 0.015, M('blackmetal'), -X + 0.08, dy, 0.3, 20)); { const a1 = box(0.012, 0.34, 0.012, M('blackmetal'), -X + 0.08, dy + 0.015, 0.3); a1.rotation.z = -0.3; g.add(a1); }
+      g.add(cyl(0.03, 0.06, 0.08, M('blackmetal'), -X + 0.24, dy + 0.27, 0.3, 20), cyl(0.05, 0.05, 0.003, M('glow'), -X + 0.24, dy + 0.267, 0.3, 20));
+      [['#2f3a4a', 0.24], ['#e9e2d6', 0.22], ['#9c6b4e', 0.2]].forEach(([c, bw], i) => { const b = box(0.16, 0.03, bw, M('linen', c), -X + 0.12, dy + i * 0.03, -0.36); b.rotation.y = (i - 1) * 0.12; g.add(b); });
+      const mug = cyl(0.035, 0.032, 0.09, M('ceramic', '#e9e2d6'), dx + 0.2, dy, 0.36, 20), hdl = mesh(new THREE.TorusGeometry(0.025, 0.007, 6, 14), M('ceramic', '#e9e2d6')); hdl.position.set(dx + 0.2, dy + 0.045, 0.4); hdl.rotation.y = Math.PI / 2; g.add(mug, hdl);
+      g.add(cyl(0.03, 0.03, 0.09, oak, dx + 0.2, dy, -0.36, 16));
+      for (let i = 0; i < 4; i++) { const pn = cyl(0.004, 0.004, 0.14, M(['blackmetal', 'brass', 'steel', 'blackmetal'][i]), dx + 0.2 + (i - 1.5) * 0.012, dy + 0.02, -0.36, 6); pn.rotation.x = (i - 1.5) * 0.12; g.add(pn); }
+      const nb = box(0.21, 0.012, 0.29, M('linen', '#f4efe7'), dx + 0.12, dy, -0.24); nb.rotation.y = 0.2; g.add(nb, box(0.14, 0.005, 0.005, M('brass'), dx + 0.12, dy + 0.014, -0.24));
+      g.add(rbox(0.155, 0.009, 0.075, 0.006, M('blackglass'), dx + 0.2, dy, 0.12));
+      g.add(cyl(0.035, 0.03, 0.07, M('matteceramic'), -X + 0.13, 1.525, -0.38 + 18 * 0.034 + 0.06, 16));
+      // reeded-glass pivot door on the east face (pivot near its north edge, swings inward)
+      const door = new THREE.Group(); door.position.set(X - 0.02, 0, dz0);
+      for (const [bz, bl] of [[0.02, 0.04], [DW - 0.02, 0.04]]) door.add(box(0.035, sh - 0.01, bl, oak, 0, P, bz));
+      door.add(box(0.035, 0.05, DW, oak, 0, P, DW / 2), box(0.035, 0.05, DW, oak, 0, P + sh - 0.06, DW / 2), box(0.006, sh - 0.1, DW - 0.08, M('frosted'), 0, P + 0.05, DW / 2));
+      for (let z = 0.08; z < DW - 0.05; z += 0.05) door.add(box(0.01, sh - 0.1, 0.006, M('brass'), 0.006, P + 0.05, z));
+      door.add(box(0.03, 0.7, 0.02, M('brass'), 0.035, 0.75, DW - 0.09));
+      door.userData.part = { kind: 'hinge', angle: -1.5 };
+      g.add(door);
+      return g;
+    } },
   coffee_bar: { label: 'Coffee corner', cat: 'Kitchen', w: 1.9, d: 0.6, h: 2.6,
     spec: 'Coffee corner: tall walnut pantry with brass bar handle; base unit with fluted walnut doors and cream marble top; Calacatta splash panel with two floating walnut shelves on brass rails, warm LED; walnut top cabinet; espresso machine, grinder, cups and jars',
     build: ({ w, d, h }) => {

@@ -23,7 +23,7 @@ fetch('version.txt', { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then
     location.replace(location.pathname + '?v=' + encodeURIComponent(v));
   }
 }).catch(() => {});
-const SNAP = 0.05, KEY = 'wadi-houf-design-v14';
+const SNAP = 0.05, KEY = 'wadi-houf-design-v15';
 
 // ---------- renderer / scene ----------
 const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
@@ -373,7 +373,7 @@ const FINISH_SPEC = {
   Kitchen: 'Floor: light white glossy porcelain 60×60 · Wall cabinets above on three walls (doors open, dishes / glasses inside) with LED under-light · Top drawers with cutlery organisers · Worktop: coffee machine, kettle, toaster, knife block + board, cutlery caddy, utensil jar, oil set, fruit bowl · Washer-dryer built in under the worktop on the run by the door · Hob under the window (downdraft extractor), sink on the left wall, fridge column straight ahead from the door · Base units: handleless greige lacquer · Tall units: walnut · Worktop + splash: Calacatta 2 cm · Brass mixer',
   Bedroom: 'Floor: wall-to-wall plush ivory carpet over the existing wood-look tile; dark skirting kept · Two single beds 90×200 on the fluted walnut wall, shared nightstand · L-shaped study desk with PC + laptop where the wardrobe was · Curtains: sheer + linen',
   'Master bedroom': 'Floor: wall-to-wall ivory carpet with taupe border over the existing wood-look tile; dark skirting kept · Headboard wall: built-out full-height fluted walnut (hides the column) · Wardrobe: cream lacquer + light oak to ceiling, mirror doors, open lit shelf column',
-  Corridor: 'Former laundry cupboard removed; curved office pod fitted lengthwise in that corner: cream lacquer shell, oak bands, LED, curved reeded-glass sliding door with brass ribs; desk, ergonomic chair, books & accessories · Floating fluted-walnut shoe cabinet with round mirror and two brass wall lights · Floor: wall-to-wall wool carpet, sand diamond lattice, over the existing tile · Art lighting · Doors: flush walnut, 2.25 m, brass levers; entrance: armoured, dark walnut',
+  Corridor: 'Former laundry cupboard removed; office capsule fitted lengthwise in that corner: cream lacquer walls with brass inlays, rounded corner, oak bands with LED, reeded-glass pivot door; desk on the end wall with 1.35 m chair space, ergonomic chair, books & accessories · Floating fluted-walnut shoe cabinet with round mirror and two brass wall lights · Floor: wall-to-wall wool carpet, sand diamond lattice, over the existing tile · Art lighting · Doors: flush walnut, 2.25 m, brass levers; entrance: armoured, dark walnut',
 };
 $('quality').textContent = PHONE ? '⚡ Quality: Fast' : '✨ Quality: High';
 $('quality').hidden = TOUCH;
@@ -530,7 +530,7 @@ addEventListener('keyup', e => { keys[e.code] = false; });
 // ---------- Inside mode: first-person, eye height, walls / furniture / closed doors are solid ----------
 const EYE = 1.6, R = 0.22;
 let yaw = 0, pitch = 0, walkTo = null, furnBoxes = null, fly = null;
-const SKIP = new Set(['office_chair', 'office_pod_curve', 'vanity_set', 'shower', 'water_heater', 'rug', 'rug_abstract', 'rug_border', 'rug_runner', 'rug_shag', 'rug_round', 'bath_mat', 'curtain', 'curtain_open', 'pendant', 'art', 'mirror_round', 'mirror_led', 'tv', 'hood', 'flowers', 'vase', 'ceramic_vase', 'table_lamp']);
+const SKIP = new Set(['office_chair', 'office_pod_curve', 'office_capsule', 'vanity_set', 'shower', 'water_heater', 'rug', 'rug_abstract', 'rug_border', 'rug_runner', 'rug_shag', 'rug_round', 'bath_mat', 'curtain', 'curtain_open', 'pendant', 'art', 'mirror_round', 'mirror_led', 'tv', 'hood', 'flowers', 'vase', 'ceramic_vase', 'table_lamp']);
 const inPanoRect = ([a, b, c, d]) => a >= PANORAMA[0] - 0.01 && c <= PANORAMA[2] + 0.01 && b >= PANORAMA[1] - 0.01 && d <= PANORAMA[3] + 0.01;
 const STATIC = PLAN.walls.concat(PLAN.windows).filter(r => !inPanoRect(r)).concat([PANORAMA]);
 function solids() {
@@ -539,7 +539,7 @@ function solids() {
     return [b.min.x + 0.04, b.min.z + 0.04, b.max.x - 0.04, b.max.z - 0.04];
   });
   // shower: solid while its glass door is shut (unless you are already standing inside it)
-  const showers = furn.children.filter(o => ['shower', 'office_pod_curve'].includes(o.userData.item.type)).flatMap(o => {
+  const showers = furn.children.filter(o => ['shower', 'office_pod_curve', 'office_capsule'].includes(o.userData.item.type)).flatMap(o => {
     let open = false; o.traverse(c => { if (c.userData.part && c.userData.part.kind !== 'toggle' && c.userData.part.open) open = true; });
     const b = new THREE.Box3().setFromObject(o), c = camera.position;
     const inside = c.x > b.min.x && c.x < b.max.x && c.z > b.min.z && c.z < b.max.z;
