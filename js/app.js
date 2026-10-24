@@ -23,7 +23,7 @@ fetch('version.txt', { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then
     location.replace(location.pathname + '?v=' + encodeURIComponent(v));
   }
 }).catch(() => {});
-const SNAP = 0.05, KEY = 'wadi-houf-design-v5';
+const SNAP = 0.05, KEY = 'wadi-houf-design-v6';
 
 // ---------- renderer / scene ----------
 const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });

@@ -88,7 +88,7 @@ export const PROPOSAL = [
   // Bathroom: sink by the door, shower cabin in the back corner beside the toilet
   ['vanity', 9.17, 2.62, -90, 0.8, 0.46],
   ['mirror_led', 9.40, 2.62, -90, 0.7, 0.03, 0.7, 1.25],
-  ['shower', 8.95, 1.49, 0, 0.9, 1.38],          // full length along the right wall, up to the sink
+  ['shower', 9.025, 1.49, 0, 0.75, 1.38],          // full length along the right wall, up to the sink
   // Kitchen
   ['counter', 10.184, 0.677, 0, 0.85], ['hob_unit', 11.06, 0.677, 0, 0.9],
   ['dishwasher', 11.81, 0.677, 0, 0.6], ['fridge', 12.52, 0.677, 0, 0.61, 0.6, 2.4],
