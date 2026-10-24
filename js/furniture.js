@@ -366,20 +366,54 @@ export const CATALOG = {
       g.add(cyl(0.07, 0.08, 0.02, k, rx + D / 2, h, bz + 0.15), cyl(0.008, 0.008, 0.4, k, rx + D / 2, h + 0.02, bz + 0.15, 8), cyl(0.06, 0.08, 0.1, k, rx + D / 2, h + 0.38, bz + 0.15, 16));
       return g;
     } },
-  office_chair: { label: 'Office chair', cat: 'Bedroom', w: 0.62, d: 0.62, h: 1.1,
-    spec: 'Ergonomic office chair, charcoal fabric, adjustable height and lumbar support, 5-star base on castors',
+  office_chair: { label: 'Ergonomic office chair', cat: 'Bedroom', w: 0.66, d: 0.66, h: 1.22,
+    spec: 'Ergonomic task chair: graphite mesh back with adjustable lumbar pad and headrest, waterfall-edge upholstered seat, height-adjustable padded armrests, gas lift with cover, polished 5-star base on soft castors',
     build: ({ w, h }) => {
-      const k = M('blackmetal'), fab = M('velvet', '#3a3a3c'), g = new THREE.Group();
+      const k = M('blackmetal'), al = M('steel'), fab = M('velvet', '#34363a'), mesh_ = M('frosted', '#2c2d30'), g = new THREE.Group(), r = w * 0.46;
+      // base: 5 tapered polished legs with castors
+      g.add(cyl(0.045, 0.05, 0.06, al, 0, 0.07));
       for (let i = 0; i < 5; i++) {
-        const a = i / 5 * Math.PI * 2, arm = box(w * 0.46, 0.03, 0.05, k, 0, 0.05, 0);
-        arm.geometry.translate(w * 0.23, 0, 0); arm.position.set(0, 0.065, 0); arm.rotation.y = a; g.add(arm);
-        g.add(cyl(0.025, 0.025, 0.05, k, Math.cos(a) * w * 0.44, 0, -Math.sin(a) * w * 0.44, 12));
+        const a = i / 5 * Math.PI * 2 + 0.3, leg = box(r, 0.03, 0.045, al, 0, 0, 0);
+        leg.geometry.translate(r / 2, 0, 0); leg.position.set(0, 0.08, 0); leg.rotation.set(0, a, -0.08); g.add(leg);
+        const cx = Math.cos(a) * r, cz = -Math.sin(a) * r;
+        g.add(box(0.02, 0.04, 0.02, k, cx, 0.05, cz));
+        for (const s of [-1, 1]) { const wheel = cyl(0.028, 0.028, 0.018, k, 0, 0, 0, 16); wheel.rotation.z = Math.PI / 2; wheel.position.set(cx + s * 0.012, 0.028, cz); g.add(wheel); }
       }
-      g.add(cyl(0.025, 0.03, 0.36, k, 0, 0.08), rbox(0.5, 0.08, 0.5, 0.03, fab, 0, 0.44));
-      const back = rbox(0.46, h - 0.6, 0.07, 0.03, fab, 0, 0.58, -0.24); back.rotation.x = -0.1; g.add(back);
-      for (const sx of [-1, 1]) g.add(box(0.04, 0.2, 0.04, k, sx * 0.27, 0.48, -0.02), box(0.06, 0.025, 0.26, k, sx * 0.27, 0.68, 0.0));
+      // gas lift + cover, tilt mechanism, adjustment lever
+      g.add(cyl(0.022, 0.022, 0.18, al, 0, 0.13), cyl(0.035, 0.03, 0.14, k, 0, 0.17), box(0.22, 0.05, 0.25, k, 0, 0.32, 0), box(0.12, 0.01, 0.015, k, 0.16, 0.33, 0.06));
+      // seat: padded cushion with rounded waterfall front
+      g.add(rbox(0.5, 0.075, 0.48, 0.035, fab, 0, 0.37, 0.01), box(0.48, 0.02, 0.46, k, 0, 0.355, 0.01));
+      const wf = cyl(0.04, 0.04, 0.48, fab, 0, 0, 0, 16); wf.rotation.z = Math.PI / 2; wf.position.set(0, 0.405, 0.23); g.add(wf);
+      // armrests: post + padded top
+      for (const s of [-1, 1]) g.add(box(0.03, 0.22, 0.04, k, s * 0.27, 0.35, -0.04), box(0.08, 0.03, 0.04, k, s * 0.25, 0.35, -0.04), rbox(0.075, 0.03, 0.26, 0.012, fab, s * 0.27, 0.57, 0.0));
+      // back: frame + mesh, lumbar pad, headrest, spine bar
+      const back = new THREE.Group(); back.position.set(0, 0.47, -0.24); back.rotation.x = -0.12;
+      const bh = h - 0.75;
+      for (const s of [-1, 1]) back.add(rbox(0.03, bh, 0.03, 0.012, k, s * 0.23, 0, 0));
+      back.add(rbox(0.49, 0.035, 0.035, 0.012, k, 0, bh - 0.035, 0), rbox(0.46, 0.035, 0.035, 0.012, k, 0, 0.02, 0), box(0.44, bh - 0.06, 0.006, mesh_, 0, 0.04, 0));
+      back.add(rbox(0.32, 0.09, 0.04, 0.02, fab, 0, 0.16, 0.03), box(0.04, 0.18, 0.03, k, 0, -0.12, -0.03));
+      const head = rbox(0.3, 0.12, 0.05, 0.03, fab, 0, bh + 0.06, 0.02); back.add(head, box(0.03, 0.08, 0.02, k, 0, bh, 0));
+      g.add(back);
       return g;
     } },
+  shoe_cabinet: { label: 'Shoe cabinet (floating)', cat: 'Other', w: 1.4, d: 0.32, h: 0.85, y: 0.12,
+    spec: 'Wall-hung shoe cabinet, 32 cm deep: three tilt-out fluted walnut doors with angled shoe racks inside, cream marble top, warm LED strip underneath; key bowl and small vase on top',
+    build: ({ w, d, h }) => {
+      const g = group(box(w, h - 0.03, d - 0.02, M('walnut_v'), 0, 0, -0.01), box(w + 0.02, 0.03, d + 0.01, M('cream'), 0, h - 0.03, 0.005),
+        box(w - 0.06, 0.006, 0.012, M('ledstrip'), 0, -0.006, d / 2 - 0.06));
+      const n = 3, dw = w / n;
+      for (let i = 0; i < n; i++) {
+        const x = -w / 2 + dw * (i + 0.5), f = fluted(dw - 0.008, h - 0.05, M('walnut_v'), 0.03); f.position.set(x, 0.01, d / 2 - 0.005); g.add(f);
+        g.add(box(0.1, 0.012, 0.02, M('brass'), x, h - 0.1, d / 2 + 0.01));
+      }
+      g.add(cyl(0.11, 0.07, 0.05, M('matteceramic', '#cbbfae'), w / 2 - 0.25, h, 0, 24), cyl(0.04, 0.03, 0.2, M('ceramic'), -w / 2 + 0.2, h, -0.03, 20));
+      const pl = model('calathea', 0.15, 0.14, 0.15); pl.position.set(-w / 2 + 0.2, h + 0.18, -0.03); g.add(pl);
+      return g;
+    } },
+  wall_sconce: { label: 'Wall light (brass)', cat: 'Lighting', w: 0.14, d: 0.16, h: 0.3, y: 1.55, wall: true,
+    spec: 'Brass wall sconce with opal glass shade, warm 2700 K',
+    build: ({ h }) => group(box(0.1, 0.16, 0.02, M('brass'), 0, 0, -0.07), box(0.016, 0.016, 0.12, M('brass'), 0, 0.07, -0.01),
+      cyl(0.055, 0.045, 0.14, M('glow'), 0, 0.03, 0.05, 24), cyl(0.058, 0.058, 0.012, M('brass'), 0, 0.17, 0.05, 24), lampLight(0.1, 1.2, 3)) },
   bookcase: { label: 'Bookcase (oak, with books)', cat: 'Living', w: 0.9, d: 0.35, h: 2.4,
     spec: 'Open light-oak bookcase to the ceiling line, 5 shelves, styled with books, vases and small objects',
     build: ({ w, d, h }) => {
@@ -427,7 +461,7 @@ export const CATALOG = {
       return g;
     } },
   office_pod_curve: { label: 'Curved office pod', cat: 'Bedroom', w: 1.9, d: 1.1, h: 2.5,
-    spec: 'Curved study pod: smooth cream lacquer curved shell, light-oak canopy and plinth bands with hidden warm LED, curved reeded-glass door with brass ribs that glides round behind the shell (tap to open), fluted walnut back wall, oak desk with drawers, lit shelf with books',
+    spec: 'Curved study pod (in the corridor corner, lengthwise): smooth cream lacquer curved shell, light-oak canopy and plinth bands with hidden warm LED, curved reeded-glass door with brass ribs that glides round behind the shell (tap to open), fluted walnut back wall, oak desk with drawers, lit shelf with books',
     build: ({ w, d, h }) => {
       const oak = M('lightoak'), cream = M('lacquer', '#efe8dd'), g = new THREE.Group(), bz = -d / 2, half = w / 2;
       const zs = bz + 0.3, zf = d / 2, s = zf - zs, R = (half * half + s * s) / (2 * s), cz = zf - R, A = Math.asin(half / R);
@@ -450,7 +484,22 @@ export const CATALOG = {
       const scr = box(0.3, 0.2, 0.008, M('steel'), 0.42, 0.787, bz + 0.215); scr.rotation.x = -0.25; g.add(box(0.3, 0.012, 0.21, M('steel'), 0.42, 0.775, bz + 0.32), scr);
       g.add(box(w - 0.14, 0.025, 0.24, oak, 0, 1.55, bz + 0.14), box(w - 0.2, 0.006, 0.012, M('ledstrip'), 0, 1.544, bz + 0.25));
       const COLS = ['#e9e2d6', '#6e6a4c', '#2f3a4a', '#9c6b4e', '#b9a48a'];
-      for (let i = 0; i < 16; i++) g.add(box(0.03, 0.2 + (i % 3) * 0.03, 0.18, M('linen', COLS[i % 5]), -half + 0.15 + i * 0.034, 1.575, bz + 0.13));
+      for (let i = 0; i < 22; i++) g.add(box(0.03, 0.2 + (i % 3) * 0.03, 0.18, M('linen', COLS[i % 5]), -half + 0.15 + i * 0.034, 1.575, bz + 0.13));
+      // desk styling: book stack, task lamp, mug, pen pot, notebook + pen, phone, small plant, headphones; more on the shelf
+      const dy = 0.775, dz = bz + 0.27;
+      [['#2f3a4a', 0.24], ['#e9e2d6', 0.22], ['#9c6b4e', 0.2]].forEach(([c, bw], i) => { const b = box(bw, 0.03, 0.16, M('linen', c), -0.5, dy + i * 0.03, dz - 0.05); b.rotation.y = (i - 1) * 0.12; g.add(b); });
+      g.add(cyl(0.06, 0.07, 0.015, M('blackmetal'), 0.55, dy, dz - 0.12, 20));
+      const arm1 = box(0.012, 0.32, 0.012, M('blackmetal'), 0.55, dy + 0.015, dz - 0.12); arm1.rotation.x = 0.25; g.add(arm1);
+      const arm2 = box(0.012, 0.012, 0.25, M('blackmetal'), 0.55, dy + 0.32, dz - 0.0); g.add(arm2);
+      g.add(cyl(0.03, 0.06, 0.08, M('blackmetal'), 0.55, dy + 0.25, dz + 0.12, 20), cyl(0.05, 0.05, 0.003, M('glow'), 0.55, dy + 0.247, dz + 0.12, 20));
+      const mug = cyl(0.035, 0.032, 0.09, M('ceramic', '#e9e2d6'), 0.12, dy, dz + 0.18, 20), hdl = mesh(new THREE.TorusGeometry(0.025, 0.007, 6, 14), M('ceramic', '#e9e2d6')); hdl.position.set(0.16, dy + 0.045, dz + 0.18); g.add(mug, hdl);
+      g.add(cyl(0.03, 0.03, 0.09, M('lightoak'), -0.35, dy, dz - 0.15, 16));
+      for (let i = 0; i < 4; i++) { const p = cyl(0.004, 0.004, 0.14, M(['blackmetal', 'brass', 'steel', 'blackmetal'][i]), -0.35 + (i - 1.5) * 0.012, dy + 0.02, dz - 0.15, 6); p.rotation.z = (i - 1.5) * 0.12; g.add(p); }
+      const nb = box(0.21, 0.012, 0.29, M('linen', '#f4efe7'), -0.3, dy, dz + 0.1); nb.rotation.y = 0.15; g.add(nb, box(0.005, 0.005, 0.14, M('brass'), -0.27, dy + 0.014, dz + 0.1));
+      g.add(rbox(0.075, 0.009, 0.155, 0.006, M('blackglass'), 0.3, dy, dz + 0.17));
+      g.add(cyl(0.035, 0.03, 0.07, M('matteceramic'), -0.6, dy, dz - 0.17, 16)); { const pl = model('calathea', 0.13, 0.12, 0.13); pl.position.set(-0.6, dy + 0.07, dz - 0.17); g.add(pl); }
+      const hp = mesh(new THREE.TorusGeometry(0.08, 0.012, 8, 24, Math.PI), M('blackmetal')); hp.position.set(0.33, dy + 0.012, dz - 0.15); hp.rotation.x = -Math.PI / 2; g.add(hp, cyl(0.03, 0.03, 0.02, M('blackmetal'), 0.25, dy, dz - 0.15, 16), cyl(0.03, 0.03, 0.02, M('blackmetal'), 0.41, dy, dz - 0.15, 16));
+      g.add(cyl(0.04, 0.035, 0.12, M('ceramic', '#b9a48a'), half - 0.25, 1.575, bz + 0.13, 20), box(0.12, 0.16, 0.02, M('lightoak'), half - 0.45, 1.575, bz + 0.08), box(0.09, 0.12, 0.004, M('linen', '#c7b8a3'), half - 0.45, 1.595, bz + 0.091));
       // curved reeded-glass door inside the shell line; pivot at the arc centre, rotating slides it behind the shell
       const pivot = new THREE.Group(); pivot.position.set(0, 0, cz);
       const rd = R - 0.05, gh = sh - 0.02, t0 = -A;
