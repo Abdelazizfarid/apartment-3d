@@ -72,11 +72,12 @@ export const PROPOSAL = [
   ['curtain_open', 0.355, 2.57, 90, 3.4], ['curtain', 2.715, 0.48, 0, 2.6],
   // Dining
   ['rug_border', 6.125, 2.525, 0, 2.85, 3.15],
-  ['dining_round', 6.2, 2.5, 0, 1.3, 1.3],
-  ['dining_chair', 6.91, 2.91, -120], ['dining_chair', 6.20, 3.32, -180], ['dining_chair', 5.49, 2.91, 120],
-  ['dining_chair', 5.49, 2.09, 60], ['dining_chair', 6.20, 1.68, 0], ['dining_chair', 6.91, 2.09, -60],
-  ['pendant', 6.2, 2.5, 0],
-  ['flowers', 6.2, 2.5, 0, 0.3, 0.2, 0.3, 0.76],
+  ['dining_table', 6.0, 2.5, 0, 1.8, 0.95],
+  ['dining_chair', 5.6, 1.8, 0], ['dining_chair', 6.4, 1.8, 0],
+  ['dining_chair', 5.6, 3.2, 180], ['dining_chair', 6.4, 3.2, 180],
+  ['dining_chair', 4.85, 2.5, 90], ['dining_chair', 7.0, 2.5, -90],
+  ['pendant', 5.65, 2.5, 0], ['pendant', 6.35, 2.5, 0],
+  ['flowers', 6.0, 2.5, 0, 0.3, 0.2, 0.3, 0.76],
   ['sideboard', 7.5, 2.0, -90, 1.6, 0.45, 0.75],
   ['mirror_round', 7.715, 2.0, -90, 0.9, 0.03, 0.9, 1.25],
   ['vase', 7.5, 1.55, 0, 0.23, 0.23, 0.6, 0.75],
@@ -90,27 +91,26 @@ export const PROPOSAL = [
   ['mirror_led', 9.40, 2.62, -90, 0.7, 0.03, 0.7, 1.25],
   ['shower', 9.025, 1.49, 0, 0.75, 1.38],          // full length along the right wall, up to the sink
   // Kitchen
-  ['counter', 10.184, 0.677, 0, 0.85], ['hob_unit', 11.06, 0.677, 0, 0.9],
-  ['dishwasher', 11.81, 0.677, 0, 0.6], ['fridge', 12.52, 0.677, 0, 0.61, 0.6, 2.4],
-  ['counter', 10.058, 1.14, 90, 0.32], ['sink_unit', 10.058, 1.75, 90, 0.9], ['counter', 10.058, 2.375, 90, 0.35],
+  ['counter', 10.17, 0.677, 0, 0.82], ['sink_unit', 11.03, 0.677, 0, 0.9],
+  ['dishwasher', 11.78, 0.677, 0, 0.6], ['fridge', 12.455, 0.677, 0, 0.75, 0.6, 2.4],
+  ['counter', 10.058, 1.14, 90, 0.32], ['hob_unit', 10.058, 1.75, 90, 0.9], ['counter', 10.058, 2.375, 90, 0.35],
+  ['hood', 10.008, 1.75, 90, 0.9, 0.5, 0.45, 1.65],
   ['counter', 10.058, 2.855, 90, 0.61],
   // worktop accessories
   ['coffee_machine', 10.05, 0.58, 0], ['kettle', 10.4, 0.6, 0],
   ['knife_block', 11.85, 0.6, 0], ['cutlery_caddy', 9.95, 1.12, 90], ['utensil_jar', 9.92, 2.33, 90], ['oil_set', 9.92, 2.62, 90],
   ['fruit_bowl', 10.66, 2.9, 180], ['toaster', 11.35, 2.98, 180],
   // upper kitchen: wall cabinets on the left wall, left of the window and over the counter by the door
-  ['wall_cab', 9.933, 1.955, 90, 2.4, 0.35, 0.8, 1.5], ['wall_cab', 10.19, 0.572, 0, 0.8, 0.35, 0.8, 1.5],
+  ['wall_cab', 9.933, 0.98, 90, 0.45, 0.35, 0.8, 1.5], ['wall_cab', 9.933, 2.7, 90, 0.9, 0.35, 0.8, 1.5], ['wall_cab', 10.19, 0.572, 0, 0.8, 0.35, 0.8, 1.5],
   ['wall_cab', 11.02, 2.986, 180, 1.32, 0.35, 0.8, 1.5],
   ['washer_int', 10.66, 2.861, 180, 0.6], ['counter', 11.32, 2.861, 180, 0.72],
   ['rug_runner', 11.45, 1.45, 0, 1.8, 0.7],
-  // Bedroom: two single beds with a shared nightstand; L-shaped study desk where the wardrobe was
+  // Bedroom: two single beds with a shared nightstand; full-size wardrobe on the east wall
   ['bed', 14.14, 0.82, 90, 0.9, 2.0], ['bed', 14.14, 2.27, 90, 0.9, 2.0],
   ['nightstand', 13.36, 1.545, 90],
   ['table_lamp', 13.36, 1.545, 0, 0.32, 0.32, 0.55, 0.5],
   ['rug_shag', 14.75, 2.335, 0, 2.8, 3.77],
-  ['desk_l', 15.543, 3.175, -90, 2.45, 1.6],
-  ['office_chair', 15.2, 3.05, 90],
-  ['wardrobe', 16.06, 1.55, -90, 0.78, 0.55, 2.2],
+  ['wardrobe', 16.043, 2.78, -90, 2.9, 0.6, 2.85],
   ['curtain', 14.826, 0.33, 0, 2.0], ['curtain', 16.26, 0.8, -90, 1.0],
   // Master bedroom
   ['bed', 18.62, 2.48, 0, 1.8, 2.1],
