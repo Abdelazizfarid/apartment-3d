@@ -565,8 +565,8 @@ export const CATALOG = {
   // Corridor office nook: uses the old laundry niche walls (west, south, bathroom wall) as its own walls and only adds a front.
   // Local origin = NW corner of the nook's front line; x runs east along the corridor (length w), z runs south to the back wall (depth d).
   // West of wallEnd the nook only starts at z = E (the bathroom wall); east of it the front is pushed out E into the corridor.
-  office_nook: { label: 'Office nook (curved front)', cat: 'Bedroom', w: 4.0, d: 1.41, h: 2.9,
-    spec: 'Built-in study nook in the former laundry niche: existing walls kept, new cream lacquer front with brass inlay lines pushed 35 cm into the corridor past the bathroom wall, rounded end, oak canopy to the ceiling with hidden warm LED; reeded-glass pivot door in an oak frame; 1.8 m desk along the back (left) wall with drawers and a lit bookshelf above, fluted walnut end wall, oak floor',
+  office_nook: { label: 'Office nook (curved front)', cat: 'Bedroom', w: 4.0, d: 1.06, h: 2.9,
+    spec: 'Built-in study nook in the former laundry niche: existing walls kept, new cream lacquer front with brass inlay lines flush with the end of the bathroom wall, rounded end, oak canopy to the ceiling with hidden warm LED; reeded-glass pivot door in an oak frame; 1.8 m desk along the back (left) wall with drawers and a lit bookshelf above, fluted walnut end wall, oak floor',
     build: ({ w: L, d: D, h }) => {
       const oak = M('lightoak'), cream = M('lacquer', '#efe8dd'), g = new THREE.Group(), R = 0.5, TOP = 0.15, sh = h - TOP, T = 0.04, wallEnd = 0.909, E = D - 1.062;
       // rounded end + east face
@@ -589,7 +589,7 @@ export const CATALOG = {
       // fluted walnut end wall
       const fw = fluted(D - E - 0.02, sh); fw.rotation.y = Math.PI / 2; fw.position.set(0.012, 0, (E + D) / 2); g.add(fw);
       // desk along the back wall (left as you walk in), drawer pedestal, lit bookshelf above
-      const DL = 1.8, DD = 0.55, dxc = 0.1 + DL / 2, dz = D - DD / 2, dy = 0.775, back = D - 0.06;
+      const DL = 1.8, DD = 0.5, dxc = 0.1 + DL / 2, dz = D - DD / 2, dy = 0.775, back = D - 0.06;
       g.add(box(DL, 0.035, DD, oak, dxc, 0.74, dz), box(0.42, 0.6, DD - 0.05, oak, 0.1 + DL - 0.23, 0.12, dz + 0.02), box(0.03, 0.74, 0.03, M('blackmetal'), 0.13, 0, D - DD + 0.03));
       for (const y of [0.32, 0.52]) g.add(box(0.38, 0.004, 0.004, M('shadowgap'), 0.1 + DL - 0.23, y, D - DD - 0.005));
       g.add(box(DL, 0.025, 0.26, oak, dxc, 1.5, D - 0.13), box(DL - 0.04, 0.006, 0.012, M('ledstrip'), dxc, 1.494, D - 0.25));
