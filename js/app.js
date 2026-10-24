@@ -23,7 +23,7 @@ fetch('version.txt', { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then
     location.replace(location.pathname + '?v=' + encodeURIComponent(v));
   }
 }).catch(() => {});
-const SNAP = 0.05, KEY = 'wadi-houf-design-v16';
+const SNAP = 0.05, KEY = 'wadi-houf-design-v17';
 
 // ---------- renderer / scene ----------
 const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
@@ -373,7 +373,7 @@ const FINISH_SPEC = {
   Kitchen: 'Floor: light white glossy porcelain 60×60 · Wall cabinets above on three walls (doors open, dishes / glasses inside) with LED under-light · Top drawers with cutlery organisers · Worktop: coffee machine, kettle, toaster, knife block + board, cutlery caddy, utensil jar, oil set, fruit bowl · Washer-dryer built in under the worktop on the run by the door · Hob under the window (downdraft extractor), sink on the left wall, fridge column straight ahead from the door · Base units: handleless greige lacquer · Tall units: walnut · Worktop + splash: Calacatta 2 cm · Brass mixer',
   Bedroom: 'Floor: wall-to-wall plush ivory carpet over the existing wood-look tile; dark skirting kept · Two single beds 90×200 on the fluted walnut wall, shared nightstand · L-shaped study desk with PC + laptop where the wardrobe was · Curtains: sheer + linen',
   'Master bedroom': 'Floor: wall-to-wall ivory carpet with taupe border over the existing wood-look tile; dark skirting kept · Headboard wall: built-out full-height fluted walnut (hides the column) · Wardrobe: cream lacquer + light oak to ceiling, mirror doors, open lit shelf column',
-  Corridor: 'Former laundry cupboard removed; built-in office nook using the niche walls: only a new curved cream front from the end of the bathroom wall (≈2.2 m long, 1.06 m deep to the wall), oak canopy to the ceiling with LED, reeded-glass pivot door; desk on the end wall facing left with ~1.5 m chair space, ergonomic chair, books & accessories · Floating fluted-walnut shoe cabinet with round mirror and two brass wall lights · Floor: wall-to-wall wool carpet, sand diamond lattice, over the existing tile · Art lighting · Doors: flush walnut, 2.25 m, brass levers; entrance: armoured, dark walnut',
+  Corridor: 'Former laundry cupboard removed; built-in office nook using the niche walls: only a new cream front from the end of the bathroom wall with a rounded end (≈4.0 m long, 1.06 m deep to the wall), long oak credenza with books and plant inside, oak canopy to the ceiling with LED, reeded-glass pivot door; desk on the end wall facing left with ~1.5 m chair space, ergonomic chair, books & accessories · Floating fluted-walnut shoe cabinet with round mirror and two brass wall lights · Floor: wall-to-wall wool carpet, sand diamond lattice, over the existing tile · Art lighting · Doors: flush walnut, 2.25 m, brass levers; entrance: armoured, dark walnut',
 };
 $('quality').textContent = PHONE ? '⚡ Quality: Fast' : '✨ Quality: High';
 $('quality').hidden = TOUCH;

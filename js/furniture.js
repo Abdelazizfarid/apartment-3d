@@ -601,8 +601,25 @@ export const CATALOG = {
       g.add(rbox(0.155, 0.009, 0.075, 0.006, M('blackglass'), dx + 0.2, dy, D - 0.32));
       // oak floor inside
       g.add(box(L - 0.05, 0.006, D - 0.02, oak, (L - 0.05) / 2, 0, D / 2));
-      // reeded-glass pivot door across the straight front: hinge at the curve end, opens inward
-      const DW = L - R - wallEnd - 0.04, door = new THREE.Group(); door.position.set(L - R, 0, 0.02);
+      // fixed cream front from the wall end up to the door, with brass inlay lines
+      const DW = 0.8, fx1 = L - R - DW - 0.04, COL2 = ['#e9e2d6', '#6e6a4c', '#2f3a4a', '#9c6b4e', '#b9a48a'];
+      if (fx1 > wallEnd + 0.05) {
+        g.add(box(fx1 - wallEnd, sh, T, cream, (wallEnd + fx1) / 2, 0, T / 2), box(0.035, sh, 0.06, oak, fx1 + 0.0175, 0, 0.03));
+        for (let x = wallEnd + 0.3; x < fx1 - 0.1; x += 0.3) g.add(box(0.01, sh, 0.004, M('brass'), x, 0, -0.002));
+        // long oak credenza on the back wall with books, plant and lamp
+        const cx0 = 1.0, cx1 = L - R - 0.1, cw = cx1 - cx0;
+        if (cw > 0.6) {
+          g.add(box(cw, 0.6, 0.45, oak, cx0 + cw / 2, 0.1, D - 0.24), box(cw - 0.02, 0.012, 0.47, M('cream'), cx0 + cw / 2, 0.7, D - 0.24));
+          for (let x = cx0 + 0.45; x < cx1 - 0.1; x += 0.45) g.add(box(0.004, 0.5, 0.004, M('shadowgap'), x, 0.15, D - 0.465));
+          g.add(box(cw, 0.025, 0.26, oak, cx0 + cw / 2, 1.5, D - 0.14), box(cw - 0.04, 0.006, 0.012, M('ledstrip'), cx0 + cw / 2, 1.494, D - 0.27));
+          for (let i = 0; i < Math.floor(cw / 0.034) - 10; i++) g.add(box(0.03, 0.2 + (i % 3) * 0.03, 0.18, M('linen', COL2[i % 5]), cx0 + 0.1 + i * 0.034, 1.525, D - 0.13));
+          const pl = model('pachira', 0.5, 1.0, 0.5); pl.position.set(cx1 - 0.25, 0.96, D - 0.24); g.add(pl, cyl(0.12, 0.1, 0.25, M('matteceramic'), cx1 - 0.25, 0.71, D - 0.24, 20));
+          g.add(cyl(0.05, 0.03, 0.3, M('matteceramic', '#b9a48a'), cx0 + 0.3, 0.71, D - 0.24, 20), cyl(0.1, 0.12, 0.14, M('sheer', '#f3e9d8'), cx0 + 0.3, 1.0, D - 0.24, 24, true));
+          const lt = lampLight(1.05, 0.8, 2.5); lt.position.set(cx0 + 0.3, 1.05, D - 0.24); g.add(lt);
+        }
+      }
+      // reeded-glass pivot door next to the rounded end: hinge at the curve, opens inward
+      const door = new THREE.Group(); door.position.set(L - R, 0, 0.02);
       for (const x of [-0.02, -DW + 0.02]) door.add(box(0.04, sh - 0.01, 0.035, oak, x, 0.005, 0));
       door.add(box(DW, 0.05, 0.035, oak, -DW / 2, 0.005, 0), box(DW, 0.05, 0.035, oak, -DW / 2, sh - 0.06, 0), box(DW - 0.08, sh - 0.1, 0.006, M('frosted'), -DW / 2, 0.05, 0));
       for (let x = -0.07; x > -DW + 0.05; x -= 0.05) door.add(box(0.006, sh - 0.1, 0.01, M('brass'), x, 0.05, -0.006));
