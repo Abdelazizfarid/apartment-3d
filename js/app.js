@@ -611,6 +611,7 @@ function updateDoors(dt) {
     const p = o.userData.part;
     if (p.kind === 'hinge') o.rotation.y += ((p.open ? p.angle : 0) - o.rotation.y) * k;
     else if (p.kind === 'slide') o.position.z += (p.z0 + (p.open ? p.dist : 0) - o.position.z) * k;
+    else if (p.kind === 'slidex') o.position.x += (p.x0 + (p.open ? p.dist : 0) - o.position.x) * k;
     else if (p.kind === 'van') {                                  // minibus door: out first, then along the track
       p.t += Math.sign((p.open ? 1 : 0) - p.t) * Math.min(Math.abs((p.open ? 1 : 0) - p.t), dt * 1.2);
       o.position.x = p.x0 + p.out * Math.min(1, p.t / 0.25);

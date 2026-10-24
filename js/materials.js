@@ -135,6 +135,7 @@ const DEFS = {
   steel:      { tile: 1, p: () => ({ color: '#9da3a8', metalness: 1, roughness: 0.3 }) },
   glass:      { tile: 1, p: () => ({ color: '#ffffff', metalness: 0, roughness: 0.02, transmission: 1, thickness: 0.01, ior: 1.5, transparent: true, opacity: PHONE ? 0.06 : 0.25, depthWrite: false }) },
   showerglass:{ tile: 1, p: () => ({ color: '#e8f0f0', roughness: 0.03, metalness: 0.1, transparent: true, opacity: 0.12, depthWrite: false, side: THREE.DoubleSide }) },
+  frosted:    { tile: 1, p: () => ({ color: '#f4f1ec', roughness: 0.6, metalness: 0, transparent: true, opacity: 0.72, side: THREE.DoubleSide }) },
   mirror:     { tile: 1, p: () => ({ color: '#ffffff', metalness: 1, roughness: 0.02 }) },
   ceramic:    { tile: 1, p: () => ({ color: '#f6f4f0', roughness: 0.12, clearcoat: 0.8 }) },
   matteceramic:{ tile: 1, p: () => ({ color: '#d8d0c4', roughness: 0.7 }) },

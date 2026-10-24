@@ -396,6 +396,57 @@ export const CATALOG = {
       }
       return g;
     } },
+  office_pod: { label: 'Office pod (sliding doors)', cat: 'Bedroom', w: 1.9, d: 1.1, h: 2.6,
+    spec: 'Built-in study pod: light-oak side panels and canopy, fluted walnut back, 1.8 m oak desk with drawers, shelf with books, LED in the canopy; front closed by two frosted-glass sliding doors in oak frames on a top track (tap to slide open)',
+    build: ({ w, d, h }) => {
+      const oak = M('lightoak'), k = M('blackmetal'), g = new THREE.Group(), iw = w - 0.08, bz = -d / 2;
+      for (const s of [-1, 1]) g.add(box(0.04, h, d, oak, s * (w / 2 - 0.02), 0, 0));
+      g.add(box(w, 0.08, d, oak, 0, h - 0.08, 0), box(iw - 0.04, 0.006, 0.015, M('ledstrip'), 0, h - 0.086, 0.05));
+      const back = fluted(iw, h - 0.1); back.position.set(0, 0.02, bz + 0.015); g.add(back);
+      g.add(box(iw, 0.035, 0.6, oak, 0, 0.74, bz + 0.31), box(0.42, 0.6, 0.5, oak, iw / 2 - 0.23, 0.12, bz + 0.27));
+      for (const y of [0.32, 0.52]) g.add(box(0.4, 0.004, 0.004, M('shadowgap'), iw / 2 - 0.23, y, bz + 0.52));
+      g.add(box(0.03, 0.74, 0.03, k, -iw / 2 + 0.03, 0, bz + 0.58));
+      g.add(box(0.6, 0.35, 0.025, k, -0.1, 0.95, bz + 0.12), box(0.58, 0.33, 0.003, M('blackglass'), -0.1, 0.96, bz + 0.135), box(0.04, 0.2, 0.03, k, -0.1, 0.775, bz + 0.1), box(0.2, 0.012, 0.15, k, -0.1, 0.775, bz + 0.1));
+      g.add(box(0.42, 0.018, 0.13, M('steel'), -0.1, 0.775, bz + 0.35), box(0.06, 0.02, 0.09, M('steel'), 0.18, 0.775, bz + 0.35));
+      const lap = box(0.3, 0.012, 0.21, M('steel'), 0.42, 0.775, bz + 0.32), scr = box(0.3, 0.2, 0.008, M('steel'), 0.42, 0.787, bz + 0.215); scr.rotation.x = -0.25; g.add(lap, scr);
+      g.add(box(iw, 0.025, 0.26, oak, 0, 1.55, bz + 0.15), box(iw - 0.04, 0.006, 0.012, M('ledstrip'), 0, 1.544, bz + 0.27));
+      const COLS = ['#e9e2d6', '#6e6a4c', '#2f3a4a', '#9c6b4e', '#b9a48a'];
+      for (let i = 0; i < 14; i++) g.add(box(0.03, 0.2 + (i % 3) * 0.03, 0.18, M('linen', COLS[i % 5]), -iw / 2 + 0.08 + i * 0.033, 1.575, bz + 0.13));
+      g.add(cyl(0.05, 0.04, 0.16, M('matteceramic'), iw / 2 - 0.2, 1.575, bz + 0.14, 20));
+      // sliding doors: outer one slides across the inner one to open
+      const DW = w / 2 + 0.02, dh = h - 0.14, fz = d / 2;
+      g.add(box(w, 0.04, 0.1, k, 0, h - 0.12, fz - 0.04), box(w, 0.012, 0.1, k, 0, 0, fz - 0.04));
+      const door = (x, z) => {
+        const p = new THREE.Group(); p.position.set(x, 0.012, z);
+        for (const [bw, bh, bx, by] of [[DW, 0.05, 0, 0], [DW, 0.05, 0, dh - 0.05], [0.05, dh, -DW / 2 + 0.025, 0], [0.05, dh, DW / 2 - 0.025, 0]]) p.add(box(bw, bh, 0.03, oak, bx, by, 0));
+        p.add(box(DW - 0.1, dh - 0.1, 0.006, M('frosted'), 0, 0.05, 0), box(0.02, 0.5, 0.02, k, -DW / 2 + 0.07, 0.8, 0.025));
+        g.add(p); return p;
+      };
+      door(w / 4, fz - 0.065);
+      const out = door(-w / 4, fz - 0.02); out.userData.part = { kind: 'slidex', dist: w / 2 - 0.04 };
+      return g;
+    } },
+  coffee_bar: { label: 'Coffee corner', cat: 'Kitchen', w: 1.9, d: 0.6, h: 2.6,
+    spec: 'Coffee corner: tall walnut pantry with brass bar handle; base unit with fluted walnut doors and cream marble top; Calacatta splash panel with two floating walnut shelves on brass rails, warm LED; walnut top cabinet; espresso machine, grinder, cups and jars',
+    build: ({ w, d, h }) => {
+      const wal = M('walnut_v'), g = new THREE.Group(), cw = 0.6, bx0 = -w / 2 + cw, bw = w - cw, bc = bx0 + bw / 2;
+      g.add(box(cw, h, d, wal, -w / 2 + cw / 2, 0, 0), box(0.014, 0.9, 0.03, M('brass'), bx0 - 0.06, 0.8, d / 2 + 0.01), box(cw - 0.01, 0.004, 0.003, M('shadowgap'), -w / 2 + cw / 2, 1.55, d / 2 + 0.001));
+      g.add(box(bw, 0.1, d - 0.06, M('shadowgap'), bc, 0, -0.03), box(bw, 0.78, d - 0.03, wal, bc, 0.1, -0.015));
+      const fl = fluted(bw - 0.02, 0.76, wal, 0.035); fl.position.set(bc, 0.11, d / 2 - 0.005); g.add(fl);
+      g.add(box(bw + 0.02, 0.04, d + 0.02, M('cream'), bc, 0.88, 0.01));
+      g.add(box(bw, 1.3, 0.02, M('calacatta'), bc, 0.92, -d / 2 + 0.01), box(bw, 0.38, d * 0.6, wal, bc, h - 0.38, -d * 0.2), box(bw - 0.04, 0.006, 0.015, M('ledstrip'), bc, h - 0.386, d * 0.08));
+      for (const y of [1.38, 1.78]) {
+        g.add(box(bw - 0.1, 0.035, 0.24, wal, bc, y, -d / 2 + 0.14), box(bw - 0.1, 0.012, 0.012, M('brass'), bc, y + 0.06, -d / 2 + 0.25), box(bw - 0.14, 0.005, 0.012, M('ledstrip'), bc, y - 0.006, -d / 2 + 0.22));
+        for (let i = 0; i < 5; i++) g.add(cyl(0.04, 0.032, 0.09, M('ceramic', ['#efe8dc', '#b9a48a', '#e9e2d6', '#8a7560', '#f4efe7'][i]), bc - 0.45 + i * 0.12, y + 0.035, -d / 2 + 0.14, 20));
+        g.add(cyl(0.05, 0.05, 0.2, M('glass'), bc + 0.28, y + 0.035, -d / 2 + 0.14, 20), cyl(0.045, 0.045, 0.12, M('ceramic', '#6b4a33'), bc + 0.28, y + 0.04, -d / 2 + 0.14, 20));
+      }
+      const cm = CATALOG.coffee_machine.build({ w: 0.3, d: 0.38, h: 0.4 }); cm.position.set(bc - 0.25, 0.92, -0.02); g.add(cm);
+      g.add(cyl(0.06, 0.05, 0.3, M('blackmetal'), bc + 0.05, 0.92, -0.1, 20), cyl(0.07, 0.04, 0.1, M('glass'), bc + 0.05, 1.22, -0.1, 20));
+      g.add(box(0.36, 0.015, 0.2, M('walnut'), bc + 0.37, 0.92, 0.05));
+      for (let i = 0; i < 4; i++) g.add(cyl(0.035, 0.03, 0.08, M('ceramic'), bc + 0.24 + (i % 2) * 0.1, 0.935, 0.0 + Math.floor(i / 2) * 0.09, 18));
+      const pl = model('calathea', 0.2, 0.2, 0.2); pl.position.set(bc + 0.5, 1.06, -0.15); g.add(cyl(0.06, 0.05, 0.12, M('matteceramic'), bc + 0.5, 0.92, -0.15, 20), pl);
+      return g;
+    } },
   desk: { label: 'Dresser / desk', cat: 'Bedroom', w: 1.2, d: 0.5, h: 0.76,
     spec: 'Walnut dressing desk with drawer, slim brass legs',
     build: ({ w, d, h }) => group(rbox(w, 0.035, d, 0.01, M('walnut'), 0, h - 0.035), box(w - 0.04, 0.12, d - 0.04, M('walnut'), 0, h - 0.155),
