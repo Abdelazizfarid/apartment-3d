@@ -71,14 +71,14 @@ export const PROPOSAL = [
   ['floor_lamp', 0.55, 2.8, 0],
   ['curtain_open', 0.355, 2.57, 90, 3.4], ['curtain', 2.715, 0.48, 0, 2.6],
   // Dining
-  ['rug_border', 6.125, 2.525, 0, 2.85, 3.15],
-  // sideboard + mirror removed; table moved in towards the free east wall, clear of the sofa
-  ['dining_table', 6.35, 2.75, 0, 1.8, 0.95],
-  ['dining_chair', 5.95, 2.05, 0], ['dining_chair', 6.75, 2.05, 0],
-  ['dining_chair', 5.95, 3.45, 180], ['dining_chair', 6.75, 3.45, 180],
-  ['dining_chair', 5.2, 2.75, 90], ['dining_chair', 7.45, 2.75, -90],
-  ['pendant', 6.0, 2.75, 0], ['pendant', 6.7, 2.75, 0],
-  ['flowers', 6.35, 2.75, 0, 0.3, 0.2, 0.3, 0.76],
+  ['rug_border', 6.4, 2.05, 0, 2.6, 2.5],
+  // table pushed up to the window wall to keep a clear path to the corridor door; sideboard + mirror removed
+  ['dining_table', 6.4, 1.9, 0, 1.6, 0.95],
+  ['dining_chair', 6.0, 1.2, 0], ['dining_chair', 6.8, 1.2, 0],
+  ['dining_chair', 6.0, 2.6, 180], ['dining_chair', 6.8, 2.6, 180],
+  ['dining_chair', 5.33, 1.9, 90], ['dining_chair', 7.44, 1.9, -90],
+  ['pendant', 6.05, 1.9, 0], ['pendant', 6.75, 1.9, 0],
+  ['flowers', 6.4, 1.9, 0, 0.3, 0.2, 0.3, 0.76],
   ['curtain', 6.53, 0.83, 0, 1.4],
   // Bathroom
   ['toilet', 8.06, 1.07, 0],
